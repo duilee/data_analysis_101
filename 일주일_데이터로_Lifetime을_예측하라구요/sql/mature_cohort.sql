@@ -1,12 +1,12 @@
--- Case 3. 성숙 코호트 직접 측정
--- 1년 전 성숙 코호트의 실측 lifetime을, 신규 코호트의 D1~D7 면적 비율만큼 보정한다.
---   lifetime_new ≈ lifetime_mature × (신규 D1~D7 면적 / 성숙 D1~D7 면적)
--- 성숙 코호트의 두 집계값은 사전 계산된 상수로 받는다(BigQuery DECLARE 대신 params CTE 사용).
+-- Case 3. 장기 코호트 직접 측정
+-- 1년 전 장기 코호트의 실측 lifetime을, 신규 코호트의 D1~D7 면적 비율만큼 보정한다.
+--   lifetime_new ≈ lifetime_mature × (신규 D1~D7 면적 / 장기 D1~D7 면적)
+-- 장기 코호트의 두 집계값은 사전 계산된 상수로 받는다(BigQuery DECLARE 대신 params CTE 사용).
 
 WITH params AS (
   SELECT
-    51.5  AS lifetime_mature,    -- 성숙 코호트의 1년치 실측 lifetime = SUM(retention) over D1~D365
-    1.875 AS area_d1_d7_mature   -- 성숙 코호트의 D1~D7 면적 = SUM(retention) over D1~D7
+    51.5  AS lifetime_mature,    -- 장기 코호트의 1년치 실측 lifetime = SUM(retention) over D1~D365
+    1.875 AS area_d1_d7_mature   -- 장기 코호트의 D1~D7 면적 = SUM(retention) over D1~D7
 ),
 new_area AS (
   SELECT SUM(retention) AS area_d1_d7_new

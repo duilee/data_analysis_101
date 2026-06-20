@@ -6,7 +6,7 @@ lifetime 추정 실습 코드입니다. 유저의 lifetime(가입 후 이탈 전
 
 - **Case 1. 이탈률 휴리스틱.** D1~D7 면적에 D7 이후의 등비급수 꼬리를 더해 추정합니다.
 - **Case 2. 리텐션 카탈로그 매칭.** sBG 곡선 2,000장을 만들어 두고, 신규 코호트의 (D1, D3, D7)과 가장 닮은 곡선의 lifetime을 가져옵니다.
-- **Case 3. 성숙 코호트 직접 측정.** 1년 전 코호트의 실측 lifetime을 신규 코호트의 7일 면적 비율로 보정합니다.
+- **Case 3. 장기 코호트 직접 측정.** 1년 전 코호트의 실측 lifetime을 신규 코호트의 7일 면적 비율로 보정합니다.
 - 마지막에 세 방법의 결과를 한 표·막대그래프로 비교합니다(삼각측량).
 
 ## 실행 방법
@@ -24,7 +24,7 @@ jupyter notebook lifetime_estimation.ipynb   # 노트북을 위에서 아래로 
 | `data/cohort_retention.csv` | 신규 코호트의 일별 retention (`day, retention`, D0~D7 8행) |
 | `sql/heuristic.sql` | Case 1 — 이탈률 휴리스틱 (등비급수 외삽) |
 | `sql/catalog_match.sql` | Case 2 — 카탈로그에서 SSE 최소 곡선 매칭 |
-| `sql/mature_cohort.sql` | Case 3 — 성숙 코호트 실측 lifetime의 7일 면적 비례 보정 |
+| `sql/mature_cohort.sql` | Case 3 — 장기 코호트 실측 lifetime의 7일 면적 비례 보정 |
 | `sql/compare_methods.sql` | 세 방법 결과를 한 표로 비교 |
 | `lifetime_estimation.ipynb` | Case 1~3 + 비교 노트북 (sBG 카탈로그는 노트북에서 생성) |
 

@@ -39,4 +39,4 @@ SELECT 'Case 1. 이탈률 휴리스틱'      AS method, ROUND(lifetime_estimate,
 UNION ALL
 SELECT 'Case 2. 리텐션 카탈로그 매칭', ROUND(lifetime_estimate, 2)           FROM lookup_match
 UNION ALL
-SELECT 'Case 3. 성숙 코호트 직접 측정', ROUND(lifetime_estimate, 2)          FROM mature_extrap;
+SELECT 'Case 3. 장기 코호트 직접 측정', ROUND(lifetime_estimate, 2)          FROM mature_extrap;
