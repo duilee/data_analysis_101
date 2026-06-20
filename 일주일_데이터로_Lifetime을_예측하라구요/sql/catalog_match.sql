@@ -1,0 +1,32 @@
+-- Case 2. 리텐션 카탈로그 매칭
+-- 미리 만들어 둔 곡선 카탈로그(lifetime_catalog)에서, 신규 코호트의 관측 (D1, D3, D7)과
+-- SSE(제곱오차의 합)가 최소가 되는 행을 찾아 그 행의 lifetime을 추정치로 가져온다.
+--   (lifetime_catalog 은 노트북에서 sBG 격자로 생성해 등록한 2,000행 테이블)
+
+WITH new_obs AS (
+  SELECT
+    MAX(CASE WHEN day = 1 THEN retention END) AS d1,
+    MAX(CASE WHEN day = 3 THEN retention END) AS d3,
+    MAX(CASE WHEN day = 7 THEN retention END) AS d7
+  FROM cohort_retention
+),
+errors AS (
+  SELECT
+    cat.D1 AS matched_d1,
+    cat.a,
+    cat.c,
+    POW(cat.D1 - obs.d1, 2)
+      + POW(cat.D3 - obs.d3, 2)
+      + POW(cat.D7 - obs.d7, 2) AS sse,
+    cat.lifetime
+  FROM lifetime_catalog AS cat, new_obs AS obs
+)
+SELECT
+  ROUND(matched_d1, 2) AS matched_d1,
+  ROUND(a, 4)          AS matched_a,
+  ROUND(c, 4)          AS matched_c,
+  ROUND(sse, 6)        AS sse,
+  ROUND(lifetime, 2)   AS lifetime_estimate
+FROM errors
+ORDER BY sse ASC
+LIMIT 1;
