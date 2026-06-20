@@ -103,9 +103,10 @@ def build():
                 activity_rows.append((user_id, day))
             day += timedelta(days=1)
 
-        # 신규 가입 유저는 가입 당일 활동을 보장한다(가입=첫 접속).
-        if first_active == TARGET_DATE:
-            activity_rows.append((user_id, TARGET_DATE))
+        # 가입(첫 접속) 당일은 반드시 활동이 한 줄 찍힌다(가입 = 첫 접속).
+        # 덕분에 활동이 0행인 유저가 존재하지 않아, count_if/bool_or 가 NULL 이 될 일이 없고
+        # '가입했지만 활동이 전혀 없는' 비현실적인 케이스도 생기지 않는다.
+        activity_rows.append((user_id, first_active))
 
     master = pd.DataFrame(master_rows, columns=["user_id", "first_active_date"])
     activity = pd.DataFrame(activity_rows, columns=["user_id", "event_date"])
