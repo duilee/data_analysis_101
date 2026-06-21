@@ -11,3 +11,4 @@
 | [DAU 차트를 봐서는 DAU를 올릴 수 없다](./DAU_차트를_봐서는_DAU를_올릴_수_없다) | 유저를 7개 세그먼트로 쪼개 분포(Stock)·전이(Flow)·비율 지표로 활동성 진단하기 |
 | [일주일 데이터로 Lifetime을 예측하라구요?](./일주일_데이터로_Lifetime을_예측하라구요) | 초기 7일 retention으로 1년치 lifetime 추정하기 (이탈률 휴리스틱·sBG 카탈로그 매칭·장기 코호트 보정) |
 | [Machine Learning으로 찾아보는 유저들의 사용패턴](./Machine_Learning으로_찾아보는_유저들의_사용패턴) | KMeans로 유저 사용 패턴(페르소나)을 비지도 클러스터링하고 중심점 해석·네이밍, 리텐션 KPI로 액션 연결 |
+| [MAB 그거 어떻게 쓰는건데…?](./MAB_그거_어떻게_쓰는건데) | Multi-Armed Bandit의 Thompson Sampling을 시뮬레이션 (AB 비교·Alpha 계수·Discounted TS) |
