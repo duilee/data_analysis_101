@@ -1,2 +1,13 @@
+# macOS
+.DS_Store
+
 # Jupyter
 .ipynb_checkpoints/
+
+# Notebook runtime artifacts (saved models / exported labels)
+models/
+output/
+*.pkl
+
+# Article drafts (canonical copy lives in Google Docs)
+*.docx
