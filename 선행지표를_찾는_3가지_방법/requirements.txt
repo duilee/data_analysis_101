@@ -1,0 +1,12 @@
+pandas
+numpy
+duckdb
+matplotlib
+seaborn
+scikit-learn
+lightgbm
+shap
+optuna
+plotly
+nbformat
+jupyter

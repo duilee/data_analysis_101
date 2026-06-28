@@ -12,3 +12,4 @@
 | [일주일 데이터로 Lifetime을 예측하라구요?](./일주일_데이터로_Lifetime을_예측하라구요) | 초기 7일 retention으로 1년치 lifetime 추정하기 (이탈률 휴리스틱·sBG 카탈로그 매칭·장기 코호트 보정) |
 | [Machine Learning으로 찾아보는 유저들의 사용패턴](./Machine_Learning으로_찾아보는_유저들의_사용패턴) | KMeans로 유저 사용 패턴(페르소나)을 비지도 클러스터링하고 중심점 해석·네이밍, 리텐션 KPI로 액션 연결 |
 | [MAB 그거 어떻게 쓰는건데…?](./MAB_그거_어떻게_쓰는건데) | Multi-Armed Bandit의 Thompson Sampling을 시뮬레이션 (AB 비교·Alpha 계수·Discounted TS) |
+| [선행지표를 찾는 3가지 방법](./선행지표를_찾는_3가지_방법) | D7 잔존의 선행지표를 같은 이벤트 로그에서 EDA 비교·SHAP·Sankey 세 방법으로 찾기 |
