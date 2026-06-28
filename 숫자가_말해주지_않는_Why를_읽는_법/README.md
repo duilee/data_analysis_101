@@ -10,6 +10,7 @@
 - **맥락·관계** — 바이그램, 동시출현 네트워크 그래프
 - **토픽 모델링(LDA)** — 리뷰를 관통하는 주제 묶기
 - **원문으로 돌아가기** — KWIC, LDA 토픽별 대표 리뷰 읽기
+- **긍정 리뷰의 재발견** — 5점 리뷰의 동시출현에서 미처 몰랐던 쓰임새·고객군 읽기
 
 ## 실행 방법
 
@@ -24,7 +25,7 @@ jupyter notebook review_analysis.ipynb        # 노트북을 위에서 아래로
 | --- | --- |
 | `generate_data.py` | 별점별 어휘 차이를 심어 둔 합성 리뷰 생성기 |
 | `data/reviews.csv` | 상품 구매 리뷰 (`review_id, product_id, rating, text`) |
-| `review_analysis.ipynb` | 전처리→빈도→변별 키워드→네트워크→토픽→원문회귀 실습 노트북 |
+| `review_analysis.ipynb` | 전처리→빈도→변별 키워드→네트워크→토픽→원문회귀→긍정 리뷰 재발견 실습 노트북 |
 
 > 책 본문의 임베딩 군집화(`sentence-transformers`)·LLM 코딩은 무거운 의존성이나 API 키가
 > 필요해 노트북에서는 생략했고, 원문 회귀는 LDA 토픽 비중으로 대표 리뷰를 뽑아 대신했습니다.
