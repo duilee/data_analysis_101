@@ -17,9 +17,43 @@
 
 import csv
 import random
+import datetime
 from pathlib import Path
 
 random.seed(42)
+
+# === 리뷰 작성일(created_at) 설계 ===
+# 텍스트/별점은 그대로 두고 '언제 쓰였는지'만 부여한다. 6장의 '발견' 서사를 시간축으로 살린다:
+#   - 자취·원룸(기획 의도)은 초반에 몰리고,
+#   - 차박·캠핑, 반려동물(발견된 쓰임새/고객)은 입소문을 타며 후반으로 갈수록 늘어난다.
+#   - 1점 환불·배송 불만은 중반에 물류 이슈처럼 한 번 몰린다.
+# → 토픽 시계열(area) 차트에서 '주제가 언제 떠오르고 가라앉는지'가 드러난다.
+START_DATE = datetime.date(2024, 1, 1)
+WEEKS = 26   # 약 6개월
+
+
+def _clip_week(w):
+    return int(min(WEEKS - 1, max(0, round(w))))
+
+
+def assign_date(rating, text):
+    """텍스트 내용으로 주제를 가늠해, 그 주제가 유행하는 시기에 작성일을 배정한다."""
+    if rating == 5:
+        if ("차박" in text) or ("캠핑" in text):          # 발견된 쓰임새 → 후반 상승
+            w = random.triangular(WEEKS * 0.3, WEEKS - 1, WEEKS - 2)
+        elif ("반려동물" in text) or ("강아지" in text):   # 발견된 고객군 → 중후반 상승
+            w = random.triangular(WEEKS * 0.4, WEEKS - 1, WEEKS * 0.9)
+        else:                                              # 자취·원룸(기획 의도) → 초반 집중
+            w = random.triangular(0, WEEKS * 0.6, WEEKS * 0.15)
+    elif rating == 1:
+        if ("지연" in text) or ("하세월" in text) or ("환불" in text):   # 물류·CS 이슈 → 중반 급증
+            w = random.triangular(WEEKS * 0.35, WEEKS * 0.8, WEEKS * 0.55)
+        else:
+            w = random.uniform(0, WEEKS - 1)
+    else:
+        w = random.uniform(0, WEEKS - 1)
+    d = START_DATE + datetime.timedelta(weeks=_clip_week(w), days=random.randint(0, 6))
+    return d.isoformat()
 
 OUT = Path(__file__).parent / "data"
 OUT.mkdir(exist_ok=True)
@@ -137,11 +171,12 @@ for _ in range(120):
     rows.append((random.choice(PRODUCTS), random.choice([2, 3, 4]), make_mid()))
 
 random.shuffle(rows)
-rows = [(i + 1, p, r, t) for i, (p, r, t) in enumerate(rows)]  # review_id 1..N 재부여
+# review_id 1..N 재부여 + 작성일(created_at) 부여 (텍스트 생성이 끝난 뒤라 본문/별점은 그대로)
+rows = [(i + 1, p, r, t, assign_date(r, t)) for i, (p, r, t) in enumerate(rows)]
 
 with open(OUT / "reviews.csv", "w", newline="", encoding="utf-8") as f:
     w = csv.writer(f)
-    w.writerow(["review_id", "product_id", "rating", "text"])
+    w.writerow(["review_id", "product_id", "rating", "text", "created_at"])
     w.writerows(rows)
 
-print(f"reviews.csv 생성 완료: {len(rows)}건 (1점 450 / 5점 450 / 2~4점 120)")
+print(f"reviews.csv 생성 완료: {len(rows)}건 (1점 450 / 5점 450 / 2~4점 120), created_at 포함")
