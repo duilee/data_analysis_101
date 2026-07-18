@@ -1,9 +1,13 @@
+# 형태소 분리(kiwipiepy)와 TF-IDF·LDA(scikit-learn) 결과는 버전에 따라 달라질 수 있어,
+# 본문에 실린 정확한 수치를 그대로 재현하려면 이 둘은 버전을 고정합니다.
+kiwipiepy==0.23.2
+scikit-learn==1.9.0
+
+# 아래는 최신 버전으로 설치해도 무방합니다.
 pandas
 numpy
 matplotlib
-scikit-learn
 wordcloud
 Pillow
 networkx
-kiwipiepy
 jupyter
