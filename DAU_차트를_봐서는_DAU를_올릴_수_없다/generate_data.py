@@ -17,10 +17,14 @@
 from __future__ import annotations
 
 import os
+import sys
 from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
+
+# 출력이 파이프로 캡처될 때 cp949로 인코딩돼 한글이 깨지는 것을 방지 (콘솔 직접 출력에는 영향 없음)
+sys.stdout.reconfigure(encoding="utf-8")
 
 SEED = 42
 TARGET_DATE = date(2026, 5, 20)   # 분석 기준일(오늘)

@@ -14,9 +14,13 @@ from __future__ import annotations
 
 import math
 import os
+import sys
 
 import numpy as np
 import pandas as pd
+
+# 출력이 파이프로 캡처될 때 cp949로 인코딩돼 한글이 깨지는 것을 방지 (콘솔 직접 출력에는 영향 없음)
+sys.stdout.reconfigure(encoding="utf-8")
 
 SEED = 42
 START = pd.Timestamp("2024-09-02")  # 월요일

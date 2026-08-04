@@ -13,8 +13,12 @@ Case 2(카탈로그 매칭)에서 SSE가 0이 아니라 작은 값으로 나오�
 """
 
 import os
+import sys
 
 import pandas as pd
+
+# 출력이 파이프로 캡처될 때 cp949로 인코딩돼 한글이 깨지는 것을 방지 (콘솔 직접 출력에는 영향 없음)
+sys.stdout.reconfigure(encoding="utf-8")
 
 # 신규 코호트의 7일 관측 리텐션 (day, retention)
 COHORT_RETENTION = [

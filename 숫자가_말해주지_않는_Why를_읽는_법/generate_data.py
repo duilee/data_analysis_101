@@ -18,7 +18,11 @@
 import csv
 import random
 import datetime
+import sys
 from pathlib import Path
+
+# 출력이 파이프로 캡처될 때 cp949로 인코딩돼 한글이 깨지는 것을 방지 (콘솔 직접 출력에는 영향 없음)
+sys.stdout.reconfigure(encoding="utf-8")
 
 random.seed(42)
 

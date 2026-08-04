@@ -21,10 +21,14 @@ order_number의 prefix(동일 유저)와 suffix(갱신 회차)를 파싱해서 �
 from __future__ import annotations
 
 import os
+import sys
 from datetime import date
 
 import numpy as np
 import pandas as pd
+
+# 출력이 파이프로 캡처될 때 cp949로 인코딩돼 한글이 깨지는 것을 방지 (콘솔 직접 출력에는 영향 없음)
+sys.stdout.reconfigure(encoding="utf-8")
 
 SEED = 42
 START = (2025, 1)          # 첫 코호트 가입 월
