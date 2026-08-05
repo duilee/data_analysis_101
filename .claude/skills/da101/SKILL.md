@@ -1,13 +1,24 @@
 ---
-name: data-analysis-101
+name: da101
+argument-hint: "[run|apply|qna|quiz] [챕터·키워드·질문]"
 description: This skill should be used when a reader of the 데이터 분석 book works through or applies this repo's practice chapters — asks to "run/verify a chapter", "apply a method to my own data", "predict DAU", "estimate lifetime/LTV from retention", "segment users", "cluster usage patterns", "use Thompson Sampling / MAB instead of A/B test", "find leading indicators", "decompose MRR / GRR / NRR", "analyze reviews or VOC text", or in Korean "챕터 실행/검증", "내 데이터에 적용", "DAU 예측", "라이프타임 추정", "유저 세그먼트", "클러스터링", "선행지표 찾기", "MRR 분해", "리뷰 분석" — or asks which chapter/method fits a business question.
 ---
 
-# 데이터 분석 실습 도우미 (data-analysis-101)
+# 데이터 분석 실습 도우미 (da101)
 
 데이터 분석 책의 실습 레포(챕터별 폴더)를 독자가 실행·검증하고, 각 챕터의 방법을
 독자 자신의 데이터에 적용하도록 돕는 스킬. 아래 5가지 모드 중 독자의 요청에 맞는
 모드로 동작하고, 해당 챕터의 reference 파일을 **그 챕터를 다룰 때만** 읽는다.
+
+## 인자 처리 — `/da101 [모드] [나머지]`
+
+`/da101`로 호출되면 첫 인자가 모드 키워드인지 본다: `run` → 실행·검증(모드 1),
+`apply` → 내 데이터에 적용(모드 2), `qna` → QnA(모드 4), `quiz` → 심화학습·퀴즈(모드 5).
+나머지 인자는 챕터명·키워드·질문으로 해석해 라우팅 표에 매칭한다 — 애매하면 후보를
+보여주고 독자가 고르게 하고, 없으면 챕터 목록을 보여주고 물어본다. 첫 인자가 모드
+키워드가 아니면 입력 전체를 비즈니스 질문으로 보고 방법 선택(모드 3)으로 진행한다.
+인자가 아예 없으면 챕터 목록(라우팅 표의 "독자의 질문" 열 중심)과 5가지 모드를 간단히
+소개하고 어떤 고민이 있는지 묻는다. 모드별 동작은 아래 모드 정의를 그대로 따른다.
 
 ## 5가지 모드
 
