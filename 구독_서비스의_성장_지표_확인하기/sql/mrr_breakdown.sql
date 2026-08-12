@@ -1,7 +1,7 @@
 -- 실습 3. 월별 MRR 분해: new / renew / reactivation / expansion / contraction / churn
 -- 유저×월 단위로 결제를 모은 뒤 전월과 FULL OUTER JOIN:
 --   양쪽에 있으면 계속 구독(renew + 업/다운그레이드 증감), 전월에만 있으면 churn.
-WITH classified AS (
+WITH payments AS (
     SELECT
         split_part(order_number, '..', 1)  AS pid
       , date_trunc('month', order_charged_date) AS month
@@ -14,6 +14,15 @@ WITH classified AS (
                             order_charged_date) < 32 THEN 'renew'
              ELSE 'reactivation' END AS pay_type
     FROM sales
+),
+classified AS (   -- 유저×월 집계: 같은 달 결제가 여러 건(월중 플랜 변경 등)이어도 한 행으로 합친다
+    SELECT
+        pid
+      , month
+      , sum(amt)      AS amt
+      , min(pay_type) AS pay_type   -- 우선순위 new > reactivation > renew (알파벳순과 우연히 일치)
+    FROM payments
+    GROUP BY pid, month
 ),
 paired AS (
     SELECT
