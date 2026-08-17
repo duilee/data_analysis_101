@@ -1,7 +1,7 @@
 ---
 name: da101
 argument-hint: "[run|apply|qna|quiz] [챕터·키워드·질문]"
-description: This skill should be used when a reader of the 데이터 분석 book works through or applies this repo's practice chapters — asks to "run/verify a chapter", "apply a method to my own data", "predict DAU", "estimate lifetime/LTV from retention", "segment users", "cluster usage patterns", "use Thompson Sampling / MAB instead of A/B test", "find leading indicators", "decompose MRR / GRR / NRR", "analyze reviews or VOC text", or in Korean "챕터 실행/검증", "내 데이터에 적용", "DAU 예측", "라이프타임 추정", "유저 세그먼트", "클러스터링", "선행지표 찾기", "MRR 분해", "리뷰 분석" — or asks which chapter/method fits a business question.
+description: This skill should be used when a reader of the 데이터 분석 book works through or applies this repo's practice chapters — asks to "run/verify a chapter", "apply a method to my own data", "predict DAU", "estimate lifetime/LTV from retention", "segment users", "cluster usage patterns", "use Thompson Sampling / MAB instead of A/B test", "find leading indicators", "decompose MRR / GRR / NRR", "analyze reviews or VOC text", "design or interpret an A/B test (sample size, MDE, p-value, peeking, SRM)", or in Korean "챕터 실행/검증", "내 데이터에 적용", "DAU 예측", "라이프타임 추정", "유저 세그먼트", "클러스터링", "선행지표 찾기", "MRR 분해", "리뷰 분석", "실험 설계/해석", "p값" — or asks which chapter/method fits a business question.
 ---
 
 # 데이터 분석 실습 도우미 (da101)
@@ -84,6 +84,7 @@ QnA ↔ 심화학습·퀴즈).
 | "D7 리텐션을 미리 알려주는 행동(아하 모먼트)을 찾고 싶다" | `선행지표를_찾는_3가지_방법` | `references/leading-indicators.md` |
 | "구독 매출이 건강하게 크고 있나? 이탈이 문제인가?" | `구독_서비스의_성장_지표_확인하기` | `references/mrr.md` |
 | "숫자로 안 보이는 불만/만족의 이유를 알고 싶다 (리뷰·VOC)" | `숫자가_말해주지_않는_Why를_읽는_법` | `references/review-analysis.md` |
+| "A/B 테스트를 며칠 돌려야 하나? 유의한데 이 결과 믿어도 되나?" — 실험 설계·해석 | `P값이_0.049면_출시해도_되죠` | `references/ab-test.md` |
 
 라우팅 팁: "DAU 정체" 계열 질문은 두 갈래다 — **어디서** 새는지는 dau-segments(구성·전이 진단),
 **무엇이** 리텐션을 결정하는지는 leading-indicators(원인 행동 탐색). 순서를 정해야 하면
@@ -97,14 +98,14 @@ QnA ↔ 심화학습·퀴즈).
   jupyter nbconvert --to notebook --execute --inplace <노트북>.ipynb     # 끝까지 실행
   ```
   노트북 첫 셀이 `%pip install -q -r requirements.txt`로 의존성을 설치하므로 별도 pip 불필요.
-  예외: MAB 챕터는 데이터 파일이 없어 `generate_data.py` 단계가 없다.
+  예외: MAB·A/B 테스트 챕터는 데이터 파일이 없어 `generate_data.py` 단계가 없다.
   성공 판정은 **종료 코드 0** 기준 — Windows에서는 성공해도 stderr에 ZMQ/asyncio 계열
   RuntimeWarning이 찍힐 수 있으며 이는 정상이다. 독자가 물으면 무해한 경고라고 안내한다.
 - **합성 데이터는 정답을 심어 생성**된다(시드 고정). 노트북의 적합/추정 결과가 심어둔
   파라미터를 복원하는지가 검증 포인트이며, reference마다 그 정답이 적혀 있다.
 - **SQL은 DuckDB로 로컬 CSV 위에서 실행**한다(`duckdb.query(sql).to_df()`). 같은 쿼리가
   노트북 인라인(`query = """…"""`)과 `sql/*.sql` 파일 양쪽에 있다 — 독자 데이터 적용 시
-  치환 대상은 노트북 인라인 쿼리다. 예외: MAB·리뷰 분석 챕터는 SQL/DuckDB를 쓰지 않는다.
+  치환 대상은 노트북 인라인 쿼리다. 예외: MAB·리뷰 분석·A/B 테스트 챕터는 SQL/DuckDB를 쓰지 않는다.
 - 시각화 라벨은 영어, 서술은 한국어.
 - 독자 데이터에 적용할 때 챕터 폴더 안의 예시 CSV를 덮어쓰지 말 것 — 독자 데이터는
   별도 경로에 두고 쿼리의 파일 경로만 바꾼다.
@@ -125,3 +126,4 @@ QnA ↔ 심화학습·퀴즈).
 - `references/leading-indicators.md` — EDA·SHAP·Sankey 3렌즈 선행지표 탐색
 - `references/mrr.md` — 스토어 결제 로그 MRR 6요소 분해, GRR/NRR
 - `references/review-analysis.md` — 리뷰 텍스트 분석 (형태소→키워드→네트워크→LDA→원문)
+- `references/ab-test.md` — A/B 테스트 함정 시뮬레이션 (MDE·배정 균형·SRM·Peeking)
