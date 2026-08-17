@@ -1,6 +1,9 @@
 # macOS
 .DS_Store
 
+# Python 가상환경
+.venv/
+
 # Jupyter
 .ipynb_checkpoints/
 
