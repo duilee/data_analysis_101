@@ -1,6 +1,7 @@
 -- 실습 3. 월별 MRR 분해: new / renew / reactivation / expansion / contraction / churn
 -- 유저×월 단위로 결제를 모은 뒤 전월과 FULL OUTER JOIN:
 --   양쪽에 있으면 계속 구독(renew + 업/다운그레이드 증감), 전월에만 있으면 churn.
+-- (단독 실행용 전체 쿼리 — 노트북은 orders/classified/monthly 뷰 체인으로 같은 계산을 단계화한다)
 WITH payments AS (
     SELECT
         split_part(order_number, '..', 1)  AS pid
