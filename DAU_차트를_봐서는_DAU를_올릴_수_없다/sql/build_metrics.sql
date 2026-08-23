@@ -4,6 +4,9 @@
 -- is_newbie / d0_active / active_day_count / last_active_date 4개 지표를 만들고
 -- user_metrics 테이블로 저장한다. (다음 단계 classify_segment.sql 의 입력)
 -- 가입 당일은 반드시 활동이 찍히므로(가입 = 첫 접속) 활동 0행 유저는 없다.
+-- 준비: 두 원천 CSV를 테이블로 등록해 두었다는 전제 (노트북 0단계)
+--   CREATE TABLE user_master   AS SELECT * FROM read_csv_auto('data/user_master.csv');
+--   CREATE TABLE user_activity AS SELECT * FROM read_csv_auto('data/user_activity.csv');
 
 CREATE OR REPLACE TABLE user_metrics AS
 SELECT
@@ -17,6 +20,5 @@ SELECT
                             AND DATE '2026-05-20') AS active_day_count,
   -- 4. 마지막 활동일 (가입 당일 활동이 보장되므로 항상 존재)
   max(CASE WHEN a.event_date <= DATE '2026-05-20' THEN a.event_date END) AS last_active_date
-FROM read_csv_auto('data/user_master.csv') m
-LEFT JOIN read_csv_auto('data/user_activity.csv') a USING (user_id)
+FROM user_master m LEFT JOIN user_activity a USING (user_id)
 GROUP BY m.user_id, m.first_active_date;

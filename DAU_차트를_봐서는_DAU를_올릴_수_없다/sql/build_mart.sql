@@ -1,66 +1,34 @@
 -- 유저 세그먼트 마트 생성 (mart_user_segment)
 --
--- 두 원천 CSV에서 4개 파생지표를 '오늘'과 '어제' 두 시점으로 계산하고,
--- 각 시점을 7개 세그먼트로 분류해 한 행에 user_seg(오늘) / user_seg_from(어제)으로 담는다.
--- 기준일(target_date)은 2026-05-20.
---
--- 가입(첫 접속) 당일은 반드시 활동이 한 줄 찍히므로(가입 = 첫 접속), 활동 0행 유저는 없다.
--- 단, 오늘 막 가입한 신규는 '어제' 시점에는 존재하지 않으므로 last_active_date_from 이
--- NULL 이 되어 user_seg_from 도 NULL 로 남는다(어제 세그먼트가 없는 게 정상).
+-- 4개 파생지표를 오늘/어제 두 시점으로 계산해 세그먼트 마트를 적재한다. 기준일 2026-05-20.
+-- 분류는 classify_macro.sql 의 classify_seg 매크로를 두 시점에 재사용한다 (먼저 실행할 것).
+-- 오늘 막 가입한 신규는 '어제' 기록이 없으므로 user_seg_from 이 NULL 이 된다.
+-- 준비: 두 원천 CSV를 테이블로 등록해 두었다는 전제 (노트북 0단계)
+--   CREATE TABLE user_master   AS SELECT * FROM read_csv_auto('data/user_master.csv');
+--   CREATE TABLE user_activity AS SELECT * FROM read_csv_auto('data/user_activity.csv');
 
 CREATE OR REPLACE TABLE mart_user_segment AS
 WITH metrics AS (
   SELECT
     m.user_id,
-
-    -- [오늘 시점 지표]
+    -- 오늘(기준일) 지표
     (m.first_active_date = DATE '2026-05-20') AS is_newbie,
     bool_or(a.event_date = DATE '2026-05-20') AS d0_active,
     count_if(a.event_date BETWEEN DATE '2026-05-20' - INTERVAL 6 DAY
-                              AND DATE '2026-05-20') AS active_day_count,
-    max(CASE WHEN a.event_date <= DATE '2026-05-20' THEN a.event_date END) AS last_active_date,
-
-    -- [어제 시점 지표] (윈도우를 하루씩 미룬다)
+                              AND DATE '2026-05-20') AS cnt,
+    max(CASE WHEN a.event_date <= DATE '2026-05-20' THEN a.event_date END) AS last_active,
+    -- 어제 지표 (같은 정의에서 윈도우만 하루 미룸)
     (m.first_active_date = DATE '2026-05-20' - INTERVAL 1 DAY) AS is_newbie_from,
     bool_or(a.event_date = DATE '2026-05-20' - INTERVAL 1 DAY) AS d0_active_from,
     count_if(a.event_date BETWEEN DATE '2026-05-20' - INTERVAL 7 DAY
-                              AND DATE '2026-05-20' - INTERVAL 1 DAY) AS active_day_count_from,
-    -- 어제까지의 마지막 활동일. 오늘 막 가입한 신규는 어제 활동이 없어 NULL → user_seg_from 도 NULL.
-    max(CASE WHEN a.event_date <= DATE '2026-05-20' - INTERVAL 1 DAY THEN a.event_date END) AS last_active_date_from
-  FROM read_csv_auto('data/user_master.csv') m
-  LEFT JOIN read_csv_auto('data/user_activity.csv') a USING (user_id)
+                              AND DATE '2026-05-20' - INTERVAL 1 DAY) AS cnt_from,
+    max(CASE WHEN a.event_date <= DATE '2026-05-20' - INTERVAL 1 DAY THEN a.event_date END) AS last_active_from
+  FROM user_master m LEFT JOIN user_activity a USING (user_id)
   GROUP BY m.user_id, m.first_active_date
 )
 SELECT
-  DATE '2026-05-20' AS target_date,
-  user_id,
-
-  -- [어제 시점 분류]
-  CASE
-    WHEN is_newbie_from                                                          THEN 'new'
-    WHEN d0_active_from     AND active_day_count_from >= 5                        THEN 'heavy_active'
-    WHEN d0_active_from     AND active_day_count_from BETWEEN 1 AND 4             THEN 'light_active'
-    WHEN NOT d0_active_from AND active_day_count_from >= 5                        THEN 'heavy_inactive'
-    WHEN NOT d0_active_from AND active_day_count_from BETWEEN 1 AND 4             THEN 'light_inactive'
-    WHEN active_day_count_from = 0
-         AND last_active_date_from BETWEEN DATE '2026-05-20' - INTERVAL 31 DAY
-                                       AND DATE '2026-05-20' - INTERVAL 7 DAY    THEN 'risk'
-    WHEN active_day_count_from = 0
-         AND last_active_date_from <  DATE '2026-05-20' - INTERVAL 31 DAY        THEN 'dormant'
-  END AS user_seg_from,
-
-  -- [오늘 시점 분류]
-  CASE
-    WHEN is_newbie                                                          THEN 'new'
-    WHEN d0_active     AND active_day_count >= 5                            THEN 'heavy_active'
-    WHEN d0_active     AND active_day_count BETWEEN 1 AND 4                 THEN 'light_active'
-    WHEN NOT d0_active AND active_day_count >= 5                            THEN 'heavy_inactive'
-    WHEN NOT d0_active AND active_day_count BETWEEN 1 AND 4                 THEN 'light_inactive'
-    WHEN active_day_count = 0
-         AND last_active_date BETWEEN DATE '2026-05-20' - INTERVAL 30 DAY
-                                  AND DATE '2026-05-20' - INTERVAL 6 DAY   THEN 'risk'
-    WHEN active_day_count = 0
-         AND last_active_date <  DATE '2026-05-20' - INTERVAL 30 DAY       THEN 'dormant'
-  END AS user_seg
-FROM metrics
-ORDER BY user_id;
+  DATE '2026-05-20' AS target_date, user_id,
+  classify_seg(is_newbie_from, d0_active_from, cnt_from, last_active_from,
+               DATE '2026-05-20' - INTERVAL 1 DAY) AS user_seg_from,
+  classify_seg(is_newbie, d0_active, cnt, last_active, DATE '2026-05-20') AS user_seg
+FROM metrics ORDER BY user_id;

@@ -24,6 +24,7 @@ jupyter notebook dau_segment.ipynb    # 노트북을 위에서 아래로 실행 
 | `data/user_activity.csv` | 유저별 일별 접속 로그 (`user_id, event_date`) |
 | `sql/build_metrics.sql` | 4개 파생지표 계산 → `user_metrics` 테이블 (오늘 시점) |
 | `sql/classify_segment.sql` | `user_metrics` 의 4개 지표를 7개 세그먼트로 분류 |
+| `sql/classify_macro.sql` | 분류 CASE를 기준일 인자를 받는 매크로로 정의 (마트가 재사용) |
 | `sql/build_mart.sql` | 어제·오늘 두 시점을 담은 세그먼트 마트 생성 |
 | `sql/stock_distribution.sql` | 일별 세그먼트 분포 (Stock) |
 | `sql/transition_matrix.sql` | 세그먼트 전이 행렬 (Flow) |
