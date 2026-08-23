@@ -1,4 +1,4 @@
-# 선행지표 탐색 — EDA·SHAP·Sankey 3렌즈 + 삼각측량
+# 선행지표 탐색 — EDA·SHAP·Sankey 3렌즈 교차 확인
 
 **챕터**: `선행지표를_찾는_3가지_방법/` · 노트북: `leading_indicators.ipynb`
 
@@ -6,7 +6,7 @@
 
 후행지표(D7 잔존)는 결과라서 직접 움직일 수 없다. 같은 신규 유저 이벤트 로그 한 벌에서
 D7 잔존을 미리 알려주는 **선행지표(아하 모먼트 행동)**를 세 가지 렌즈로 찾고, 세 방법이
-공통으로 가리키는 행동을 삼각측량으로 확정한다:
+공통으로 가리키는 행동만 최종 후보로 확정한다:
 
 - **실습 1. EDA 비교** — D7 잔존/비잔존 코호트의 D0~D1 행동 발생 비중·평균 횟수 차이.
 - **실습 2. SHAP** — LGBM으로 D7 잔존 예측 모델을 학습(Optuna 튜닝)하고, SHAP summary로
@@ -26,7 +26,7 @@ jupyter nbconvert --to notebook --execute --inplace leading_indicators.ipynb
 - SQL 3개: `eda_leading_indicator.sql`, `feature_matrix.sql`, `sankey_transitions.sql`.
 - **기대 결과**: 생성기가 잠재 품질·경로 의존 잔존을 심어 두었으므로, 세 렌즈가 **같은
   행동들**을 상위 선행지표로 가리켜야 한다(EDA `share_diff` 상위 ≈ SHAP 상위 피처 ≈ Sankey의
-  고잔존 갈림길). 마지막 삼각측량 표에서 이 일치를 확인한다.
+  고잔존 갈림길). 세 실습의 결과를 나란히 놓고 이 일치를 확인한다.
 - 의존성이 가장 무거운 챕터다(lightgbm, shap, optuna, plotly 등) — 첫 실행 시 설치 시간이 걸린다.
 
 ## 내 데이터에 적용 — 인터랙티브 프로토콜
@@ -88,7 +88,7 @@ duckdb.query("""SELECT COUNT(DISTINCT user_id) AS users,
 3. 실습 2: `fm_query` → baseline LGBM(`report`) → ROC-AUC가 0.5 근처면 피처 재설계로 회귀.
    Optuna 튜닝 → SHAP summary → 상위 피처를 EDA 결과와 대조. dependence plot으로 임계점 읽기.
 4. 실습 3: Sankey 생성 → 색(전이별 잔존율)이 갈리는 갈림길 확인 → `branches` 진단.
-5. 삼각측량 표: 세 렌즈 공통 행동만 선행지표 후보로 확정 → A/B 실험 후보로 번역.
+5. 세 렌즈의 결과를 나란히 정리해 공통 행동만 선행지표 후보로 확정 → A/B 실험 후보로 번역.
 
 ### 5. 결과 해석
 
@@ -113,7 +113,7 @@ duckdb.query("""SELECT COUNT(DISTINCT user_id) AS users,
   경향, dependence는 피처값-기여도 관계(임계점).
 - **데이터 누수(leakage)** — 라벨 이후의 정보가 피처에 섞이는 것. 시간 경계를 지키는 것이
   이 분석의 생명선.
-- **삼각측량** — 가정이 다른 방법들이 같은 답을 가리킬 때만 믿는 태도. EDA(단변량)·SHAP
+- **세 방법의 교차 확인** — 가정이 다른 방법들이 같은 답을 가리킬 때만 믿는 태도. EDA(단변량)·SHAP
   (다변량 모델)·Sankey(경로) 는 서로의 맹점을 보완한다.
 
 ### 개념 체크

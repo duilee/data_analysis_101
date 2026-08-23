@@ -1,87 +1,62 @@
--- 실습 3) 설치 세션의 스텝 전이 + 전이별 D7 잔존율
--- 설치 직후 1시간 이내 이벤트를 순서대로 늘어놓고(연속 중복 제거), 스텝 N → N+1
--- 전이를 만든다. 각 전이를 지나간 유저 수와 그 유저들의 D7 잔존율을 함께 집계해
--- "어느 갈림길에서 잔존이 갈리는지"를 Sankey로 색칠해 본다.
--- (노트북에서는 MAX_STEPS / TOP_K / MIN_USERS 를 변수로 주입한다. 여기서는 기본값 사용.)
-WITH base AS (
-    SELECT user_id
-         , MIN(event_timestamp) AS install_ts
-         , MIN(event_date)      AS install_date
-    FROM event_log
-    WHERE event_name = 'application_install'
-    GROUP BY 1
-),
-user_retention AS (
-    SELECT b.user_id
-         , MAX(CASE WHEN date_diff('day', b.install_date, e.event_date) = 7 THEN 1 ELSE 0 END) AS d7_retained
-    FROM base AS b
-    LEFT JOIN event_log AS e ON b.user_id = e.user_id
-    GROUP BY 1
-),
-session_events AS (
-    -- 설치 후 1시간 이내 이벤트 + 직전 이벤트(연속 중복 제거용)
-    SELECT b.user_id
-         , e.event_name
-         , e.event_timestamp
-         , LAG(e.event_name) OVER (PARTITION BY b.user_id ORDER BY e.event_timestamp) AS prev_event
-    FROM base AS b
+-- 실습 3) 설치 세션 스텝 전이 + 전이별 D7 잔존율 (Sankey 입력)
+-- 노트북의 CONFIG 상수는 값으로 전개: MAX_STEPS=10, TOP_K=6, MIN_USERS=20
+--
+-- 전제: event_log 테이블이 등록돼 있어야 한다 (노트북 준비 셀과 동일):
+--   CREATE OR REPLACE TABLE event_log AS SELECT * FROM read_csv_auto('data/event_log.csv');
+-- 아래 공용 뷰(installs·d7_label)는 실습 1·2·3 sql 파일마다 같은 정의를 반복해 두어 어느 파일이든 단독 실행된다.
+
+-- 설치(D0) 시점: 유저별 첫 application_install
+CREATE OR REPLACE VIEW installs AS
+  SELECT user_id, MIN(event_timestamp) AS install_ts, MIN(event_date) AS install_date
+  FROM event_log WHERE event_name = 'application_install' GROUP BY 1;
+
+-- D7 잔존 라벨: 설치 7일째에 활동이 있으면 1. 실습 1·2·3 이 모두 이 뷰를 쓴다
+CREATE OR REPLACE VIEW d7_label AS
+  SELECT i.user_id, i.install_ts, i.install_date,
+         MAX(CASE WHEN date_diff('day', i.install_date, e.event_date) = 7 THEN 1 ELSE 0 END) AS d7_retention_flag
+  FROM installs AS i LEFT JOIN event_log AS e ON i.user_id = e.user_id
+  GROUP BY 1, 2, 3;
+
+-- 설치 후 1시간 안의 이벤트를 순서대로 (연속 중복 제거) → 유저별 스텝 번호
+CREATE OR REPLACE VIEW user_steps AS
+  WITH session_events AS (
+    SELECT i.user_id, e.event_name, e.event_timestamp,
+           LAG(e.event_name) OVER (PARTITION BY i.user_id ORDER BY e.event_timestamp) AS prev_event
+    FROM installs AS i
     JOIN event_log AS e
-      ON b.user_id = e.user_id
-     AND e.event_timestamp >= b.install_ts
-     AND e.event_timestamp <= b.install_ts + INTERVAL 1 HOUR
-),
-deduped AS (
-    SELECT user_id, event_name, event_timestamp
-    FROM session_events
-    WHERE prev_event IS NULL OR event_name != prev_event
-),
-user_steps AS (
-    SELECT user_id
-         , event_name
-         , event_timestamp
-         , ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY event_timestamp) AS step_num
-    FROM deduped
-    QUALIFY step_num <= 10               -- MAX_STEPS
-),
-event_volume AS (
-    -- 스텝 위치별 이벤트 유저 수 순위 (상위 K개만 남기고 나머지는 ETC)
-    SELECT step_num
-         , event_name
-         , COUNT(DISTINCT user_id) AS user_cnt
-         , ROW_NUMBER() OVER (PARTITION BY step_num ORDER BY COUNT(DISTINCT user_id) DESC) AS rnk
+      ON i.user_id = e.user_id
+     AND e.event_timestamp >= i.install_ts
+     AND e.event_timestamp <= i.install_ts + INTERVAL 1 HOUR
+  )
+  SELECT user_id, event_name, event_timestamp,
+         ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY event_timestamp) AS step_num
+  FROM session_events
+  WHERE prev_event IS NULL OR event_name != prev_event
+  QUALIFY step_num <= 10;
+
+WITH event_volume AS (   -- 스텝별 이벤트 빈도 순위
+    SELECT step_num, event_name, COUNT(DISTINCT user_id) AS user_cnt,
+           ROW_NUMBER() OVER (PARTITION BY step_num ORDER BY COUNT(DISTINCT user_id) DESC) AS rnk
     FROM user_steps
     GROUP BY 1, 2
 ),
-top_events AS (
-    SELECT step_num, event_name FROM event_volume WHERE rnk <= 6   -- TOP_K
+steps_resolved AS (     -- 상위 K 밖 이벤트는 ETC 로 묶기
+    SELECT s.user_id, s.step_num,
+           CASE WHEN v.rnk <= 6 THEN s.event_name ELSE 'ETC' END AS event_name
+    FROM user_steps AS s JOIN event_volume AS v USING (step_num, event_name)
 ),
-steps_resolved AS (
-    SELECT s.user_id
-         , s.step_num
-         , CASE WHEN t.event_name IS NOT NULL THEN s.event_name ELSE 'ETC' END AS event_name
-    FROM user_steps AS s
-    LEFT JOIN top_events AS t
-      ON s.step_num = t.step_num
-     AND s.event_name = t.event_name
-),
-transitions AS (
-    SELECT a.user_id
-         , a.step_num                                          AS from_step
-         , CAST(a.step_num AS VARCHAR) || '-' || a.event_name  AS source
-         , CAST(b.step_num AS VARCHAR) || '-' || b.event_name  AS target
+transitions AS (        -- 스텝 N -> N+1 전이
+    SELECT a.user_id, a.step_num AS from_step,
+           CAST(a.step_num AS VARCHAR) || '-' || a.event_name AS source,
+           CAST(b.step_num AS VARCHAR) || '-' || b.event_name AS target
     FROM steps_resolved AS a
-    JOIN steps_resolved AS b
-      ON a.user_id = b.user_id
-     AND b.step_num = a.step_num + 1
+    JOIN steps_resolved AS b ON a.user_id = b.user_id AND b.step_num = a.step_num + 1
 )
-SELECT t.from_step
-     , t.source
-     , t.target
-     , COUNT(DISTINCT t.user_id) AS user_count
-     , COUNT(DISTINCT CASE WHEN r.d7_retained = 1 THEN t.user_id END) * 100.0
-       / NULLIF(COUNT(DISTINCT t.user_id), 0) AS d7_retention
-FROM transitions AS t
-LEFT JOIN user_retention AS r ON t.user_id = r.user_id
+SELECT t.from_step, t.source, t.target,
+       COUNT(DISTINCT t.user_id) AS user_count,
+       COUNT(DISTINCT CASE WHEN r.d7_retention_flag = 1 THEN t.user_id END) * 100.0
+         / NULLIF(COUNT(DISTINCT t.user_id), 0) AS d7_retention
+FROM transitions AS t LEFT JOIN d7_label AS r USING (user_id)
 GROUP BY 1, 2, 3
-HAVING COUNT(DISTINCT t.user_id) >= 20    -- MIN_USERS
-ORDER BY from_step, user_count DESC
+HAVING COUNT(DISTINCT t.user_id) >= 20
+ORDER BY from_step, user_count DESC;
