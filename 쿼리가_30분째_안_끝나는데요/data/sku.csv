@@ -1,0 +1,5 @@
+sku_id,duration_days,trial_days,base_price_usd
+monthly_basic,30,7,4.99
+monthly_plus,30,7,7.99
+yearly_basic,365,7,29.99
+yearly_plus,365,7,49.99

@@ -1,7 +1,7 @@
 ---
 name: da101
 argument-hint: "[run|apply|qna|quiz] [챕터·키워드·질문]"
-description: This skill should be used when a reader of the 데이터 분석 book works through or applies this repo's practice chapters — asks to "run/verify a chapter", "apply a method to my own data", "predict DAU", "estimate lifetime/LTV from retention", "segment users", "cluster usage patterns", "use Thompson Sampling / MAB instead of A/B test", "find leading indicators", "decompose MRR / GRR / NRR", "analyze reviews or VOC text", "design or interpret an A/B test (sample size, MDE, p-value, peeking, SRM)", "compute unit economics / CAC / LTV / payback period", or in Korean "챕터 실행/검증", "내 데이터에 적용", "DAU 예측", "라이프타임 추정", "유저 세그먼트", "클러스터링", "선행지표 찾기", "MRR 분해", "리뷰 분석", "실험 설계/해석", "p값", "유닛 이코노믹스", "CAC 계산", "LTV vs LTR", "회수 기간/Payback", "ROAS는 좋은데 적자" — or asks which chapter/method fits a business question.
+description: This skill should be used when a reader of the 데이터 분석 book works through or applies this repo's practice chapters — asks to "run/verify a chapter", "apply a method to my own data", "predict DAU", "estimate lifetime/LTV from retention", "segment users", "cluster usage patterns", "use Thompson Sampling / MAB instead of A/B test", "find leading indicators", "decompose MRR / GRR / NRR", "analyze reviews or VOC text", "design or interpret an A/B test (sample size, MDE, p-value, peeking, SRM)", "compute unit economics / CAC / LTV / payback period", or in Korean "챕터 실행/검증", "내 데이터에 적용", "DAU 예측", "라이프타임 추정", "유저 세그먼트", "클러스터링", "선행지표 찾기", "MRR 분해", "리뷰 분석", "실험 설계/해석", "p값", "유닛 이코노믹스", "CAC 계산", "LTV vs LTR", "회수 기간/Payback", "ROAS는 좋은데 적자" — or asks which chapter/method fits a business question. Also use when the reader asks to "design a data mart", "build DW layers (staging·dimension·fact·mart)", "why is my query so slow", "데이터 마트 설계", "마트 설계 템플릿", "DW/데이터 레이크 층 구조", "쿼리가 너무 느려요".
 ---
 
 # 데이터 분석 실습 도우미 (da101)
@@ -86,6 +86,7 @@ QnA ↔ 심화학습·퀴즈).
 | "숫자로 안 보이는 불만/만족의 이유를 알고 싶다 (리뷰·VOC)" | `숫자가_말해주지_않는_Why를_읽는_법` | `references/review-analysis.md` |
 | "A/B 테스트를 며칠 돌려야 하나? 유의한데 이 결과 믿어도 되나?" — 실험 설계·해석 | `P값이_0.049면_출시해도_되죠` | `references/ab-test.md` |
 | "ROAS는 좋은데 회사는 왜 적자지?" — CAC·LTV(공헌이익)·회수 기간 진단 | `ROAS가_220인데_왜_우리는_적자예요` | `references/unit-economics.md` |
+| "쿼리가 30분째 안 끝난다 / 그 데이터는 DW에 없다 / 팀마다 숫자가 다르다" — 데이터 마트 설계·층 구조 | `쿼리가_30분째_안_끝나는데요` | `references/data-mart.md` |
 
 라우팅 팁: "DAU 정체" 계열 질문은 두 갈래다 — **어디서** 새는지는 dau-segments(구성·전이 진단),
 **무엇이** 리텐션을 결정하는지는 leading-indicators(원인 행동 탐색). 순서를 정해야 하면
@@ -129,3 +130,4 @@ QnA ↔ 심화학습·퀴즈).
 - `references/review-analysis.md` — 리뷰 텍스트 분석 (형태소→키워드→네트워크→LDA→원문)
 - `references/ab-test.md` — A/B 테스트 함정 시뮬레이션 (MDE·배정 균형·SRM·Peeking)
 - `references/unit-economics.md` — 원본 로그 3장으로 CAC·LTV(공헌이익)·회수 곡선 복원
+- `references/data-mart.md` — raw→staging→dim/fact→mart 층 쌓기 · 마트 설계 5단계 템플릿(apply는 코드가 아니라 설계 문서)
