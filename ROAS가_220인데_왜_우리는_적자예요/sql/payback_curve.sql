@@ -1,5 +1,6 @@
 -- 회수 곡선: 코호트(채널×획득월)의 경과월별 공헌이익 누적 ÷ CAC 총액
 -- 본문 3.1의 작도법 5단계를 그대로 구현 (예: 2025-04 검색 코호트)
+-- (노트북은 이 쿼리를 채널·획득월 인자를 받는 payback_df 함수로 감싸 표와 차트가 재사용한다)
 WITH cohort AS (
     SELECT user_id FROM users
     WHERE channel = 'search'

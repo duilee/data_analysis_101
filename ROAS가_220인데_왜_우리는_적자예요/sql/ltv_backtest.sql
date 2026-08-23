@@ -1,5 +1,6 @@
 -- 성숙 코호트 백테스트: 획득 후 36개월이 지난 유저의 실측 LTR → LTV(공헌이익)
 -- 외삽·할인 없이 '이미 끝난 경기의 기록'만 사용한다
+-- (노트북은 mature 를 VIEW 로 만들어 CAC 가이드라인 계산에서도 재사용한다)
 WITH mature AS (
     SELECT user_id, channel, date_trunc('month', signup_date) AS cohort_month
     FROM users
