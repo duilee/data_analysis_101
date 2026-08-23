@@ -1,7 +1,10 @@
--- 세 방법 결과 비교
--- Case 1~3을 한 표에 모아 UNION ALL로 묶는다.
--- (휴리스틱의 r은 별도 CTE로 분리해 계산한다 — 집계함수 안에 윈도우 함수를 중첩하면
---  DuckDB에서 실행되지 않고, WHERE가 윈도우보다 먼저 적용되어 r이 달라질 수 있기 때문)
+-- 세 가지 lifetime 추정 방법을 하나의 SQL로 나란히 비교 (단독 실행용)
+--
+-- 노트북은 앞 단계에서 계산한 결과(heuristic / catalog_match / mature)를 pandas 로
+-- 재사용해 표를 만들지만, SQL만으로 한 번에 보고 싶을 때는 이 쿼리를 쓴다.
+-- (cohort_retention 테이블과 lifetime_catalog 등록이 선행되어야 한다)
+-- 휴리스틱의 r은 별도 CTE로 분리해 계산한다 — 집계함수 안에 윈도우 함수를 중첩하면
+-- DuckDB에서 실행되지 않고, WHERE가 윈도우보다 먼저 적용되어 r이 달라질 수 있기 때문.
 
 WITH params AS (
   SELECT 51.5 AS lifetime_mature, 1.875 AS area_d1_d7_mature
