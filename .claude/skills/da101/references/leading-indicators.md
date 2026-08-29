@@ -1,6 +1,6 @@
 # 선행지표 탐색 — EDA·SHAP·Sankey 3렌즈 교차 확인
 
-**챕터**: `선행지표를_찾는_3가지_방법/` · 노트북: `leading_indicators.ipynb`
+**챕터**: `02_선행지표를_찾는_3가지_방법/` · 노트북: `leading_indicators.ipynb`
 
 ## 이 방법이 푸는 문제
 

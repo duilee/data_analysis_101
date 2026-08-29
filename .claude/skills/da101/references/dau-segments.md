@@ -1,6 +1,6 @@
 # DAU 구성 진단 — 7세그먼트 Stock/Flow 분석
 
-**챕터**: `DAU_차트를_봐서는_DAU를_올릴_수_없다/` · 노트북: `dau_segment.ipynb`
+**챕터**: `01_DAU_차트를_봐서는_DAU를_올릴_수_없다/` · 노트북: `dau_segment.ipynb`
 
 ## 이 방법이 푸는 문제
 

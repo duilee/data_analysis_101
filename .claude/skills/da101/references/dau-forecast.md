@@ -1,6 +1,6 @@
 # DAU 기여 추정 — power law 리텐션 적합
 
-**챕터**: `이_기능은_DAU_얼마짜리_기능일까/` · 노트북: `dau_forecast.ipynb`
+**챕터**: `05_이_기능은_DAU_얼마짜리_기능일까/` · 노트북: `dau_forecast.ipynb`
 
 ## 이 방법이 푸는 문제
 

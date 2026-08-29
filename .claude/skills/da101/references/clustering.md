@@ -1,6 +1,6 @@
 # 사용패턴 클러스터링 — KMeans 페르소나
 
-**챕터**: `Machine_Learning으로_찾아보는_유저들의_사용패턴/` · 노트북: `user_segmentation.ipynb`
+**챕터**: `08_Machine_Learning으로_찾아보는_유저들의_사용패턴/` · 노트북: `user_segmentation.ipynb`
 
 ## 이 방법이 푸는 문제
 

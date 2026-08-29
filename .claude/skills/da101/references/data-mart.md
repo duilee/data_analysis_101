@@ -1,6 +1,6 @@
 # 데이터 마트 층 쌓기 — raw → staging → dim/fact → mart
 
-**챕터**: `쿼리가_30분째_안_끝나는데요/` · 노트북: `data_mart_layers.ipynb`
+**챕터**: `11_쿼리가_30분째_안_끝나는데요/` · 노트북: `data_mart_layers.ipynb`
 
 ## 이 방법이 푸는 문제
 
