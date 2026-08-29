@@ -70,7 +70,7 @@ df.groupby("YOUR_RATING_COL").agg(n=("YOUR_TEXT_COL", "count"),
 | 앵커 (절/식별자) | 무엇을 | 어떻게 |
 | --- | --- | --- |
 | 로드 셀 | `data/reviews.csv` 경로, `rating`/`text`/`created_at` 컬럼명 | 독자 데이터로 |
-| ⚠ 집단 정의 | `GROUP_A = reviews["rating"] == 5` / `GROUP_B == 1` — TF-IDF 셀에 `is_pos`/`is_neg`로 **다시 하드코딩**되어 있음 | **두 셀 함께** 독자 정의로 |
+| ⚠ 집단 정의 | `GROUP_A = reviews["rating"] == 5` / `GROUP_B == 1` (로드 셀 한 곳) | 독자 정의로 — TF-IDF 셀의 `is_pos`/`is_neg`는 `GROUP_A/B`를 재사용하므로 따라 바뀐다 |
 | 전처리 셀 | `STOPWORDS`(7개 기본), `kiwi.add_user_word(...)` | 독자 도메인 불용어·고유명사로 확장 |
 | 〃 | `tokenize()` 품사 규칙 (`NNG/NNP` 길이≥2, `VV/VA`→`~다`, 부정 `NEG_BEFORE/NEG_AFTER`) | 기본 유지 권장 — 형용사 뉘앙스가 중요하면 확장 |
 | 변별 셀 | `TOP = 100`(유니크 키워드), `log_odds_z(..., alpha0=1000)` | 데이터 크기에 맞게 |
