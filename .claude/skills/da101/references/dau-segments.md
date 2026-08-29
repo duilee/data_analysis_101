@@ -18,10 +18,11 @@ jupyter nbconvert --to notebook --execute --inplace dau_segment.ipynb
 ```
 
 - 입력: `user_master.csv` (`user_id, first_active_date`), `user_activity.csv` (`user_id, event_date`).
-- 파이프라인: `metrics_query`(4개 파생지표: `is_newbie, d0_active, active_day_count,
-  last_active_date`) → `classify_query`(7분류, 컬럼 `user_seg`) → `build_mart_query`
-  (어제·오늘 2시점 → 테이블 `mart_user_segment`) → Stock(`dist`)/Flow(`trans`)/KPI(`kpi`) →
-  실습 4에서 31일치 백필 후 N일 추적.
+- 파이프라인: 파생지표 쿼리(4개 지표: `is_newbie, d0_active, active_day_count,
+  last_active_date` → 테이블 `user_metrics`) → 분류 CASE(7분류, 컬럼 `user_seg`) →
+  분류 CASE를 매크로화한 `classify_seg` + `build_mart_query`(어제·오늘 2시점 → 테이블
+  `mart_user_segment`) → Stock(`dist`)/Flow(`trans`)/KPI(`kpi`) → 실습 4에서 31일치 백필 후
+  N일 추적.
 - **기대 결과**: 생성기(시드 42, 유저 200명, 기준일 `TARGET = "2026-05-20"`)가 활동 티어와
   이탈 유형(recent/mid/old)을 심어 두었으므로, Stock에 dormant·risk가 뚜렷이 나타나고
   전이 행렬에서 active → inactive → dormant 흐름이 읽혀야 한다.
@@ -29,7 +30,7 @@ jupyter nbconvert --to notebook --execute --inplace dau_segment.ipynb
 ## 내 데이터에 적용 — 인터랙티브 프로토콜
 
 아래 1→5 순서로 진행한다. 각 단계 결과를 독자에게 보여주고 확인한 뒤 다음으로 간다.
-노트북에 `[내 데이터 적용]` 주석이 7곳 있다 — 그 지점을 기본으로 따라가되, 아래 ⚠ 항목이
+노트북에 `[내 데이터 적용]` 주석이 4곳 있다 — 그 지점을 기본으로 따라가되, 아래 ⚠ 항목이
 주석보다 넓은 범위를 다룬다.
 
 ### 1. 인테이크 — 독자에게 물을 것
@@ -62,9 +63,10 @@ duckdb.query("""SELECT COUNT(DISTINCT user_id) AS users, MIN(event_date) AS min_
 
 | 앵커 (실습/식별자) | 무엇을 | 어떻게 |
 | --- | --- | --- |
-| ⚠ CSV 경로 | `metrics_query`·`build_mart_query` 안 **4곳** + 데이터 미리보기 셀 **2곳** | 전부 독자 경로로 |
+| ⚠ CSV 경로 | 준비 셀의 `read_csv_auto` **2곳**(테이블 등록) | 독자 경로로 — 이후 쿼리는 테이블명 참조라 추가 수정 불필요 |
 | ⚠ 기준일 | SQL 문자열 안에 `'2026-05-20'` 리터럴로 하드코딩 | 실습 4의 `build_mart_query.replace("2026-05-20", ts)` 패턴처럼 `TARGET` 변수 치환으로 통일 |
-| ⚠ 세그먼트 경계 | heavy 기준 `active_day_count >= 5`, 최근성 `INTERVAL 6 DAY`(어제 버전 `INTERVAL 7 DAY`), dormant 기준 `INTERVAL 30 DAY`(어제 버전 `31 DAY`) | **세 곳의 CASE 블록**(실습 1 + `build_mart_query` 안의 오늘/어제 두 블록)을 반드시 함께 수정 |
+| ⚠ 세그먼트 경계 | heavy 기준 `cnt >= 5`, dormant 기준 `INTERVAL 30 DAY` | **실습 1의 분류 CASE + `classify_seg` 매크로 두 곳**을 반드시 함께 수정 |
+| ⚠ 최근성 윈도 | 오늘 `INTERVAL 6 DAY`, 어제 `INTERVAL 7 DAY ~ 1 DAY` | 파생지표 쿼리(`user_metrics`)와 `build_mart_query` 의 오늘/어제 윈도를 함께 수정 |
 | 실습 4 | `pd.date_range(end=TARGET, periods=31)` | 추적 기간에 맞게 |
 | 실습 4 | `heavy = "('heavy_active', 'heavy_inactive')"` | 추적할 출발 세그먼트 — 활성화 분석이면 `('new')`로 |
 
@@ -72,13 +74,13 @@ duckdb.query("""SELECT COUNT(DISTINCT user_id) AS users, MIN(event_date) AS min_
   reactivation_pct`) 계산 로직은 그대로 둔다.
 - 경계 조정 가이드: 주기가 긴 서비스일수록 최근성 윈도(6일)와 heavy 기준(7일 중 5일)을
   주기 배수로 늘린다. 예: 주 1회 서비스면 "최근 21일 중 3회 이상 = heavy" 식.
-- `sql/*.sql` 7개는 인라인 쿼리의 전시용 사본 — 노트북만 고치면 sql 파일은 구버전으로 남는다.
+- `sql/*.sql` 8개는 인라인 쿼리의 전시용 사본 — 노트북만 고치면 sql 파일은 구버전으로 남는다.
 
 ### 4. 단계별 진행
 
-1. `metrics_query` 실행 → `user_metrics` 분포(4개 지표 요약 통계) 확인 — 경계값이 실제 분포의
+1. 파생지표 쿼리 실행 → `user_metrics` 분포(4개 지표 요약 통계) 확인 — 경계값이 실제 분포의
    의미 있는 지점에 있는지 독자와 함께 본다.
-2. `classify_query` → 세그먼트별 인원수. 특정 세그먼트가 0명이거나 90% 이상이면 경계 재조정.
+2. 분류 CASE 쿼리 → 세그먼트별 인원수. 특정 세그먼트가 0명이거나 90% 이상이면 경계 재조정.
 3. `build_mart_query` → 대표 유저 몇 명의 from→to 이동을 보여주고 분류가 직관과 맞는지 확인.
 4. Stock → Flow → KPI 순서로 실행하며 각각 해석을 붙인다.
 5. (독자가 원하면) 실습 4 백필로 30일 추적까지 — 실무에서는 일 배치 적재 구조를 권한다.

@@ -2,7 +2,8 @@
 --
 -- 실습 1의 분류 CASE를 기준일(ref_date)을 인자로 받는 매크로로 정의한다.
 -- build_mart.sql 이 오늘/어제 두 시점에 이 매크로를 재사용한다.
--- 임계값(heavy 컷·경계일)을 바꿨다면 이 매크로에만 반영하면 된다.
+-- 임계값(heavy 컷·경계일)을 바꿀 때는 실습 1의 분류 CASE(classify_segment.sql)와
+-- 이 매크로 두 곳을 똑같이 고친다.
 
 CREATE OR REPLACE MACRO classify_seg(is_newbie, d0_active, cnt, last_active, ref_date) AS
   CASE
