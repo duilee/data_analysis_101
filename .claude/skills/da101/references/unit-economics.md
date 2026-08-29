@@ -20,8 +20,8 @@ jupyter nbconvert --to notebook --execute --inplace unit_economics.ipynb
 - 입력: `data/marketing_costs.csv`(월×채널 비용, 매체비/기타 분리) ·
   `data/users.csv`(유입 명부 — **미결제 유저 포함**) · `data/payments.csv`(결제 건별 매출).
 - 흐름: 실습 1 채널별 CAC(매체비 vs fully-loaded, 오가닉은 비용 조인에서 자연 탈락) →
-  실습 2 성숙 코호트(획득 후 36개월) 백테스트로 LTR → ×`CM_RATIO`(0.65) → LTV공헌이익 +
-  캐스케이드 → 실습 3 CAC·LTV를 채널 단위로 merge(채널 표) → 실습 4 `payback_curve()`로
+  실습 2 장기 코호트(획득 후 36개월) 백테스트로 LTR → ×`CM_RATIO`(0.65) → LTV공헌이익 +
+  캐스케이드 → 실습 3 CAC·LTV를 채널 단위로 merge(채널 표) → 실습 4 `payback_df()`로
   회수 곡선 4개(검색·디스플레이 × 2025-03/04) → 실습 5 Payback 기반 CAC 가이드라인.
 - **기대 결과**: 생성기가 심은 정답(모두 본문 표의 값)이 복원돼야 한다.
   - 유료 전체 CAC: 매체비 **12,000원** → fully-loaded **14,500원**
@@ -86,7 +86,7 @@ duckdb.query("""SELECT (SELECT COUNT(*) FROM read_csv_auto('USERS')) AS users,
 ### 4. 단계별 진행
 
 1. 채널별 CAC → 어트리뷰션 툴의 채널 리포트와 상식 대조 (매체비/fully-loaded 격차 확인).
-2. 성숙 코호트 LTV → 채널별 값 제시, 캐스케이드(매출 기준 vs 공헌이익 기준) 재현.
+2. 장기 코호트 LTV → 채널별 값 제시, 캐스케이드(매출 기준 vs 공헌이익 기준) 재현.
 3. 채널 표 완성 → 평균 비율과 채널별 비율의 격차를 짚는다.
 4. 회수 곡선 → 코호트별 Payback 비교. 최근 코호트는 곡선이 '낮은 게 아니라 짧은' 것임을
    함께 확인.
