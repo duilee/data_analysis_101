@@ -74,19 +74,19 @@ QnA ↔ 심화학습·퀴즈).
 
 ## 라우팅 표 — 비즈니스 질문 → 챕터
 
-| 독자의 질문 | 챕터 (폴더) | reference |
-| --- | --- | --- |
-| "이 기능을 붙이면 DAU가 얼마나 오를까?" — 기능·신규유입의 DAU 기여 추정 | `이_기능은_DAU_얼마짜리_기능일까` | `references/dau-forecast.md` |
-| "DAU가 왜 정체지? 어디서 새고 있지?" — DAU 구성·이동 진단 | `DAU_차트를_봐서는_DAU를_올릴_수_없다` | `references/dau-segments.md` |
-| "일주일 데이터로 LTV/라이프타임을 알 수 있나?" | `일주일_데이터로_Lifetime을_예측하라구요` | `references/lifetime.md` |
-| "유저 유형(페르소나)을 데이터로 나누고 싶다" | `Machine_Learning으로_찾아보는_유저들의_사용패턴` | `references/clustering.md` |
-| "A/B 테스트 비용 없이 배너/문구를 최적화하고 싶다" | `MAB_그거_어떻게_쓰는건데` | `references/mab.md` |
-| "D7 리텐션을 미리 알려주는 행동(아하 모먼트)을 찾고 싶다" | `선행지표를_찾는_3가지_방법` | `references/leading-indicators.md` |
-| "구독 매출이 건강하게 크고 있나? 이탈이 문제인가?" | `구독_서비스의_성장_지표_확인하기` | `references/mrr.md` |
-| "숫자로 안 보이는 불만/만족의 이유를 알고 싶다 (리뷰·VOC)" | `숫자가_말해주지_않는_Why를_읽는_법` | `references/review-analysis.md` |
-| "A/B 테스트를 며칠 돌려야 하나? 유의한데 이 결과 믿어도 되나?" — 실험 설계·해석 | `P값이_0.049면_출시해도_되죠` | `references/ab-test.md` |
-| "ROAS는 좋은데 회사는 왜 적자지?" — CAC·LTV(공헌이익)·회수 기간 진단 | `ROAS가_220인데_왜_우리는_적자예요` | `references/unit-economics.md` |
-| "쿼리가 30분째 안 끝난다 / 그 데이터는 DW에 없다 / 팀마다 숫자가 다르다" — 데이터 마트 설계·층 구조 | `쿼리가_30분째_안_끝나는데요` | `references/data-mart.md` |
+| 장 | 독자의 질문 | 챕터 (폴더) | reference |
+| --- | --- | --- | --- |
+| 5장 | "이 기능을 붙이면 DAU가 얼마나 오를까?" — 기능·신규유입의 DAU 기여 추정 | `이_기능은_DAU_얼마짜리_기능일까` | `references/dau-forecast.md` |
+| 1장 | "DAU가 왜 정체지? 어디서 새고 있지?" — DAU 구성·이동 진단 | `DAU_차트를_봐서는_DAU를_올릴_수_없다` | `references/dau-segments.md` |
+| 4장 | "일주일 데이터로 LTV/라이프타임을 알 수 있나?" | `일주일_데이터로_Lifetime을_예측하라구요` | `references/lifetime.md` |
+| 8장 | "유저 유형(페르소나)을 데이터로 나누고 싶다" | `Machine_Learning으로_찾아보는_유저들의_사용패턴` | `references/clustering.md` |
+| 9장 | "A/B 테스트 비용 없이 배너/문구를 최적화하고 싶다" | `MAB_그거_어떻게_쓰는건데` | `references/mab.md` |
+| 2장 | "D7 리텐션을 미리 알려주는 행동(아하 모먼트)을 찾고 싶다" | `선행지표를_찾는_3가지_방법` | `references/leading-indicators.md` |
+| 6장 | "구독 매출이 건강하게 크고 있나? 이탈이 문제인가?" | `구독_서비스의_성장_지표_확인하기` | `references/mrr.md` |
+| 10장 | "숫자로 안 보이는 불만/만족의 이유를 알고 싶다 (리뷰·VOC)" | `숫자가_말해주지_않는_Why를_읽는_법` | `references/review-analysis.md` |
+| 3장 | "A/B 테스트를 며칠 돌려야 하나? 유의한데 이 결과 믿어도 되나?" — 실험 설계·해석 | `P값이_0.049면_출시해도_되죠` | `references/ab-test.md` |
+| 7장 | "ROAS는 좋은데 회사는 왜 적자지?" — CAC·LTV(공헌이익)·회수 기간 진단 | `ROAS가_220인데_왜_우리는_적자예요` | `references/unit-economics.md` |
+| 11장 | "쿼리가 30분째 안 끝난다 / 그 데이터는 DW에 없다 / 팀마다 숫자가 다르다" — 데이터 마트 설계·층 구조 | `쿼리가_30분째_안_끝나는데요` | `references/data-mart.md` |
 
 라우팅 팁: "DAU 정체" 계열 질문은 두 갈래다 — **어디서** 새는지는 dau-segments(구성·전이 진단),
 **무엇이** 리텐션을 결정하는지는 leading-indicators(원인 행동 탐색). 순서를 정해야 하면

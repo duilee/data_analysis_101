@@ -1,4 +1,4 @@
-# MAB(Multi Armed Bandit) 그거 어떻게 쓰는건데…?
+# 9장. MAB(Multi Armed Bandit) 그거 어떻게 쓰는건데…?
 
 이 챕터의 실습 코드입니다. Multi-Armed Bandit 의 **Thompson Sampling**(베이지안·베타 분포)을
 시뮬레이션으로 직접 돌려 보며, 실제 서비스(배너 클릭율 최적화)에 적용할 때의 보완 기법까지 다룹니다.
