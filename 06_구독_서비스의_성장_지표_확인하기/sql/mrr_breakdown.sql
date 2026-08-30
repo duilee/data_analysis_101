@@ -1,7 +1,9 @@
 -- 실습 3. 월별 MRR 분해: new / renew / reactivation / expansion / contraction / churn
 -- 유저×월 단위로 결제를 모은 뒤 전월과 FULL OUTER JOIN:
 --   양쪽에 있으면 계속 구독(renew + 업/다운그레이드 증감), 전월에만 있으면 churn.
--- (단독 실행용 전체 쿼리 — 노트북은 orders/classified/monthly 뷰 체인으로 같은 계산을 단계화한다)
+-- 준비: sales 테이블(data/subscription_sales.csv)만 있으면 단독 실행 가능.
+-- (단독 실행용 전체 쿼리 — 노트북은 orders/classified/monthly/paired 뷰 체인으로
+--  같은 계산을 단계화하고, '두 달 모두 결제' 조건은 stayed 플래그로 한 번만 계산한다)
 WITH payments AS (
     SELECT
         split_part(order_number, '..', 1)  AS pid
@@ -31,23 +33,21 @@ paired AS (
       , c.amt        AS amt        -- 이번 달 결제액 (없으면 NULL = 이탈)
       , p.amt        AS prev_amt   -- 전월 결제액 (없으면 NULL = 신규/복귀)
       , c.pay_type
+      , c.amt IS NOT NULL AND p.amt IS NOT NULL AS stayed   -- 두 달 모두 결제 = 계속 구독
     FROM classified c
     FULL OUTER JOIN classified p
       ON c.pid = p.pid AND p.month = c.month - INTERVAL 1 MONTH
 )
 SELECT
     month
-  , sum(amt)                                                        AS mrr
-  , sum(CASE WHEN pay_type = 'new'          THEN amt END)           AS new_mrr
-  , sum(CASE WHEN pay_type = 'reactivation' THEN amt END)           AS reactivation_mrr
-  , sum(CASE WHEN amt IS NOT NULL AND prev_amt IS NOT NULL
-             THEN least(amt, prev_amt) END)                         AS renew_mrr
-  , sum(CASE WHEN amt IS NOT NULL AND prev_amt IS NOT NULL
-             THEN greatest(amt - prev_amt, 0) END)                  AS expansion_mrr
-  , sum(CASE WHEN amt IS NOT NULL AND prev_amt IS NOT NULL
-             THEN greatest(prev_amt - amt, 0) END)                  AS contraction_mrr
-  , sum(CASE WHEN amt IS NULL THEN prev_amt END)                    AS churn_mrr
-  , sum(prev_amt)                                                   AS baseline_mrr
+  , sum(amt)                                                   AS mrr
+  , sum(CASE WHEN pay_type = 'new'          THEN amt END)      AS new_mrr
+  , sum(CASE WHEN pay_type = 'reactivation' THEN amt END)      AS reactivation_mrr
+  , sum(CASE WHEN stayed THEN least(amt, prev_amt) END)        AS renew_mrr
+  , sum(CASE WHEN stayed THEN greatest(amt - prev_amt, 0) END) AS expansion_mrr
+  , sum(CASE WHEN stayed THEN greatest(prev_amt - amt, 0) END) AS contraction_mrr
+  , sum(CASE WHEN amt IS NULL THEN prev_amt END)               AS churn_mrr
+  , sum(prev_amt)                                              AS baseline_mrr
 FROM paired
 WHERE month <= (SELECT max(month) FROM classified)   -- 데이터 종료 이후의 유령 월 제거
 GROUP BY month
