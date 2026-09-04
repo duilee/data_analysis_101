@@ -5,7 +5,7 @@ lifetime 추정 실습 코드입니다. 유저의 lifetime(가입 후 이탈 전
 비교합니다.
 
 - **Case 1. 이탈률 휴리스틱.** D1~D7 면적에 D7 이후의 등비급수 꼬리를 더해 추정합니다.
-- **Case 2. 리텐션 카탈로그 매칭.** sBG 곡선 2,000장을 만들어 두고, 신규 코호트의 (D1, D3, D7)과 가장 닮은 곡선의 lifetime을 가져옵니다.
+- **Case 2. 리텐션 카탈로그 매칭.** 멱함수 곡선 3,456장을 만들어 두고, 신규 코호트의 (D1, D3, D7)과 가장 닮은 곡선의 lifetime을 가져옵니다.
 - **Case 3. 장기 코호트 직접 측정.** 1년 전 코호트의 실측 lifetime을 신규 코호트의 7일 면적 비율로 보정합니다.
 - 마지막에 세 방법의 결과를 한 표·막대그래프로 비교합니다(삼각측량).
 
@@ -26,8 +26,8 @@ jupyter notebook lifetime_estimation.ipynb   # 노트북을 위에서 아래로 
 | `sql/catalog_match.sql` | Case 2 — 카탈로그에서 SSE 최소 곡선 매칭 |
 | `sql/mature_cohort.sql` | Case 3 — 장기 코호트 실측 lifetime의 7일 면적 비례 보정 |
 | `sql/compare_methods.sql` | 세 방법 결과를 한 표로 비교 |
-| `lifetime_estimation.ipynb` | Case 1~3 + 비교 노트북 (sBG 카탈로그는 노트북에서 생성) |
+| `lifetime_estimation.ipynb` | Case 1~3 + 비교 노트북 (멱함수 카탈로그는 노트북에서 생성) |
 
-> 카탈로그(2,000행)는 노트북 안에서 sBG 격자로 즉석 생성해 DuckDB에 등록하므로 별도 CSV로
+> 카탈로그(3,456행)는 노트북 안에서 멱함수 격자로 즉석 생성해 DuckDB에 등록하므로 별도 CSV로
 > 두지 않습니다. `sql/catalog_match.sql`·`sql/compare_methods.sql`은 그 `lifetime_catalog`
 > 테이블이 등록돼 있다고 가정합니다.

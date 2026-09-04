@@ -8,7 +8,7 @@
 서로 다른 가정을 가진 세 방법을 같은 코호트에 적용해 결과를 교차 검증(삼각측량)한다:
 
 - **Case 1. 이탈률 휴리스틱** — D1~D7 면적 + D7 이후 등비급수 꼬리 (`d7*r/(1-r)`).
-- **Case 2. sBG 카탈로그 매칭** — sBG 곡선 2,000장 중 (D1, D3, D7) SSE 최소 곡선의 lifetime.
+- **Case 2. 멱함수 카탈로그 매칭** — 멱함수(`D_t = D1·t^(-b)`) 곡선 3,456장 중 (D1, D3, D7) SSE 최소 곡선의 lifetime.
 - **Case 3. 장기 코호트 보정** — 1년 전 코호트의 실측 lifetime을 두 코호트의 7일 면적 비율로 리스케일.
 
 ## 실행·검증
@@ -21,11 +21,11 @@ jupyter nbconvert --to notebook --execute --inplace lifetime_estimation.ipynb
 - 입력: `data/cohort_retention.csv` — `day, retention` 8행 (D0=1.000, D1=0.341 … D7=0.244).
 - SQL 4개: `heuristic.sql`(Case 1), `catalog_match.sql`(Case 2), `mature_cohort.sql`(Case 3),
   `compare_methods.sql`(비교).
-- **주의**: sBG 카탈로그(2,000행)는 노트북 안에서 `sbg_curve(a, c, d1)` 그리드로 즉석 생성해
+- **주의**: 멱함수 카탈로그(3,456행)는 노트북 안에서 `power_curve(b, d1)` 그리드로 즉석 생성해
   DuckDB에 `lifetime_catalog`로 등록한다. 따라서 `catalog_match.sql`·`compare_methods.sql`은
   **단독 실행 불가** — 노트북 흐름 안에서만 돌려야 한다.
 - **기대 결과**: 세 방법의 lifetime 추정치가 한 표·막대그래프로 비교되며, 심어둔 정답 기준
-  **Case 1 ≈ 13.3일, Case 2 ≈ 52.6일, Case 3 ≈ 52.5일**이 나와야 한다. Case 2·3이 ~53일에서
+  **Case 1 ≈ 13.3일, Case 2 ≈ 52.2일, Case 3 ≈ 52.5일**이 나와야 한다. Case 2·3이 ~52일에서
   수 일 이내로 모이고 Case 1(휴리스틱)만 크게 낮은 것이 **정상이며 이 챕터의 교훈**이다 —
   등비급수 가정은 두꺼운 꼬리를 표현하지 못해 시스템적으로 과소 추정되고, 가정이 다른
   두 방법(2·3)이 만나는 값을 신뢰하고 떨어진 값(1)을 의심하는 것이 삼각측량이다.
@@ -65,11 +65,11 @@ jupyter nbconvert --to notebook --execute --inplace lifetime_estimation.ipynb
 | 데이터 셀 | `data/cohort_retention.csv` 경로 | 독자 파일로 (컬럼명 `day, retention` 유지가 가장 간단) |
 | 설정 셀 | `DAYS = 365` | lifetime 정의 기간 (기본 1년 유지 권장) |
 | ⚠ Case 1 | 이탈률 추정 윈도 `WHERE day BETWEEN 5 AND 7` | `heuristic_query`와 `compare_query` **두 곳** 함께 |
-| Case 2 | 카탈로그 그리드: `d1_anchors = np.round(np.arange(0.15, 0.55, 0.05), 2)`, `a_grid`(25점), `c_grid`(10점) | 독자의 D1이 0.15~0.50 밖이면 anchors 범위를 넓힌다 |
+| Case 2 | 카탈로그 그리드: `d1_anchors`(0.15~0.50, 0.01 간격 36점), `b_grid`(0.05~1.00, 0.01 간격 96점) | 독자의 D1이 0.15~0.50 밖이면 anchors 범위를 넓힌다. D1 간격은 0.01을 유지(모양 파라미터가 b 하나라 성긴 D1 격자 오차가 lifetime에 그대로 남는다) |
 | Case 2 | 매칭 포인트 D1/D3/D7 (`catalog_match_query`) | 관측이 더 있으면 D14 등을 추가해 SSE 항 확장 가능 |
 | ⚠ Case 3 | 장기 코호트 상수 `51.5`(실측 lifetime), `1.875`(D1~D7 면적) | `mature_query`와 `compare_query` **두 곳** 함께, 독자 실측값으로 |
 
-- `sbg_curve` 함수, SSE 매칭 로직, 비교 표 구조는 그대로 둔다.
+- `power_curve` 함수, SSE 매칭 로직, 비교 표 구조는 그대로 둔다.
 
 ### 4. 단계별 진행
 
@@ -85,9 +85,9 @@ jupyter nbconvert --to notebook --execute --inplace lifetime_estimation.ipynb
 - 세 값이 모이면 그 범위를 lifetime으로 신뢰한다.
 - 벌어지면 어느 가정이 깨졌는지 본다 — 휴리스틱만 크게 낮으면 꼬리가 등비보다 두꺼운 것
   (실제 앱 리텐션에서 가장 흔한 패턴이자 예시 챕터의 결과), 반대로 휴리스틱만 크게 높으면
-  초기 감쇠가 등비보다 빠른 것, 카탈로그만 어긋나면 리텐션 모양이 sBG 곡선족을 벗어난 것,
+  초기 감쇠가 등비보다 빠른 것, 카탈로그만 어긋나면 리텐션 모양이 멱함수 곡선족을 벗어난 것,
   Case 3만 어긋나면 과거와 현재 코호트의 질이 달라진 것.
-- lifetime × ARPU/일 = LTV 어림으로 연결할 수 있다 (MRR 챕터의 LTV 어림과 비교해 보면 좋다).
+- lifetime × ARPDAU(활성 유저 1인당 일평균 매출) = LTV 어림으로 연결할 수 있다 (MRR 챕터의 LTV 어림과 비교해 보면 좋다).
 
 ## 함정
 
@@ -102,8 +102,9 @@ jupyter nbconvert --to notebook --execute --inplace lifetime_estimation.ipynb
 - **lifetime** — 리텐션 커브 아래 면적(활동일수 기대값). `Σ retention(d)`.
 - **등비급수 꼬리** — "매일 남은 유저의 일정 비율이 남는다"는 가정으로 D7 이후를
   `d7·r/(1−r)`로 접는 것.
-- **sBG (shifted Beta-Geometric)** — 유저마다 이탈 확률이 다르다(이질성)는 가정의 생존 모델.
-  이질성 때문에 꼬리가 등비보다 두꺼워진다.
+- **멱함수 리텐션 (Power-law)** — `D_t = D1·t^(-b)`. 어제 대비 오늘 남는 비율이 `(t/(t+1))^b`로
+  매일 1에 가까워지는 가정이라, 꼬리가 등비보다 두껍다. b가 클수록 가파르게 떨어진다.
+  (sBG·Weibull은 파라미터가 둘인 대안이며, sBG의 장기 꼬리도 멱함수 꼴로 근사된다.)
 - **카탈로그 매칭** — 모델을 직접 적합하는 대신, 미리 만든 곡선 사전에서 관측과 가장 닮은
   곡선을 찾는 근사법.
 - **삼각측량** — 가정이 다른 추정을 교차시켜, 값이 아니라 **가정의 성립 여부**를 검증하는 태도.
@@ -111,14 +112,14 @@ jupyter nbconvert --to notebook --execute --inplace lifetime_estimation.ipynb
 ### 개념 체크
 
 1. 세 방법이 각각 어떤 가정에 의존하는가?
-   - 힌트: Case 1 = 일정 감쇠비, Case 2 = 리텐션이 sBG 곡선족 안에 있음, Case 3 = 과거·현재
+   - 힌트: Case 1 = 일정 감쇠비, Case 2 = 리텐션이 멱함수 곡선족 안에 있음, Case 3 = 과거·현재
      코호트의 커브 모양 상사성.
 2. D1 리텐션이 같아도 lifetime이 2배 차이 날 수 있는 이유는?
    - 힌트: 꼬리 — 같은 시작점이라도 감쇠 속도(커브 모양)가 다르면 면적이 크게 달라진다.
 3. 삼각측량에서 세 값이 벌어졌을 때 "평균 내서 쓴다"가 왜 나쁜가?
    - 힌트: 벌어짐은 어떤 가정이 깨졌다는 신호다 — 평균은 신호를 지우고 틀린 값들을 섞는다.
-4. (보너스) 등비급수 가정과 sBG 이질성 가정 중 실제 앱 리텐션 꼬리를 더 잘 맞추는 쪽은?
-   - 힌트: sBG — 이탈 성향이 낮은 유저만 남아가며 실효 이탈률이 점점 떨어진다.
+4. (보너스) 등비급수(r 고정)와 멱함수(r이 1로 수렴) 중 실제 앱 리텐션 꼬리를 더 잘 맞추는 쪽은?
+   - 힌트: 멱함수 — 이탈 성향이 낮은 유저만 남아가며 실효 이탈률이 점점 떨어진다.
 
 ### 심화 과제
 
@@ -126,8 +127,7 @@ jupyter nbconvert --to notebook --execute --inplace lifetime_estimation.ipynb
    꼬리를 더 평평하게 만들면(예: D7 0.244 → 0.280) 세 방법 중 **어느 추정치가 가장 크게
    움직일지** 순서를 예측하게 한다 → 수정 → 재실행 → 대조. (등비 r 추정 윈도가 5~7일이라
    Case 1이 민감함을 발견하는 것이 목표.) 끝나면 `git checkout --`으로 원복 후 재생성.
-2. **[샌드박스]** Case 2의 `d1_anchors` 범위를 `np.round(np.arange(0.15, 0.55, 0.05), 2) →
-   np.round(np.arange(0.30, 0.40, 0.05), 2)`로 좁혀 카탈로그를 빈약하게 만들면 매칭 결과가 어떻게 될지
-   예측 → 실행 → 대조. "카탈로그 커버리지가 추정 품질을 결정한다"를 확인. 원복 필수.
+2. **[샌드박스]** Case 2의 `d1_anchors` 간격을 `0.01 → 0.05`로 성기게 바꾸면(36점 → 8점) 매칭 결과가 어떻게 될지
+   예측 → 실행 → 대조. (D1=0.341이 0.35층에 떨어져 약 49일로 내려간다 — "카탈로그 커버리지가 추정 품질을 결정한다"를 확인.) 원복 필수.
 3. **[사고]** 구독 서비스라면 "활동일수 lifetime" 대신 무엇을 lifetime으로 정의해야 할까?
    그때 세 방법은 각각 어떻게 번역되는가? (MRR 챕터의 1/churn과의 관계를 중심으로 토론)
