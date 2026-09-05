@@ -2,12 +2,12 @@
 
 유저 세그먼트 분석 실습을 위해 두 개의 합성 테이블을 만든다.
 
-  - user_master   : 유저별 가입(첫 접속) 정보   (user_id, first_active_date)
-  - user_activity : 유저별 일별 접속 로그        (user_id, event_date)
+  - user_master   : 유저별 가입(첫 기록) 정보        (user_id, first_active_date)
+  - user_activity : 유저가 습관 체크를 남긴 날의 로그 (user_id, event_date)
 
-각 유저에게 '평소 접속 확률(activity_rate)'과 '이탈 시점(churn_date)'을
-미리 정해 두고, 가입일부터 기준일까지 하루씩 베르누이 시행으로 접속 여부를
-정한다. 이렇게 하면 기준일(target) 시점에 7개 세그먼트가 모두 등장할 뿐 아니라,
+각 유저에게 '평소 기록 확률(activity_rate)'과 '이탈 시점(churn_date)'을
+미리 정해 두고, 가입일부터 기준일까지 하루씩 베르누이 시행으로 그날 기록을 남겼는지를
+정한다. 이렇게 하면 기준일(target) 시점에 5개 세그먼트가 모두 등장할 뿐 아니라,
 유저별 이탈 시점이 고정돼 있어 '며칠 전'을 기준으로 잘라 봐도 세그먼트가
 시간에 따라 자연스럽게 이동(Flow)하는 것을 확인할 수 있다.
 
@@ -35,7 +35,7 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 MASTER_PATH = os.path.join(BASE, "data", "user_master.csv")
 ACTIVITY_PATH = os.path.join(BASE, "data", "user_activity.csv")
 
-# 활동 강도 군집: (이름, 하루 접속 확률, 비중). heavy 일수록 자주 접속한다.
+# 활동 강도 군집: (이름, 하루 기록 확률, 비중). heavy 일수록 자주 기록한다.
 ACTIVITY_TIERS = [
     ("heavy", 0.85, 0.26),
     ("mid",   0.55, 0.30),
@@ -43,11 +43,11 @@ ACTIVITY_TIERS = [
     ("rare",  0.12, 0.17),
 ]
 
-# 이탈 유형: (이름, 비중). churn_date 이후에는 접속 기록을 남기지 않는다.
+# 이탈 유형: (이름, 비중). churn_date 이후에는 기록을 남기지 않는다.
 #   none   : 이탈 없이 기준일까지 꾸준히 활동
-#   recent : 최근 1~7일 사이에 이탈 (오늘 미접속 → inactive)
-#   mid    : 8~30일 전에 이탈 (최근 7일 활동 0 → risk)
-#   deep   : 31~60일 전에 이탈 (오래 미접속 → dormant)
+#   recent : 최근 1~7일 사이에 이탈 (기록 일수가 줄어 heavy → light, 또는 light 유지)
+#   mid    : 8~30일 전에 이탈 (최근 7일 기록 0 → risk)
+#   deep   : 31~60일 전에 이탈 (마지막 기록 30일 초과 → dormant)
 CHURN_TYPES = [
     ("none",   0.62),
     ("recent", 0.14),
@@ -88,7 +88,7 @@ def build():
         rate = tier_rate[tier]
         churn = _pick(rng, CHURN_TYPES)
 
-        # 이탈 시점(churn_date): 이날 이후로는 접속하지 않는다.
+        # 이탈 시점(churn_date): 이날 이후로는 기록을 남기지 않는다.
         if churn == "none":
             churn_date = None
         elif churn == "recent":
@@ -98,16 +98,16 @@ def build():
         else:  # deep
             churn_date = TARGET_DATE - timedelta(days=int(rng.integers(31, 61)))
 
-        # 가입일부터 기준일까지 하루씩 접속 여부를 시뮬레이션.
+        # 가입일부터 기준일까지 하루씩 기록 여부를 시뮬레이션.
         day = first_active
         while day <= TARGET_DATE:
             if churn_date is not None and day >= churn_date:
-                break  # 이탈 이후에는 접속 기록 없음
+                break  # 이탈 이후에는 기록 없음
             if rng.random() < rate:
                 activity_rows.append((user_id, day))
             day += timedelta(days=1)
 
-        # 가입(첫 접속) 당일은 반드시 활동이 한 줄 찍힌다(가입 = 첫 접속).
+        # 가입(첫 기록) 당일은 반드시 활동이 한 줄 찍힌다(가입 = 첫 기록).
         # 덕분에 활동이 0행인 유저가 존재하지 않아, count_if/bool_or 가 NULL 이 될 일이 없고
         # '가입했지만 활동이 전혀 없는' 비현실적인 케이스도 생기지 않는다.
         activity_rows.append((user_id, first_active))
