@@ -11,20 +11,16 @@ WITH new_obs AS (
   FROM cohort_retention
 ),
 errors AS (
-  SELECT
-    cat.D1 AS matched_d1,
-    cat.b,
-    POW(cat.D1 - obs.d1, 2)
-      + POW(cat.D3 - obs.d3, 2)
-      + POW(cat.D7 - obs.d7, 2) AS sse,
-    cat.lifetime
+  SELECT cat.D1, cat.b, cat.lifetime,
+         POW(cat.D1 - obs.d1, 2) + POW(cat.D3 - obs.d3, 2)
+           + POW(cat.D7 - obs.d7, 2) AS sse
   FROM lifetime_catalog AS cat, new_obs AS obs
 )
 SELECT
-  ROUND(matched_d1, 2) AS matched_d1,
-  ROUND(b, 2)          AS matched_b,
-  ROUND(sse, 6)        AS sse,
-  ROUND(lifetime, 2)   AS lifetime_estimate
+  ROUND(D1, 2)       AS matched_d1,
+  ROUND(b, 2)        AS matched_b,
+  ROUND(sse, 6)      AS sse,
+  ROUND(lifetime, 2) AS lifetime_estimate
 FROM errors
 ORDER BY sse ASC
 LIMIT 1;

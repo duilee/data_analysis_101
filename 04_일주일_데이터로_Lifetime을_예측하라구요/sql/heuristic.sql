@@ -21,7 +21,7 @@ daily_ratios AS (
 r_estimate AS (
   SELECT AVG(ratio) AS r
   FROM daily_ratios
-  WHERE day BETWEEN 5 AND 7  -- D5/D4, D6/D5, D7/D6
+  WHERE day BETWEEN 5 AND 7
 ),
 -- 3) D7과 r로 꼬리 면적 계산
 d7_value AS (

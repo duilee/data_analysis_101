@@ -14,9 +14,10 @@ new_area AS (
   WHERE day BETWEEN 1 AND 7
 )
 SELECT
-  p.lifetime_mature                                                    AS lifetime_mature,
-  p.area_d1_d7_mature                                                  AS area_d1_d7_mature,
-  ROUND(n.area_d1_d7_new, 4)                                           AS area_d1_d7_new,
-  ROUND(n.area_d1_d7_new / p.area_d1_d7_mature, 4)                     AS scaling_factor,
-  ROUND(p.lifetime_mature * n.area_d1_d7_new / p.area_d1_d7_mature, 2) AS lifetime_estimate
+  p.lifetime_mature,
+  p.area_d1_d7_mature,
+  ROUND(n.area_d1_d7_new, 4) AS area_d1_d7_new,
+  ROUND(n.area_d1_d7_new / p.area_d1_d7_mature, 4) AS scaling_factor,
+  ROUND(p.lifetime_mature * n.area_d1_d7_new / p.area_d1_d7_mature, 2)
+    AS lifetime_estimate
 FROM new_area AS n, params AS p;
