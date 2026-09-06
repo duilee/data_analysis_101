@@ -15,17 +15,21 @@ WITH metrics AS (
     datediff('day', m.first_active_date, DATE '2026-05-20') AS days,
     count_if(a.event_date BETWEEN DATE '2026-05-20' - INTERVAL 6 DAY
                               AND DATE '2026-05-20') AS cnt,
-    max(CASE WHEN a.event_date <= DATE '2026-05-20' THEN a.event_date END) AS last_active,
+    max(CASE WHEN a.event_date <= DATE '2026-05-20'
+        THEN a.event_date END) AS last_active,
     -- 어제 지표 (같은 정의에서 윈도우만 하루 미룸)
-    datediff('day', m.first_active_date, DATE '2026-05-20' - INTERVAL 1 DAY) AS days_from,
+    datediff('day', m.first_active_date,
+             DATE '2026-05-20' - INTERVAL 1 DAY) AS days_from,
     count_if(a.event_date BETWEEN DATE '2026-05-20' - INTERVAL 7 DAY
-                              AND DATE '2026-05-20' - INTERVAL 1 DAY) AS cnt_from,
-    max(CASE WHEN a.event_date <= DATE '2026-05-20' - INTERVAL 1 DAY THEN a.event_date END) AS last_active_from
+                          AND DATE '2026-05-20' - INTERVAL 1 DAY) AS cnt_from,
+    max(CASE WHEN a.event_date <= DATE '2026-05-20' - INTERVAL 1 DAY
+        THEN a.event_date END) AS last_active_from
   FROM user_master m LEFT JOIN user_activity a USING (user_id)
   GROUP BY m.user_id, m.first_active_date
 )
 SELECT
   DATE '2026-05-20' AS target_date, user_id,
-  classify_seg(days_from, cnt_from, last_active_from, DATE '2026-05-20' - INTERVAL 1 DAY) AS user_seg_from,
+  classify_seg(days_from, cnt_from, last_active_from,
+               DATE '2026-05-20' - INTERVAL 1 DAY) AS user_seg_from,
   classify_seg(days, cnt, last_active, DATE '2026-05-20') AS user_seg
 FROM metrics ORDER BY user_id;

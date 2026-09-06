@@ -17,8 +17,9 @@ SELECT
   count_if(a.event_date BETWEEN DATE '2026-05-20' - INTERVAL 6 DAY
                             AND DATE '2026-05-20') AS active_day_count,
   -- 3. 마지막 기록일 (가입 당일 기록이 보장되므로 항상 존재)
-  max(CASE WHEN a.event_date <= DATE '2026-05-20' THEN a.event_date END) AS last_active_date,
-  -- (+) 오늘 기록 여부 — 세그먼트 분류에는 쓰지 않고 DAU 구성을 볼 때만 사용
+  max(CASE WHEN a.event_date <= DATE '2026-05-20'
+      THEN a.event_date END) AS last_active_date,
+  -- (+) 오늘 기록 여부
   bool_or(a.event_date = DATE '2026-05-20') AS d0_active
 FROM user_master m LEFT JOIN user_activity a USING (user_id)
 GROUP BY m.user_id, m.first_active_date;
