@@ -25,6 +25,7 @@ jupyter notebook unit_economics.ipynb    # 노트북을 위에서 아래로 실�
 | `data/users.csv` | 유입 유저 명부 (`user_id, channel, signup_date`) — 결제 안 한 유저 포함 |
 | `data/payments.csv` | 결제 건별 로그 (`user_id, payment_date, amount_krw`) |
 | `sql/cac_by_channel.sql` | 채널별 매체비/fully-loaded CAC |
-| `sql/ltv_backtest.sql` | 장기 코호트 36개월 실측 LTR → LTV(공헌이익) |
+| `sql/mature_cohort.sql` | 성숙 코호트(획득 후 36개월 경과) 뷰 — 아래 백테스트와 실습 5가 재사용 |
+| `sql/ltv_backtest.sql` | 장기 코호트 36개월 실측 LTR → LTV(공헌이익) (선행: mature_cohort.sql) |
 | `sql/payback_curve.sql` | 코호트 회수 곡선 (누적 공헌이익 ÷ CAC 총액) |
 | `unit_economics.ipynb` | 실습 1~5 노트북 |

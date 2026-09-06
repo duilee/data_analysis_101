@@ -2,8 +2,9 @@
 -- 오가닉은 비용 행이 없어 조인에서 자연스럽게 빠진다 (paid 기준 계산)
 SELECT c.channel
      , u.new_users
-     , ROUND(c.media_cost_krw / u.new_users)                      AS cac_media
-     , ROUND((c.media_cost_krw + c.other_cost_krw) / u.new_users) AS cac_fully_loaded
+     , ROUND(c.media_cost_krw / u.new_users) AS cac_media
+     , ROUND((c.media_cost_krw + c.other_cost_krw)
+             / u.new_users) AS cac_fully_loaded
 FROM marketing_costs c
 JOIN (
     SELECT channel, COUNT(*) AS new_users
