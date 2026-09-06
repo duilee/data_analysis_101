@@ -10,12 +10,14 @@ WITH orders AS (
       , sales_amount_krw
       , row_number() OVER (PARTITION BY split_part(order_number, '..', 1)
                            ORDER BY order_charged_date) AS order_cnt
-      , lag(order_charged_date) OVER (PARTITION BY split_part(order_number, '..', 1)
-                                      ORDER BY order_charged_date) AS prev_date
+      , lag(order_charged_date) OVER (
+            PARTITION BY split_part(order_number, '..', 1)
+            ORDER BY order_charged_date) AS prev_date
     FROM sales
 )
 SELECT *
      , CASE WHEN order_cnt = 1 THEN 'new'
-            WHEN date_diff('day', prev_date, order_charged_date) < 32 THEN 'renew'
+            WHEN date_diff('day', prev_date, order_charged_date) < 32
+                 THEN 'renew'
             ELSE 'reactivation' END AS pay_type
 FROM orders
