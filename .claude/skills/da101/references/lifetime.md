@@ -8,9 +8,14 @@
 유저 lifetime(가입 후 이탈 전까지 평균 활동일수)을 초기 7일 리텐션만으로 추정한다.
 서로 다른 가정을 가진 세 방법을 같은 코호트에 적용해 결과를 교차 검증(삼각측량)한다:
 
-- **Case 1. 이탈률 휴리스틱** — D1~D7 면적 + D7 이후 등비급수 꼬리 (`d7*r/(1-r)`).
-- **Case 2. 멱함수 카탈로그 매칭** — 멱함수(`D_t = D1·t^(-b)`) 곡선 3,456장 중 (D1, D3, D7) SSE 최소 곡선의 lifetime.
-- **Case 3. 장기 코호트 보정** — 1년 전 코호트의 실측 lifetime을 두 코호트의 7일 면적 비율로 리스케일.
+- **실습 1 (Case 1). 이탈률 휴리스틱** — D1~D7 면적 + D7 이후 등비급수 꼬리 (`d7*r/(1-r)`).
+- **실습 2 (Case 2). 리텐션 카탈로그 매칭** — 멱함수(`D_t = D1·t^(-b)`) 곡선 3,456장 중 (D1, D3, D7) SSE 최소 곡선의 lifetime.
+- **실습 3 (Case 3). 장기 코호트 직접 측정** — 1년 전 코호트의 실측 lifetime을 두 코호트의 7일 면적 비율로 리스케일.
+- **실습 4. 세 방법 결과 비교** — 세 추정치를 한 표·막대그래프로 나란히 놓고 삼각측량으로 읽는다.
+
+노트북 헤딩은 `실습 1~4`이며, 이 문서의 `Case 1/2/3`은 각각 `실습 1/2/3`을 가리킨다
+(실습 2 소절: 2.1 카탈로그 생성 → 2.2 시각화 → 2.3 SSE 매칭 → 2.4 해석 / 실습 3: 3.1 면적 비율 보정 → 3.2 해석 /
+실습 4: 비교 표·그래프 → 4.3 마무리).
 
 **책 이론부 포인터** — 자세한 설명은 책에서 읽게 안내한다.
 
@@ -40,13 +45,13 @@ jupyter nbconvert --to notebook --execute --inplace lifetime_estimation.ipynb
 ```
 
 - 입력: `data/cohort_retention.csv` — `day, retention` 8행 (D0=1.000, D1=0.341 … D7=0.244).
-- SQL 4개: `heuristic.sql`(Case 1), `catalog_match.sql`(Case 2), `mature_cohort.sql`(Case 3),
-  `compare_methods.sql`(비교).
+- SQL 4개: `heuristic.sql`(실습 1), `catalog_match.sql`(실습 2), `mature_cohort.sql`(실습 3),
+  `compare_methods.sql`(실습 4 비교).
 - **주의**: 멱함수 카탈로그(3,456행)는 노트북 안에서 `power_curve(b, d1)` 그리드로 즉석 생성해
   DuckDB에 `lifetime_catalog`로 등록한다. 따라서 `catalog_match.sql`·`compare_methods.sql`은
   **단독 실행 불가** — 노트북 흐름 안에서만 돌려야 한다.
-- **기대 결과**: 세 방법의 lifetime 추정치가 한 표·막대그래프로 비교되며, 심어둔 정답 기준
-  **Case 1 ≈ 13.3일, Case 2 ≈ 52.2일, Case 3 ≈ 52.5일**이 나와야 한다(책에 실린 값: 13.33 / 52.15 / 52.52).
+- **기대 결과**: 실습 4에서 세 방법의 lifetime 추정치가 한 표·막대그래프로 비교되며, 심어둔 정답 기준
+  **실습 1(Case 1) ≈ 13.3일, 실습 2(Case 2) ≈ 52.2일, 실습 3(Case 3) ≈ 52.5일**이 나와야 한다(책에 실린 값: 13.33 / 52.15 / 52.52).
   중간값도 대조 가능 — Case 1: 7일 면적 1.912, r=0.9791, 꼬리 11.42 / Case 2: 매칭 (D1, b)=(0.34, 0.18),
   SSE 0.000057 / Case 3: 보정 계수 1.0197. Case 2·3이 ~52일에서
   수 일 이내로 모이고 Case 1(휴리스틱)만 크게 낮은 것이 **정상이며 이 챕터의 교훈**이다 —
@@ -85,23 +90,23 @@ jupyter nbconvert --to notebook --execute --inplace lifetime_estimation.ipynb
 
 | 앵커 (셀/식별자) | 무엇을 | 어떻게 |
 | --- | --- | --- |
-| 데이터 셀 | `data/cohort_retention.csv` 경로 | 독자 파일로 (컬럼명 `day, retention` 유지가 가장 간단) |
-| 설정 셀 | `DAYS = 365` | lifetime 정의 기간 (기본 1년 유지 권장) |
-| ⚠ Case 1 | 이탈률 추정 윈도 `WHERE day BETWEEN 5 AND 7` | 노트북은 `heuristic_query` 한 곳. `sql/compare_methods.sql`을 따로 쓸 때는 그 안의 같은 윈도도 함께 |
-| Case 2 | 카탈로그 그리드: `d1_anchors`(0.15~0.50, 0.01 간격 36점), `b_grid`(0.05~1.00, 0.01 간격 96점) | 독자의 D1이 0.15~0.50 밖이면 anchors 범위를 넓힌다. D1 간격은 0.01을 유지(모양 파라미터가 b 하나라 성긴 D1 격자 오차가 lifetime에 그대로 남는다) |
-| Case 2 | 매칭 포인트 D1/D3/D7 (`catalog_match_query`) | 관측이 더 있으면 D14 등을 추가해 SSE 항 확장 가능 |
-| ⚠ Case 3 | 장기 코호트 상수 `51.5`(실측 lifetime), `1.875`(D1~D7 면적) | 노트북은 `mature_query` 한 곳, 독자 실측값으로. `sql/compare_methods.sql`에도 같은 상수가 있으니 그 파일을 쓸 때 함께 |
+| 0절 데이터 셀 | `data/cohort_retention.csv` 경로 | 독자 파일로 (컬럼명 `day, retention` 유지가 가장 간단) |
+| 0절 설정 셀 | `DAYS = 365` | lifetime 정의 기간 (기본 1년 유지 권장) |
+| ⚠ 실습 1 (Case 1) | 이탈률 추정 윈도 `WHERE day BETWEEN 5 AND 7` | 노트북은 `heuristic_query` 한 곳. `sql/compare_methods.sql`을 따로 쓸 때는 그 안의 같은 윈도도 함께 |
+| 실습 2.1 (Case 2) | 카탈로그 그리드: `d1_anchors`(0.15~0.50, 0.01 간격 36점), `b_grid`(0.05~1.00, 0.01 간격 96점) | 독자의 D1이 0.15~0.50 밖이면 anchors 범위를 넓힌다. D1 간격은 0.01을 유지(모양 파라미터가 b 하나라 성긴 D1 격자 오차가 lifetime에 그대로 남는다) |
+| 실습 2.3 (Case 2) | 매칭 포인트 D1/D3/D7 (`catalog_match_query`) | 관측이 더 있으면 D14 등을 추가해 SSE 항 확장 가능 |
+| ⚠ 실습 3.1 (Case 3) | 장기 코호트 상수 `51.5`(실측 lifetime), `1.875`(D1~D7 면적) | 노트북은 `mature_query` 한 곳, 독자 실측값으로. `sql/compare_methods.sql`에도 같은 상수가 있으니 그 파일을 쓸 때 함께 |
 
 - `power_curve` 함수, SSE 매칭 로직, 비교 표 구조는 그대로 둔다.
 
 ### 4. 단계별 진행
 
 1. 독자 리텐션 로드 → 곡선 플롯을 보여주고 모양(급락 후 완만) 확인.
-2. Case 1 실행 → 추정치와 함께 "r(감쇠비)이 몇으로 잡혔는지" 제시.
-3. Case 2: 카탈로그 생성 → 독자 D1이 anchors 범위 안인지 확인 → 매칭 실행 → 매칭된 곡선을
+2. 실습 1(Case 1) 실행 → 추정치와 함께 "r(감쇠비)이 몇으로 잡혔는지" 제시.
+3. 실습 2(Case 2): 2.1 카탈로그 생성 → 독자 D1이 anchors 범위 안인지 확인 → 2.3 매칭 실행 → 매칭된 곡선을
    관측치와 겹쳐 플롯.
-4. (가능하면) Case 3 실행.
-5. `compare` DataFrame 셀(pandas — 앞 세 결과를 그대로 모음)로 삼각측량 표 → 아래 해석
+4. (가능하면) 실습 3(Case 3) 실행.
+5. 실습 4의 `compare` DataFrame 셀(pandas — 앞 세 결과를 그대로 모음)로 삼각측량 표 → 아래 해석
    프레임으로 읽는다.
 
 ### 5. 결과 해석
@@ -172,7 +177,7 @@ jupyter nbconvert --to notebook --execute --inplace lifetime_estimation.ipynb
    꼬리를 더 평평하게 만들면(예: D7 0.244 → 0.280) 세 방법 중 **어느 추정치가 가장 크게
    움직일지** 순서를 예측하게 한다 → 수정 → 재실행 → 대조. (등비 r 추정 윈도가 5~7일이라
    Case 1이 민감함을 발견하는 것이 목표.) 끝나면 `git checkout --`으로 원복 후 재생성.
-2. **[샌드박스]** Case 2의 `d1_anchors` 간격을 `0.01 → 0.05`로 성기게 바꾸면(36점 → 8점) 매칭 결과가 어떻게 될지
+2. **[샌드박스]** 실습 2.1(Case 2)의 `d1_anchors` 간격을 `0.01 → 0.05`로 성기게 바꾸면(36점 → 8점) 매칭 결과가 어떻게 될지
    예측 → 실행 → 대조. (D1=0.341이 0.35층에 떨어져 약 49일로 내려간다 — "카탈로그 커버리지가 추정 품질을 결정한다"를 확인.) 원복 필수.
 3. **[사고]** 구독 서비스라면 "활동일수 lifetime" 대신 무엇을 lifetime으로 정의해야 할까?
    그때 세 방법은 각각 어떻게 번역되는가? (MRR 챕터의 1/churn과의 관계를 중심으로 토론)
