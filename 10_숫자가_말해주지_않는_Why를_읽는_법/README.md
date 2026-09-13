@@ -24,7 +24,7 @@ jupyter notebook review_analysis.ipynb        # 노트북을 위에서 아래로
 | 파일 | 설명 |
 | --- | --- |
 | `generate_data.py` | 별점별 어휘 차이를 심어 둔 합성 리뷰 생성기 |
-| `data/reviews.csv` | 상품 구매 리뷰 (`review_id, product_id, rating, text`) |
+| `data/reviews.csv` | 상품 구매 리뷰 (`review_id, product_id, rating, text, created_at`) |
 | `review_analysis.ipynb` | 전처리→빈도→변별 키워드→네트워크→토픽→원문회귀→긍정 리뷰 재발견 실습 노트북 |
 
 > 책 본문의 임베딩 군집화(`sentence-transformers`)·LLM 코딩은 무거운 의존성이나 API 키가
