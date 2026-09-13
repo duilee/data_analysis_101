@@ -33,21 +33,21 @@ jupyter nbconvert --to notebook --execute --inplace user_segmentation.ipynb
 ```
 
 - 입력: `alarm_daily.csv`(일별 알람 사용 피처), `user_master.csv`(`user_id, new_flag, retained_d7`).
-- 실습 0은 두 셀이다: `con.execute` 셀이 `clip(x, lim, cap)` 매크로와 주중 필터
+- 실습 1.1은 두 셀이다: `con.execute` 셀이 `clip(x, lim, cap)` 매크로와 주중 필터
   (`isodow(...) BETWEEN 1 AND 5`)의 `daily_stat` 뷰를 등록하고, `query` 셀이 기간 평균·클리핑으로
   유저 피처 7종 + 클리핑판 `*_cluster` 7종을 만든다(`sql/extract_features.sql`은 두 셀의 합본).
 - **기대 결과**: 생성기가 4개 페르소나를 심었다 — `minimalist`(1,389명), `trying_maximalist`
   (600명), `weak_maximalist`(312명), `weak_minimalist`(99명), 총 2,400명. `k = 4`에서 KMeans가
   이 구성을 거의 그대로 복원하고, centroid의 알람 개수·인터벌·기상 소요시간이 심어둔 특성과
   일치해야 한다. 책 실습 절에 실린 결과(노트북 출력과 동일):
-  - 실습 3 요약표 — 0 의지박약 미니멀리스트(알람 1.40, 인터벌 8.58분, 첫 알람~해제 75.15분, 99명 4.12%),
+  - 실습 3.1 요약표 — 0 의지박약 미니멀리스트(알람 1.40, 인터벌 8.58분, 첫 알람~해제 75.15분, 99명 4.12%),
     1 미니멀리스트(1.19 / 3.14 / 8.41, 1,390명 57.92%), 2 의지박약 맥시멀리스트(2.80 / 47.88 / 84.48,
     312명 13.00%), 3 노력형 맥시멀리스트(2.17 / 18.42 / 40.41, 599명 24.96%). 심어둔 수와 ±1명 차이는 정상.
-  - 실습 5 — 신규(335·184·18·301명)/기존(81·1,055·128·298명). 라벨 번호는 모델마다 임의라 번호가 아닌
+  - 실습 4.1 — 신규(335·184·18·301명)/기존(81·1,055·128·298명). 라벨 번호는 모델마다 임의라 번호가 아닌
     centroid 값으로 패턴을 맞춘다(신규 0번 = 기존 1번 = 미니멀리스트).
-  - 실습 6 — D7 리텐션 0: 0.283, 1: 0.564, 2: 0.410, 3: 0.534 → 가장 잘 남는 클러스터 1 (56%).
-  - 실습 7 — `saved 2,400 labels`, 저장·재로드 모델의 라벨 재현 일치율 100%.
-- **워크스루 포인트**: 실습 3의 중심점 표에 이르면 독자에게 각 클러스터의 이름을 직접 붙여 보게 한다
+  - 실습 4.2 — D7 리텐션 0: 0.283, 1: 0.564, 2: 0.410, 3: 0.534 → 가장 잘 남는 클러스터 1 (56%).
+  - 실습 4.3 — `saved 2,400 labels`, 저장·재로드 모델의 라벨 재현 일치율 100%.
+- **워크스루 포인트**: 실습 3.1의 중심점 표에 이르면 독자에게 각 클러스터의 이름을 직접 붙여 보게 한다
   (행동 특성은 스킬이 요약해 주고, 이름은 독자가) — 책의 페르소나 네이밍 연습이 여기다.
 - **주의**: 실행하면 `output/user_labels.csv`, `models/*.pkl`이 생성된다(gitignore 대상).
   알람 시각 피처는 분 단위 정수(0~1439)다.
@@ -84,15 +84,15 @@ jupyter nbconvert --to notebook --execute --inplace user_segmentation.ipynb
 
 | 앵커 (실습/식별자) | 무엇을 | 어떻게 |
 | --- | --- | --- |
-| 실습 0 `con.execute` 셀 | `alarm_daily.csv` 경로, 주중 필터 `isodow(...) BETWEEN 1 AND 5`, `daily_stat` 뷰의 일별 지표 | 독자 지표로 재작성. 구조(일별 `daily_stat` → 유저 `user_features`)는 유지 |
-| 실습 0 `query` 셀 | `user_master.csv` 경로, `user_features` CTE, `clip(값, 상한, 대체값)` 호출 7개 | 인테이크에서 정한 임계값으로. 클리핑판 `*_cluster` 쌍 생성 규칙은 유지 |
-| 실습 1 | `feat_cols` 리스트 (7개 피처명), `plt.subplots(2, 4)`·`axes.ravel()[-1].set_visible(False)`(7개 전제) | 독자 피처명으로 — 피처 수가 다르면 그리드도 조정 |
+| 실습 1.1 `con.execute` 셀 | `alarm_daily.csv` 경로, 주중 필터 `isodow(...) BETWEEN 1 AND 5`, `daily_stat` 뷰의 일별 지표 | 독자 지표로 재작성. 구조(일별 `daily_stat` → 유저 `user_features`)는 유지 |
+| 실습 1.1 `query` 셀 | `user_master.csv` 경로, `user_features` CTE, `clip(값, 상한, 대체값)` 호출 7개 | 인테이크에서 정한 임계값으로. 클리핑판 `*_cluster` 쌍 생성 규칙은 유지 |
+| 실습 1.2 | `feat_cols` 리스트 (7개 피처명), `plt.subplots(2, 4)`·`axes.ravel()[-1].set_visible(False)`(7개 전제) | 독자 피처명으로 — 피처 수가 다르면 그리드도 조정 |
 | 실습 2 | `cluster_cols` (`endswith('_cluster')`) | 명명 규칙 유지하면 자동 |
-| ⚠ 실습 3 | `k = 4` **와 `fit_kmeans(frame, k=4)` 시그니처 기본값 두 곳** — 실습 5는 `fit_kmeans(df_new)`처럼 k를 넘기지 않아 기본값을 쓴다 | Elbow·Silhouette 결과 보고 결정 (아래 4단계). 두 곳 함께 바꾸거나 실습 5 호출에 `k=k`를 넘길 것 |
-| 실습 3 `KOR` 딕셔너리 | 한국어 헤더 맵 7개 키 — `summary[list(KOR.values())]`로 인덱싱하므로 키가 피처명과 안 맞으면 KeyError | 독자 피처명으로 재작성 |
+| ⚠ 실습 3.1 | `k = 4` **와 `fit_kmeans(frame, k=4)` 시그니처 기본값 두 곳** — 실습 4.1은 `fit_kmeans(df_new)`처럼 k를 넘기지 않아 기본값을 쓴다 | Elbow·Silhouette 결과 보고 결정 (아래 4단계). 두 곳 함께 바꾸거나 실습 4.1 호출에 `k=k`를 넘길 것 |
+| 실습 3.1 `KOR` 딕셔너리 | 한국어 헤더 맵 7개 키 — `summary[list(KOR.values())]`로 인덱싱하므로 키가 피처명과 안 맞으면 KeyError | 독자 피처명으로 재작성 |
 | 〃 | `PERSONA_ORDER`, `name_persona(r)`의 컷오프 (`scheduled_cnt < 2` 등) | 독자 centroid를 보고 새로 작성 — 예시 도메인 전용이므로 그대로 쓰면 안 됨 |
-| 실습 5·6 | `new_flag` 그룹 축, `retained_d7` KPI 컬럼 | 독자 컬럼으로 |
-| 실습 7 | `output/`·`models/` 경로 | 필요 시 변경 |
+| 실습 4.1·4.2 | `new_flag` 그룹 축, `retained_d7` KPI 컬럼 | 독자 컬럼으로 |
+| 실습 4.3 | `output/`·`models/` 경로 | 필요 시 변경 |
 
 - `fit_kmeans(frame, k=4)`, `random_state=42, n_init=10`, scaler→`inverse_transform` 흐름은
   그대로 재사용한다.
@@ -157,7 +157,7 @@ jupyter nbconvert --to notebook --execute --inplace user_segmentation.ipynb
 3. 중심점(centroid)은 무엇이고, 왜 `scaler.inverse_transform`으로 되돌린 뒤 읽어야 할까요?
    - 힌트: 클러스터에 속한 유저들의 피처 평균으로 만든 "가상의 대표 유저". 표준화 공간의 값은
      "평균에서 몇 σ"라 사람이 읽을 수 없으니 분·개수 단위로 복원해야 네이밍이 가능하다.
-4. 실습 0에서 클러스터 입력에는 클리핑한 `*_cluster` 컬럼을 쓰고 원본 피처도 따로 남겨 둔 이유는?
+4. 실습 1.1에서 클러스터 입력에는 클리핑한 `*_cluster` 컬럼을 쓰고 원본 피처도 따로 남겨 둔 이유는?
    - 힌트: 극단값 유저 몇 명이 거리 계산과 centroid를 끌고 가 그룹 경계를 흐리므로 클러스터링에는
      클리핑판을, 분포 확인·해석에는 원본을 쓴다.
 5. "클러스터별 리텐션이 다르다"에서 "이 행동을 시키면 리텐션이 오른다"로 바로 가면 안 되는
@@ -171,7 +171,7 @@ jupyter nbconvert --to notebook --execute --inplace user_segmentation.ipynb
    3개 페르소나만 심으면 Elbow·Silhouette이 k=3과 k=4에서 각각 어떻게 변할지 예측하게 한다 →
    수정 → 재생성 → 재실행 → 대조. ("심어둔 구조 수 = 최적 k"가 복원되는지 확인.)
    끝나면 `git checkout -- generate_data.py data/` 후 재생성으로 원복.
-2. **[샌드박스]** 실습 0의 `clip` 매크로를 `AS x`로 재정의해 클리핑을 무력화하면(`*_cluster`
+2. **[샌드박스]** 실습 1.1의 `clip` 매크로를 `AS x`로 재정의해 클리핑을 무력화하면(`*_cluster`
    컬럼이 원본 그대로 — `query` 셀의 호출 7개를 지우는 것보다 간단)
    centroid가 어떻게 왜곡될지 예측 → 실행 → 심어둔 페르소나 값과 대조. "이상치 몇 명이
    중심점을 끌고 간다"를 눈으로 확인. 원복 필수.
