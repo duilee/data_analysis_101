@@ -1,7 +1,7 @@
 ---
 name: da101
 argument-hint: "[run|apply|qna|quiz] [챕터·키워드·질문]"
-description: This skill should be used when a reader of the 데이터 분석 book works through or applies this repo's practice chapters — asks to "run/verify a chapter", "apply a method to my own data", "predict DAU", "estimate lifetime/LTV from retention", "segment users", "diagnose DAU with user segments (Stock/Flow)", "cluster usage patterns", "use Thompson Sampling / MAB instead of A/B test", "find leading indicators", "decompose MRR / GRR / NRR", "analyze reviews or VOC text", "design or interpret an A/B test (sample size, MDE, p-value, peeking, SRM)", "compute unit economics / CAC / LTV / payback period", or in Korean "챕터 실행/검증", "내 데이터에 적용", "DAU 예측", "라이프타임 추정", "유저 세그먼트", "DAU 세그먼트", "Stock/Flow", "유저 분석 프레임워크", "DAU가 왜 줄었지/정체", "클러스터링", "선행지표 찾기", "MRR 분해", "리뷰 분석", "실험 설계/해석", "p값", "유닛 이코노믹스", "CAC 계산", "LTV vs LTR", "회수 기간/Payback", "ROAS는 좋은데 적자" — or asks which chapter/method fits a business question. Also use when the reader asks to "design a data mart", "build DW layers (staging·dimension·fact·mart)", "why is my query so slow", "데이터 마트 설계", "마트 설계 템플릿", "DW/데이터 레이크 층 구조", "쿼리가 너무 느려요".
+description: This skill should be used when a reader of the 데이터 분석 book works through or applies this repo's practice chapters — asks to "run/verify a chapter", "apply a method to my own data", "predict DAU", "estimate lifetime/LTV from retention", "segment users", "diagnose DAU with user segments (Stock/Flow)", "cluster usage patterns", "use Thompson Sampling / MAB instead of A/B test", "find leading indicators", "find the aha moment / behaviors that split retention", "decompose MRR / GRR / NRR", "analyze reviews or VOC text", "design or interpret an A/B test (sample size, MDE, p-value, peeking, SRM)", "compute unit economics / CAC / LTV / payback period", or in Korean "챕터 실행/검증", "내 데이터에 적용", "DAU 예측", "라이프타임 추정", "유저 세그먼트", "DAU 세그먼트", "Stock/Flow", "유저 분석 프레임워크", "DAU가 왜 줄었지/정체", "클러스터링", "선행지표 찾기", "선행지표 탐색", "아하 모먼트", "리텐션을 가르는 행동", "MRR 분해", "리뷰 분석", "실험 설계/해석", "p값", "유닛 이코노믹스", "CAC 계산", "LTV vs LTR", "회수 기간/Payback", "ROAS는 좋은데 적자" — or asks which chapter/method fits a business question. Also use when the reader asks to "design a data mart", "build DW layers (staging·dimension·fact·mart)", "why is my query so slow", "데이터 마트 설계", "마트 설계 템플릿", "DW/데이터 레이크 층 구조", "쿼리가 너무 느려요".
 ---
 
 # 데이터 분석 실습 도우미 (da101)
@@ -83,7 +83,7 @@ QnA ↔ 심화학습·퀴즈).
 | 4장 | "일주일 데이터로 LTV/라이프타임을 알 수 있나?" | `04_일주일_데이터로_Lifetime을_예측하라구요` | `references/lifetime.md` |
 | 8장 | "유저 유형(페르소나)을 데이터로 나누고 싶다" | `08_Machine_Learning으로_찾아보는_유저들의_사용패턴` | `references/clustering.md` |
 | 9장 | "A/B 테스트 비용 없이 배너/문구를 최적화하고 싶다" | `09_MAB_그거_어떻게_쓰는건데` | `references/mab.md` |
-| 2장 | "D7 리텐션을 미리 알려주는 행동(아하 모먼트)을 찾고 싶다" | `02_선행지표를_찾는_3가지_방법` | `references/leading-indicators.md` |
+| 2장 | "D7 리텐션을 미리 알려주는 행동(아하 모먼트)을 찾고 싶다" — 후행지표뿐이라 당장 관리할 지표가 없을 때 (책의 호출 별칭: **선행지표**) | `02_선행지표를_찾는_3가지_방법` | `references/leading-indicators.md` |
 | 6장 | "구독 매출이 건강하게 크고 있나? 이탈이 문제인가?" | `06_구독_서비스의_성장_지표_확인하기` | `references/mrr.md` |
 | 10장 | "숫자로 안 보이는 불만/만족의 이유를 알고 싶다 (리뷰·VOC)" | `10_숫자가_말해주지_않는_Why를_읽는_법` | `references/review-analysis.md` |
 | 3장 | "A/B 테스트를 며칠 돌려야 하나? 유의한데 이 결과 믿어도 되나?" — 실험 설계·해석 | `03_P값이_0.049면_출시해도_되죠` | `references/ab-test.md` |
@@ -122,8 +122,11 @@ QnA ↔ 심화학습·퀴즈).
 챕터 하나를 다룰 때 그 챕터의 reference **하나만** 읽는다. 각 파일은 방법 요약,
 실행·검증 절차와 기대 결과, 내 데이터 적용 레시피(입력 스키마·치환 지점·튜닝 노브·함정),
 학습 가이드(핵심 개념·개념 체크·심화 과제)를 담고 있다.
-파일 상단의 `**동기화**:` 줄은 그 reference가 마지막으로 대조된 챕터 코드의 커밋과, 책 본문
-대조 여부를 적는다 — 챕터 코드를 바꾸면 reference를 다시 대조하고 이 줄을 갱신한다.
+파일 상단의 `<!-- 동기화: … -->` 주석은 그 reference가 마지막으로 대조된 챕터 코드의 커밋과,
+책 본문 대조 여부를 적는다(독자에게는 렌더링되지 않는 관리용 표식) — 챕터 코드를 바꾸면
+reference를 다시 대조하고 이 주석을 갱신한다.
+reference에는 책 이론부를 옮겨 적지 않는다 — 요지와 "책 N절 참고" 포인터만 두고, 자세한 설명은
+독자가 책에서 읽게 안내한다(실습 절의 문장을 따르는 노트북 서술과는 다른 원칙).
 
 - `references/dau-forecast.md` — power law 리텐션 적합 → DAU 기여 공식
 - `references/dau-segments.md` — 5세그먼트 Stock/Flow/비율 KPI 진단
