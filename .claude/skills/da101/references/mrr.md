@@ -1,6 +1,7 @@
 # 구독 성장 지표 — MRR 6요소 분해와 GRR/NRR
 
 **챕터**: `06_구독_서비스의_성장_지표_확인하기/` · 노트북: `mrr_analysis.ipynb`
+**동기화**: 코드 기준 커밋 `758ccde` (2026-09-13) — 노트북·README·sql과 대조 완료. 책 본문 대조는 미실시.
 
 ## 이 방법이 푸는 문제
 
@@ -33,8 +34,8 @@ jupyter nbconvert --to notebook --execute --inplace mrr_analysis.ipynb
 ## 내 데이터에 적용 — 인터랙티브 프로토콜
 
 아래 1→5 순서로 진행한다. 각 단계 결과를 독자에게 보여주고 확인한 뒤 다음으로 간다.
-노트북에 `[내 데이터 적용]` 주석이 2곳 있지만 ⚠ 32일 임계값의 중복은 주석에 없다 —
-아래 표가 기준이다.
+노트북에 `[내 데이터 적용]` 주석이 2곳 있지만 ⚠ 32일 임계값이 `sql/subscriber_counts.sql`에도
+따로 있다는 점은 주석에 없다 — 아래 표가 기준이다.
 
 ### 1. 인테이크 — 독자에게 물을 것
 
@@ -73,20 +74,24 @@ duckdb.query("""SELECT COUNT(*) AS rows, MIN(order_charged_date) AS min_d,
 
 | 앵커 (실습/식별자) | 무엇을 | 어떻게 |
 | --- | --- | --- |
-| 로드 셀 | CSV 경로, 컬럼명 | 독자 데이터로 |
-| 실습 1 `query` | `split_part(order_number, '..', 1)`의 구분자·파싱 규칙 | 독자 주문번호 체계로 (유저 ID 있으면 이 실습 생략) |
-| ⚠ renew 임계값 | `date_diff('day', prev_date, order_charged_date) < 32`가 **실습 2 셀, 실습 3 `classified` CTE, `sql/subscriber_counts.sql` 세 곳**에 있음 | 월 구독 32일 기준. 연 구독 혼재 시 플랜별 주기+유예로 분리, **세 곳 함께** 수정 |
-| 실습 3 `query` | `INTERVAL 1 MONTH` 비교 주기 | 주 단위 분해가 필요하면 변경 |
+| 로드 셀 `CREATE TABLE sales AS …` | CSV 경로, 컬럼명 | 독자 데이터로 — 테이블명 `sales`는 유지 (이후 모든 SQL과 `sql/*.sql`이 참조) |
+| 실습 1 `orders` 뷰 셀 | `split_part(order_number, '..', 1)`의 구분자·파싱 규칙 | 독자 주문번호 체계로 (유저 ID 있으면 이 실습 생략) |
+| ⚠ renew 임계값 | `date_diff('day', prev_date, order_charged_date) < 32` — 노트북은 **실습 2 `classified` 뷰 한 곳**(실습 3·4·6이 이 뷰를 재사용), 그리고 실습 5가 읽는 **`sql/subscriber_counts.sql`**에 별도로 한 번 더 | 월 구독 32일 기준. 연 구독 혼재 시 플랜별 주기+유예로 분리, **두 곳 함께** 수정 (참고용 사본 `sql/classify_payment.sql`·`sql/mrr_breakdown.sql`도 맞춰 두면 좋다) |
+| 실습 3 `paired` 뷰 셀 | `INTERVAL 1 MONTH` 2곳 (coalesce와 JOIN 조건) | 주 단위 분해가 필요하면 함께 변경 |
 | 실습 5 | `open("sql/subscriber_counts.sql")` — 유일하게 디스크에서 읽는 SQL | 이 파일은 실제 실행 대상이므로 직접 수정 |
 | 실습 6 | 안정 구간 컷 `mrr[mrr.month >= "2025-04"]` | 독자 데이터의 초기 성장 왜곡 구간을 제외한 시점으로 |
 
 - 6요소 분해의 FULL OUTER JOIN 구조와 항등식 검증 셀(`check`)은 그대로 둔다 — 치환 후
   항등식이 깨지면 분류 규칙이 잘못된 것이다(디버깅 신호로 활용).
+- `paired` 뷰의 `stayed`(두 달 모두 결제)·`delta`(이번 달 − 전월 금액) 컬럼이 6요소의 핵심이다:
+  renew = `least(amt, prev_amt)`, expansion = `greatest(delta, 0)`, contraction = `greatest(-delta, 0)`.
+  주기를 바꿔도 이 컬럼명은 유지한다.
 
 ### 4. 단계별 진행
 
-1. (필요시) 파싱 실행 → pid 수·회차 분포 제시 → `gap` 셀로 결제 간격 분포 확인(월 구독이면
-   28~31일에 몰려야 함 — 여기서 임계값의 타당성을 독자와 확인).
+1. (필요시) 파싱 실행 → pid 수·회차 분포 제시 → 실습 2의 `gap` 셀로 결제 간격 분포 확인(월
+   구독이면 28~31일에 몰려야 함 — 여기서 임계값의 타당성을 독자와 확인). ⚠ 실습 4에서 같은
+   이름 `gap`이 NRR−GRR 갭으로 재정의되므로, 나중에 간격 분포를 다시 보려면 실습 2 셀을 재실행.
 2. `pay_type` 분류 → new/renew/reactivation 비중 제시, 상식과 대조.
 3. 6요소 분해 → **항등식 검증 통과 확인** → 월별 스택 차트 제시.
 4. GRR/NRR 계산 → 추이 차트.

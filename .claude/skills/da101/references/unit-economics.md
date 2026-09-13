@@ -1,6 +1,7 @@
 # 유닛 이코노믹스 — CAC·LTV(공헌이익)·회수 곡선
 
 **챕터**: `07_ROAS가_220인데_왜_우리는_적자예요/` · 노트북: `unit_economics.ipynb`
+**동기화**: 코드 기준 커밋 `758ccde` (2026-09-13) — 노트북·README·sql과 대조 완료. 책 본문 대조는 미실시.
 
 ## 이 방법이 푸는 문제
 
@@ -75,13 +76,16 @@ duckdb.query("""SELECT (SELECT COUNT(*) FROM read_csv_auto('USERS')) AS users,
 
 | 앵커 (실습/식별자) | 무엇을 | 어떻게 |
 | --- | --- | --- |
-| 준비 셀 | CSV 경로, `CM_RATIO = 0.65` | 독자 데이터·합의된 공헌이익률로. `CM_RATIO`는 실습 2·5와 `payback_curve()`가 공유 |
-| ⚠ 실습 4 첫 쿼리 | `SUM(p.amount_krw) * 0.65` — **여기만 0.65가 하드코딩** | `CM_RATIO` 변경 시 반드시 함께 수정 |
-| 실습 1 `query`, 실습 4 첫 쿼리 | 기준 월 `DATE '2025-04-01'` | 독자의 최근 '완결된' 월로 |
-| 실습 2·5 `mature` CTE | 컷 `DATE '2023-07-01'`, `INTERVAL 36 MONTH` | 독자의 LTV 지평으로 (두 실습 함께) |
-| 실습 4 `styles` 리스트 | 채널·코호트월 4개 조합 | 비교하고 싶은 채널×코호트로 |
+| 준비 셀 (두 번째 코드 셀) | CSV 경로, `CM_RATIO = 0.65` | 독자 데이터·합의된 공헌이익률로. `CM_RATIO`는 실습 2·5의 쿼리와 `payback_df()`가 f-string으로 공유하므로 여기 한 곳만 바꾸면 된다 |
+| ⚠ 실습 2 캐스케이드 셀 | `paid_ltr / 12000`, `paid_ltv / 12000`, `paid_ltv / 14500` — 본문 표의 CAC가 **숫자로 박혀 있음** | 실습 1에서 계산한 독자의 매체비 CAC·fully-loaded CAC 값으로 치환 |
+| 실습 1 `cac`·`apr` 쿼리 | 기준 월 `DATE '2025-04-01'` (2곳) | 독자의 최근 '완결된' 월로 |
+| 실습 2 `mature` 뷰 (`CREATE OR REPLACE VIEW`) | 컷 `DATE '2023-07-01'` | 독자의 LTV 지평으로 — 한 곳만 고치면 실습 5도 이 뷰를 재사용 |
+| 실습 2 LTV 쿼리 | `INTERVAL 36 MONTH` | LTV 지평과 같이 변경 (실습 5의 `INTERVAL 12 MONTH`·`/ 12.0`은 월평균 계산 기간이라 별개) |
+| 실습 4 `payback_df("search", "2025-04")` 호출과 `styles` 리스트 | 채널·코호트월 조합 | 비교하고 싶은 채널×코호트로 |
 
-- `sql/*.sql`은 참고용 사본이다 — 치환 대상은 노트북 인라인 쿼리.
+- `sql/*.sql` 4개(`cac_by_channel`, `mature_cohort`, `ltv_backtest`, `payback_curve`)는 참고용
+  사본이다 — 치환 대상은 노트북 인라인 쿼리. 사본에는 0.65가 리터럴로 박혀 있고
+  `ltv_backtest.sql`은 `mature_cohort.sql`의 뷰를 먼저 실행해야 한다.
 
 ### 4. 단계별 진행
 
