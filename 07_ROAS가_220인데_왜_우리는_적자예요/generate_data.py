@@ -38,7 +38,7 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 rng = np.random.default_rng(SEED)
 
 CM_RATIO = 0.65        # 공헌이익률 (본문 2.1: 변동비 35%)
-HORIZON = 36           # LTV 실측 기간(개월) — 성숙 코호트가 이 기간을 채운다
+HORIZON = 36           # LTV 실측 기간(개월) — 장기 코호트가 이 기간을 채운다
 DATA_END = pd.Period("2026-06", "M")   # 결제 로그 마지막 달
 
 # ---------------------------------------------------------------------------
