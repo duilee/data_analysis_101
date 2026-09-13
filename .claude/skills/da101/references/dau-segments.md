@@ -1,7 +1,7 @@
 # DAU 구성 진단 — 5세그먼트 Stock/Flow 분석
 
 **챕터**: `01_DAU_차트를_봐서는_DAU를_올릴_수_없다/` · 노트북: `dau_segment.ipynb`
-**동기화**: 코드 기준 커밋 `758ccde` (2026-09-13) — 노트북·README·sql과 대조 완료. 책 본문 대조는 미실시.
+**동기화**: 코드 기준 커밋 `758ccde` (2026-09-13) — 노트북·README·sql과 대조 완료. 책 본문 대조 완료 (구글 문서 2026-09-13 읽은 버전).
 
 ## 이 방법이 푸는 문제
 
@@ -10,6 +10,28 @@ DAU 한 줄 차트로는 서비스가 왜 정체인지 알 수 없다. 유저를
 일수 5일 이상/1~4일, risk/dormant 는 마지막 기록 7~30일/30일 초과)로 분류하고, 분포(Stock)·전이 행렬(Flow)·비율 KPI 5종(HURR/CURR/Heavy Loss/Light Loss/
 Reactivation)으로 **어디서 유저가 새고 어디로 이동하는지**를 입체적으로 진단한다.
 전 과정이 DuckDB SQL이라 그대로 웨어하우스 쿼리로 옮기기 좋다.
+
+**책 이론부 요약** (QnA 모드의 근거):
+- **재방문율의 착시** (1절) — 월간 재방문율이 똑같이 75%인 서비스 A와 B를 비교한다. A는 신규
+  유입이 매달 일정해 12개월쯤부터 Active User 성장이 멈추고, B는 신규 유입이 매달 20%씩
+  늘어(CCGR, Cohort/Cohort Growth Rate) 계속 성장한다. 재방문율은 "서비스가 처한 성장 단계에
+  따라 의미가 완전히 달라지는" 지표이며, 매우 높은 재방문율은 신규 유입이 멈춘 '정체 상태'의
+  신호일 수도 있다. 봐야 할 것은 수치 자체가 아니라 유입 코호트의 성장과 리텐션 커브가 어느
+  수준에서 평평해지는가 — 재방문율은 단독으로 쓰지 말고 유입 성장·이탈률의 함수로 본다.
+- **유저 분석 프레임워크** (2절) — 듀오링고는 DAU를 여러 유저 세그먼트로 쪼갠 Growth Model을
+  운영하며, 시뮬레이션 결과 CURR(Current User Retention Rate, 현재 활동 유저의 유지율)
+  개선이 DAU 성장에 가장 큰 영향을 준다고 밝혔다. 알라미(Alarmy)는 접속 이력으로 세그먼트를
+  나누고 세그먼트 간 '전이 경로'를 정의해 모니터링하는 프레임워크를 공유했다. 이 챕터의
+  5세그먼트 체계는 이 둘을 참고한 예시다.
+- **Stock과 Flow** (2.2) — 유저 세그먼트는 특정 시점(매일 자정)의 스냅샷이므로 저량(Stock),
+  세그먼트 변화는 시작과 종료가 있는 기간(하루, 한 주)의 변화이므로 유량(Flow)이다.
+- **세그먼트 변화 정의** (책 표 2, 변경 전 → 변경 후) — New Activation(new → light 또는 heavy,
+  가입 8일째 첫 주 안착) · New Loss(new → risk, 첫 주 이탈) · Loyalization(light → heavy) ·
+  Heavy Loss(heavy → light) · Light Loss(light → risk) · Risk Loss(risk → dormant) ·
+  Reactivation(risk → light) · Resurrection(dormant → light) · HURR(heavy → heavy) ·
+  CURR(light+heavy → light+heavy). 노트북의 KPI 5종은 이 중 HURR·CURR·Heavy Loss·Light Loss·
+  Reactivation만 계산한다. 가능한 경로에는 논리 제약이 있다 — light → new는 불가능하고,
+  하루 단위로는 heavy → risk나 risk → heavy가 한 번에 일어나지 않고 반드시 light를 거친다.
 
 ## 실행·검증
 
@@ -77,7 +99,8 @@ con.execute("""SELECT COUNT(DISTINCT user_id) AS users, MIN(event_date) AS min_d
 - `SEG_ORDER`(5개 세그먼트명)와 KPI 5종(`hurr_pct, curr_pct, heavy_loss_pct, light_loss_pct,
   reactivation_pct`) 계산 로직은 그대로 둔다.
 - 경계 조정 가이드: 주기가 긴 서비스일수록 최근성 윈도(6일)와 heavy 기준(7일 중 5일)을
-  주기 배수로 늘린다. 예: 주 1회 서비스면 "최근 21일 중 3회 이상 = heavy" 식.
+  주기 배수로 늘린다. 책의 예: 매일 쓰는 서비스는 7일 윈도, 주간 단위 콘텐츠 서비스는 14일이나
+  28일. '활동'의 정의도 접속이 아니라 구매·콘텐츠 소비·핵심 기능 사용으로 바꿀 수 있다.
 - `sql/*.sql` 8개는 인라인 쿼리의 전시용 사본 — 노트북만 고치면 sql 파일은 구버전으로 남는다.
 
 ### 4. 단계별 진행
@@ -101,6 +124,13 @@ con.execute("""SELECT COUNT(DISTINCT user_id) AS users, MIN(event_date) AS min_d
 - 실습 4(N일 추적)는 마트를 여러 날 적재해야 의미가 있다 — 실무에서는 일 배치로 적재하는
   구조를 먼저 만든다.
 - 세그먼트 기준을 자주 바꾸면 시계열 비교가 깨진다. 기준 변경은 버전을 남기고 소급 재계산한다.
+- **비율 지표는 분모 크기와 함께** 본다(책 3.3). 예시의 Reactivation 2.0%는 risk 51명 중 1명이
+  돌아온 결과다 — 인원이 적은 세그먼트는 한두 명에 수치가 크게 출렁이므로, 분모를 나란히
+  표기하거나 일정 기간을 누적해 분모를 키운 뒤 해석한다.
+- **1일 유지율을 N번 곱해 장기 유지율을 계산하지 않는다**(책 4절). light로 내려갔다가 다시
+  heavy로 올라오는 왕복을 놓친다 — 실습 4처럼 마트를 N일 쌓아 실측한다.
+- **재방문율(또는 어느 한 리텐션 수치) 단독 해석의 착시**(책 1절) — 같은 75%라도 신규 유입의
+  성장 속도에 따라 정체와 성장으로 갈린다. 세그먼트 진단도 유입 코호트의 추세와 같이 본다.
 
 ## 학습 가이드
 
@@ -120,10 +150,17 @@ con.execute("""SELECT COUNT(DISTINCT user_id) AS users, MIN(event_date) AS min_d
 1. Stock은 좋아 보이는데(활성 비중 높음) 서비스가 위험할 수 있는 이유는?
    - 힌트: Flow — heavy → light, light → risk 전이가 유입보다 크면 Stock은 시차를 두고 무너진다.
 2. HURR와 Reactivation 중 지금 우리 서비스에 먼저 볼 지표는 무엇이고, 판단 근거는?
-   - 힌트: heavy 비중이 크면 HURR(지키기), dormant 풀이 크면 Reactivation(되살리기) —
-     Stock 구성이 우선순위를 정한다.
+   - 힌트: heavy 비중이 크면 HURR(지키기), risk 풀이 크면 Reactivation(risk → light 되살리기) —
+     Stock 구성이 우선순위를 정한다. 분모 크기도 근거에 포함(risk 51명 중 1명 = 2.0%).
 3. DAU가 같은 두 서비스의 세그먼트 구성이 다르면 무엇이 달라지는가?
    - 힌트: 미래 DAU 궤적과 액션 포트폴리오 — heavy 중심은 안정적, new 중심은 리텐션에 취약.
+4. 1일 HURR이 92.1%인데 같은 heavy 그룹을 30일 기준으로 보면 55.6%다. 두 숫자가 왜 이렇게
+   다르고, 1일 HURR을 30번 곱하면 안 되는 이유는?
+   - 힌트: 매일의 작은 이탈이 누적된다 + light로 내려갔다 heavy로 돌아오는 왕복은 곱셈이
+     못 잡는다 — 그래서 마트를 N일 쌓아 실측한다(실습 4).
+5. 월간 재방문율이 75%로 같은 두 서비스의 Active User 궤적이 완전히 다를 수 있는 이유는?
+   - 힌트: 신규 유입의 성장 속도(CCGR) — 재방문율은 성장 단계에 따라 뜻이 달라지는 착시
+     지표라, 유입 코호트의 성장과 리텐션 커브의 평평해지는 수준을 같이 봐야 한다.
 
 ### 심화 과제
 

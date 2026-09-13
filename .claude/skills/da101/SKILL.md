@@ -1,7 +1,7 @@
 ---
 name: da101
 argument-hint: "[run|apply|qna|quiz] [챕터·키워드·질문]"
-description: This skill should be used when a reader of the 데이터 분석 book works through or applies this repo's practice chapters — asks to "run/verify a chapter", "apply a method to my own data", "predict DAU", "estimate lifetime/LTV from retention", "segment users", "cluster usage patterns", "use Thompson Sampling / MAB instead of A/B test", "find leading indicators", "decompose MRR / GRR / NRR", "analyze reviews or VOC text", "design or interpret an A/B test (sample size, MDE, p-value, peeking, SRM)", "compute unit economics / CAC / LTV / payback period", or in Korean "챕터 실행/검증", "내 데이터에 적용", "DAU 예측", "라이프타임 추정", "유저 세그먼트", "클러스터링", "선행지표 찾기", "MRR 분해", "리뷰 분석", "실험 설계/해석", "p값", "유닛 이코노믹스", "CAC 계산", "LTV vs LTR", "회수 기간/Payback", "ROAS는 좋은데 적자" — or asks which chapter/method fits a business question. Also use when the reader asks to "design a data mart", "build DW layers (staging·dimension·fact·mart)", "why is my query so slow", "데이터 마트 설계", "마트 설계 템플릿", "DW/데이터 레이크 층 구조", "쿼리가 너무 느려요".
+description: This skill should be used when a reader of the 데이터 분석 book works through or applies this repo's practice chapters — asks to "run/verify a chapter", "apply a method to my own data", "predict DAU", "estimate lifetime/LTV from retention", "segment users", "diagnose DAU with user segments (Stock/Flow)", "cluster usage patterns", "use Thompson Sampling / MAB instead of A/B test", "find leading indicators", "decompose MRR / GRR / NRR", "analyze reviews or VOC text", "design or interpret an A/B test (sample size, MDE, p-value, peeking, SRM)", "compute unit economics / CAC / LTV / payback period", or in Korean "챕터 실행/검증", "내 데이터에 적용", "DAU 예측", "라이프타임 추정", "유저 세그먼트", "DAU 세그먼트", "Stock/Flow", "유저 분석 프레임워크", "DAU가 왜 줄었지/정체", "클러스터링", "선행지표 찾기", "MRR 분해", "리뷰 분석", "실험 설계/해석", "p값", "유닛 이코노믹스", "CAC 계산", "LTV vs LTR", "회수 기간/Payback", "ROAS는 좋은데 적자" — or asks which chapter/method fits a business question. Also use when the reader asks to "design a data mart", "build DW layers (staging·dimension·fact·mart)", "why is my query so slow", "데이터 마트 설계", "마트 설계 템플릿", "DW/데이터 레이크 층 구조", "쿼리가 너무 느려요".
 ---
 
 # 데이터 분석 실습 도우미 (da101)
@@ -31,7 +31,7 @@ QnA ↔ 심화학습·퀴즈).
    진행 순서를 보여준다. 단계 **수**는 세지 않는다 — 세는 기준이 챕터·세션마다
    달라져 같은 챕터인데 다른 숫자를 말하게 된다(준비 성격의 섹션은 "준비 후 →"로
    묶어서 표시해도 좋다). 이어서 지금부터 데이터 생성 → 노트북 전체 실행을 먼저
-   돌린다는 것(1~2분 소요)을 알려준다. ② **일괄 실행** — 공통 규약의 워크플로로 노트북을 끝까지
+   돌린다는 것(1~2분 소요)을 알리고 "진행할까요?"로 확인을 받은 뒤 실행한다. ② **일괄 실행** — 공통 규약의 워크플로로 노트북을 끝까지
    실행한다(노트북이 진실의 원천 — 셀을 따로 실행해 채팅과 노트북이 어긋나게 하지
    않는다). 실행이 끝나면 "그래프까지 보면서 진행할까요? 브라우저로 열어드릴게요"라고
    **opt-in으로 묻고**, 원하면 노트북을 HTML로 내보내 기본 브라우저로 연다
@@ -60,7 +60,9 @@ QnA ↔ 심화학습·퀴즈).
    추천하고, 후보가 여럿이면 차이(무엇을 진단하는지)를 설명한 뒤 실행/적용으로 잇는다.
 4. **QnA** — "○○이 뭐야?", "○○랑 △△ 차이가 뭐야?" 등 독자의 개념 질문.
    챕터를 라우팅한 뒤 reference 본문 전체(방법 요약·함정·학습 가이드)를 근거로
-   **직접, 친절하게 답한다 — 이 모드에서는 소크라틱하게 되묻지 않는다**. 질문 없이
+   **직접, 친절하게 답한다 — 이 모드에서는 소크라틱하게 되묻지 않는다**. 질문이 특정
+   쿼리·셀·함수를 가리키면(예: "classify_segment.sql의 CASE WHEN 기준") 그 챕터의 노트북과
+   `sql/*.sql`을 직접 열어 해당 코드를 한 줄씩 짚으며 답한다 — 책이 독자에게 그렇게 약속한다. 질문 없이
    챕터만 정해졌으면 핵심 개념 목록을 "이런 걸 물어볼 수 있어요" 메뉴로 제시한다.
    답변이 마무리되면 이해 확인을 원할 경우 심화학습·퀴즈 모드로 이어갈 수 있음을
    안내한다.
@@ -77,7 +79,7 @@ QnA ↔ 심화학습·퀴즈).
 | 장 | 독자의 질문 | 챕터 (폴더) | reference |
 | --- | --- | --- | --- |
 | 5장 | "이 기능을 붙이면 DAU가 얼마나 오를까?" — 기능·신규유입의 DAU 기여 추정 | `05_이_기능은_DAU_얼마짜리_기능일까` | `references/dau-forecast.md` |
-| 1장 | "DAU가 왜 정체지? 어디서 새고 있지?" — DAU 구성·이동 진단 | `01_DAU_차트를_봐서는_DAU를_올릴_수_없다` | `references/dau-segments.md` |
+| 1장 | "DAU가 왜 정체지? 어디서 새고 있지?" — DAU 구성·이동 진단 (책의 호출 별칭: **DAU 세그먼트**) | `01_DAU_차트를_봐서는_DAU를_올릴_수_없다` | `references/dau-segments.md` |
 | 4장 | "일주일 데이터로 LTV/라이프타임을 알 수 있나?" | `04_일주일_데이터로_Lifetime을_예측하라구요` | `references/lifetime.md` |
 | 8장 | "유저 유형(페르소나)을 데이터로 나누고 싶다" | `08_Machine_Learning으로_찾아보는_유저들의_사용패턴` | `references/clustering.md` |
 | 9장 | "A/B 테스트 비용 없이 배너/문구를 최적화하고 싶다" | `09_MAB_그거_어떻게_쓰는건데` | `references/mab.md` |
@@ -90,7 +92,8 @@ QnA ↔ 심화학습·퀴즈).
 
 라우팅 팁: "DAU 정체" 계열 질문은 두 갈래다 — **어디서** 새는지는 dau-segments(구성·전이 진단),
 **무엇이** 리텐션을 결정하는지는 leading-indicators(원인 행동 탐색). 순서를 정해야 하면
-진단(segments) → 원인(leading-indicators) 순을 권한다.
+진단(segments) → 원인(leading-indicators) 순을 권한다. "DAU 세그먼트"라는 말이 들어오면 5장(DAU 기여
+추정)이 아니라 1장이다 — 책이 1장 실습을 그 이름으로 호출한다.
 
 ## 공통 규약 (모든 챕터 동일)
 
@@ -123,7 +126,7 @@ QnA ↔ 심화학습·퀴즈).
 대조 여부를 적는다 — 챕터 코드를 바꾸면 reference를 다시 대조하고 이 줄을 갱신한다.
 
 - `references/dau-forecast.md` — power law 리텐션 적합 → DAU 기여 공식
-- `references/dau-segments.md` — 7세그먼트 Stock/Flow/비율 KPI 진단
+- `references/dau-segments.md` — 5세그먼트 Stock/Flow/비율 KPI 진단
 - `references/lifetime.md` — 7일 리텐션으로 lifetime 3가지 추정 + 삼각측량
 - `references/clustering.md` — KMeans 페르소나 클러스터링
 - `references/mab.md` — Thompson Sampling 시뮬레이션과 실전 보완 기법
