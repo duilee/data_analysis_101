@@ -35,14 +35,14 @@ jupyter nbconvert --to notebook --execute --inplace mrr_analysis.ipynb
 - 흐름: 실습 1 `split_part(order_number, '..', 1) AS pid` + `row_number()` 결제 회차 →
   실습 2 `lag()` 간격 + `pay_type`(new/renew/reactivation, 32일 임계값) → 실습 3 전월
   FULL OUTER JOIN으로 6요소 분해(`mrr` df) + 항등식 검증(`check`) → 실습 4 `grr`/`nrr` →
-  실습 5 구독자 수 단위 동일 분해(`sql/subscriber_counts.sql` — 유일하게 디스크에서 읽는 SQL) →
-  실습 6 이탈률 복원·LTV 어림. 노트북 인라인 쿼리는 `orders → classified → monthly → paired`
+  4.1 소절 구독자 수 단위 동일 분해(`sql/subscriber_counts.sql` — 유일하게 디스크에서 읽는 SQL) →
+  실습 5 이탈률 복원·LTV 어림. 노트북 인라인 쿼리는 `orders → classified → monthly → paired`
   **뷰 체인**이고, `sql/mrr_breakdown.sql`은 같은 로직을 `payments → classified → paired → SELECT`
   **CTE 4층**으로 담은 단독 실행용 사본이다(QnA에서 "네 층" 설명은 이 파일 기준).
-- **기대 결과**: 생성기가 심은 정답은 **월 이탈률 5%**(`CHURN_RATE=0.05`). 실습 6에서
+- **기대 결과**: 생성기가 심은 정답은 **월 이탈률 5%**(`CHURN_RATE=0.05`). 실습 5에서
   `stable = mrr[mrr.month >= "2025-04"]` 구간의 churn rate가 5% 근처로 수렴하고
   `LTV ≈ ARPU ÷ churn rate`로 연결된다. 플랜은 monthly_basic 4,900원 / monthly_plus 9,900원 —
-  expansion/contraction은 갱신 시 업/다운그레이드에서 나온다. 실습 5에서 업/다운그레이드가
+  expansion/contraction은 갱신 시 업/다운그레이드에서 나온다. 4.1 소절에서 업/다운그레이드가
   매출은 바꾸지만 구독자 수는 바꾸지 않음을 확인한다.
   책에 실린 수치(대조용): 유저 1,653명 / 결제 10,653건(18개월, 최대 18회) · pay_type renew 8,961 /
   new 1,653 / reactivation 39 · 마지막 달 2026-06 MRR 7,608,900원(baseline 7,136,700 · new 811,700 ·
@@ -94,10 +94,10 @@ duckdb.query("""SELECT COUNT(*) AS rows, MIN(order_charged_date) AS min_d,
 | --- | --- | --- |
 | 로드 셀 `CREATE TABLE sales AS …` | CSV 경로, 컬럼명 | 독자 데이터로 — 테이블명 `sales`는 유지 (이후 모든 SQL과 `sql/*.sql`이 참조) |
 | 실습 1 `orders` 뷰 셀 | `split_part(order_number, '..', 1)`의 구분자·파싱 규칙 | 독자 주문번호 체계로 (유저 ID 있으면 이 실습 생략) |
-| ⚠ renew 임계값 | `date_diff('day', prev_date, order_charged_date) < 32` — 노트북은 **실습 2 `classified` 뷰 한 곳**(실습 3·4·6이 이 뷰를 재사용), 그리고 실습 5가 읽는 **`sql/subscriber_counts.sql`**에 별도로 한 번 더 | 월 구독 32일 기준. 연 구독 혼재 시 플랜별 주기+유예로 분리, **두 곳 함께** 수정 (참고용 사본 `sql/classify_payment.sql`·`sql/mrr_breakdown.sql`도 맞춰 두면 좋다) |
+| ⚠ renew 임계값 | `date_diff('day', prev_date, order_charged_date) < 32` — 노트북은 **실습 2 `classified` 뷰 한 곳**(실습 3·4·5가 이 뷰를 재사용), 그리고 4.1 소절이 읽는 **`sql/subscriber_counts.sql`**에 별도로 한 번 더 | 월 구독 32일 기준. 연 구독 혼재 시 플랜별 주기+유예로 분리, **두 곳 함께** 수정 (참고용 사본 `sql/classify_payment.sql`·`sql/mrr_breakdown.sql`도 맞춰 두면 좋다) |
 | 실습 3 `paired` 뷰 셀 | `INTERVAL 1 MONTH` 2곳 (coalesce와 JOIN 조건) | 주 단위 분해가 필요하면 함께 변경 |
-| 실습 5 | `open("sql/subscriber_counts.sql")` — 유일하게 디스크에서 읽는 SQL | 이 파일은 실제 실행 대상이므로 직접 수정 |
-| 실습 6 | 안정 구간 컷 `mrr[mrr.month >= "2025-04"]` | 독자 데이터의 초기 성장 왜곡 구간을 제외한 시점으로 |
+| 4.1 소절 (구독자 수 분해) | `open("sql/subscriber_counts.sql")` — 유일하게 디스크에서 읽는 SQL | 이 파일은 실제 실행 대상이므로 직접 수정 |
+| 실습 5 | 안정 구간 컷 `mrr[mrr.month >= "2025-04"]` | 독자 데이터의 초기 성장 왜곡 구간을 제외한 시점으로 |
 
 - 6요소 분해의 FULL OUTER JOIN 구조와 항등식 검증 셀(`check`)은 그대로 둔다 — 치환 후
   항등식이 깨지면 분류 규칙이 잘못된 것이다(디버깅 신호로 활용).
@@ -188,7 +188,7 @@ duckdb.query("""SELECT COUNT(*) AS rows, MIN(order_charged_date) AS min_d,
 
 ### 심화 과제
 
-1. **[샌드박스]** `generate_data.py`의 `CHURN_RATE = 0.05 → 0.08`로 바꾸면 실습 6의 복원
+1. **[샌드박스]** `generate_data.py`의 `CHURN_RATE = 0.05 → 0.08`로 바꾸면 실습 5의 복원
    churn rate, LTV, 그리고 NRR이 각각 어떻게 변할지 예측하게 한다 → 수정 →
    `python generate_data.py` → 노트북 재실행 → 대조. 끝나면
    `git checkout -- generate_data.py data/` 후 재생성으로 원복.

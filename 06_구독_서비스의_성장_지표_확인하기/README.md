@@ -7,8 +7,8 @@ MRR 분석 실습 코드입니다. 유저 ID가 없는 스토어 결제 로그(G
 - **실습 2.** `LAG()`로 직전 결제와의 간격을 재서 renew와 reactivation을 구분합니다 (32일 임계값).
 - **실습 3.** 전월과의 FULL OUTER JOIN으로 월별 MRR을 new/renew/reactivation/expansion/contraction/churn으로 분해합니다.
 - **실습 4.** GRR(방어력)과 NRR(성장력)을 계산하고 두 지표의 갭을 해석합니다.
-- **실습 5.** 같은 로직을 '구독자 수' 단위로 반복해, 업/다운그레이드가 매출만 바꾸고 사람 수는 바꾸지 않음을 확인합니다.
-- **실습 6.** 데이터에 심어 둔 월 이탈률 5%를 복원하고, LTV ≈ ARPU ÷ churn rate 어림으로 연결합니다.
+  - **4.1.** 같은 로직을 '구독자 수' 단위로 반복해, 업/다운그레이드가 매출만 바꾸고 사람 수는 바꾸지 않음을 확인합니다.
+- **실습 5.** 데이터에 심어 둔 월 이탈률 5%를 복원하고, LTV ≈ ARPU ÷ churn rate 어림으로 연결합니다.
 
 ## 실행 방법
 
@@ -27,4 +27,4 @@ jupyter notebook mrr_analysis.ipynb # 노트북을 위에서 아래로 실행 (�
 | `sql/classify_payment.sql` | new / renew / reactivation 분류 |
 | `sql/mrr_breakdown.sql` | 월별 MRR 6개 요소 분해 |
 | `sql/subscriber_counts.sql` | 구독자 수 단위의 동일 분해 |
-| `mrr_analysis.ipynb` | 실습 1~6 노트북 |
+| `mrr_analysis.ipynb` | 실습 1~5 노트북 |
