@@ -1,6 +1,7 @@
 # 선행지표 탐색 — EDA·SHAP·Sankey 3렌즈 교차 확인
 
 **챕터**: `02_선행지표를_찾는_3가지_방법/` · 노트북: `leading_indicators.ipynb`
+**동기화**: 코드 기준 커밋 `758ccde` (2026-09-13) — 노트북·README·sql와 대조 완료. 책 본문 대조는 미실시.
 
 ## 이 방법이 푸는 문제
 
@@ -26,14 +27,17 @@ jupyter nbconvert --to notebook --execute --inplace leading_indicators.ipynb
 - SQL 3개: `eda_leading_indicator.sql`, `feature_matrix.sql`, `sankey_transitions.sql`.
 - **기대 결과**: 생성기가 잠재 품질·경로 의존 잔존을 심어 두었으므로, 세 렌즈가 **같은
   행동들**을 상위 선행지표로 가리켜야 한다(EDA `share_diff` 상위 ≈ SHAP 상위 피처 ≈ Sankey의
-  고잔존 갈림길). 세 실습의 결과를 나란히 놓고 이 일치를 확인한다.
+  고잔존 갈림길). 세 실습의 결과를 나란히 놓고 이 일치를 확인한다(노트북에 요약 셀은 없다).
+  생성기가 심은 임계값은 `session_duration >= 150초`, `like_cnt >= 3` — 실습 2 해석
+  ("약 150초 / 3회")이 이를 복원하는지가 검증 포인트.
 - 의존성이 가장 무거운 챕터다(lightgbm, shap, optuna, plotly 등) — 첫 실행 시 설치 시간이 걸린다.
 
 ## 내 데이터에 적용 — 인터랙티브 프로토콜
 
 아래 1→5 순서로 진행한다. 각 단계 결과를 독자에게 보여주고 확인한 뒤 다음으로 간다.
-이 노트북에는 `[내 데이터 적용]` 주석이 없다 — 아래 치환 지도가 유일한 안내이며,
-⚠ D7 윈도가 **4개 쿼리**에 흩어져 있는 점이 최대 함정이다.
+이 노트북에는 `[내 데이터 적용]` 주석이 없다 — 아래 치환 지도가 유일한 안내다. 라벨은
+`d7_label` 뷰 한 곳에서 정의되고 세 쿼리가 이를 JOIN하므로 노트북 안의 치환 지점은 적지만,
+`sql/*.sql` 3개 파일에는 같은 뷰 정의가 각각 복제돼 있다.
 
 ### 1. 인테이크 — 독자에게 물을 것
 
@@ -70,10 +74,12 @@ duckdb.query("""SELECT COUNT(DISTINCT user_id) AS users,
 
 | 앵커 (실습/식별자) | 무엇을 | 어떻게 |
 | --- | --- | --- |
-| 로드 셀 | `data/event_log.csv` 경로, 컬럼명 | 독자 데이터로 |
-| `label_query` | 기준 이벤트 `'application_install'` | 독자 정의로 |
-| ⚠ D7 윈도 | `= 7` 조건이 **`label_query`·`eda_query`·`fm_query`·`sankey_query` 4곳** + `eda_query`의 `retention_label` 조인 캡 `AND date_diff('day', i.event_date, l.event_date) <= 7` **1곳, 총 5곳** | 타깃 경과일 변경 시 5곳 모두 (조인 캡을 빼먹으면 EDA 라벨이 전부 0이 된다) |
-| `eda_query` | 분석 기간 필터 `WHERE event_date BETWEEN DATE '2026-01-01' AND DATE '2026-01-31'`, 행동 윈도 `<= 1` (D0~D1), 노이즈 컷 `HAVING d7_ret1_share >= 10 OR d7_ret0_share >= 10` | 독자 기간·윈도·데이터 크기에 맞게 |
+| 로드 셀 `CREATE OR REPLACE TABLE event_log AS … read_csv_auto('data/event_log.csv')` | CSV 경로, 컬럼명 | 독자 데이터로 — 이후 쿼리는 전부 `event_log` 테이블명을 참조하므로 경로는 이 한 곳 |
+| 라벨 뷰 셀 (`installs`·`d7_label` 뷰, 결과는 `labels`로 확인) | 기준 이벤트 `'application_install'` | 독자 정의로 |
+| ⚠ D7 윈도 | `d7_label` 뷰의 `date_diff('day', i.install_date, e.event_date) = 7` **노트북 1곳** — `eda_query`·`fm_query`·`sankey_query`는 이 뷰를 JOIN | 타깃 경과일 변경 시 뷰 한 곳만. 단 `sql/*.sql` 3개에는 뷰 정의가 각각 복제돼 있어 파일까지 맞추면 3곳 추가. 라벨 컬럼명 `d7_retention_flag`는 세 쿼리·`fm` 분리 코드가 공유하므로 유지 |
+| `eda_query` | 행동 윈도 `<= 1` (D0~D1), 노이즈 컷 `HAVING d7_ret1_share >= 10 OR d7_ret0_share >= 10` (기간 필터는 없다 — 제한하려면 `installs` 뷰에 `WHERE` 추가) | 독자 윈도·데이터 크기에 맞게 |
+| EDA 강조 셀 `spot` | 이벤트 리스트 `content_view, like_content, search_used, share_content, error_popup` | 독자 이벤트로 |
+| SHAP dependence 셀 | `interaction_index="content_view"` | 독자의 핵심 이벤트로 |
 | `fm_query` ⚠ | 피처 이벤트명 리스트 (`content_view, like_content, search_used, share_content, page_view_profile, settings_open, error_popup, tutorial_complete, push_allow`)가 하드코딩 | 독자 이벤트 택소노미로 재작성 + SHAP 셀의 `NUMERIC` 리스트도 **함께** |
 | 모델 셀 | `train_test_split(test_size=0.10, random_state=314, stratify=y)`, LGBM 파라미터, Optuna `n_trials=25` | 기본 유지 권장, 데이터가 작으면 `test_size` 상향 |
 | Sankey CONFIG | `MAX_STEPS = 10`, `TOP_K = 6`, `MIN_USERS = 20`, 세션 윈도 `INTERVAL 1 HOUR` | 이벤트 종류 많으면 `TOP_K`↓·`MIN_USERS`↑로 노이즈 전이 제거 |
@@ -83,7 +89,7 @@ duckdb.query("""SELECT COUNT(DISTINCT user_id) AS users,
 
 ### 4. 단계별 진행
 
-1. `label_query` → 라벨 분포(잔존율) 확인. 상식과 크게 다르면 라벨 정의 재점검.
+1. 라벨 뷰 셀 → `labels` 분포(잔존율) 확인. 상식과 크게 다르면 라벨 정의 재점검.
 2. 실습 1 EDA → `share_diff` 상위 표·차트 제시, 후보 행동 목록을 독자와 합의.
 3. 실습 2: `fm_query` → baseline LGBM(`report`) → ROC-AUC가 0.5 근처면 피처 재설계로 회귀.
    Optuna 튜닝 → SHAP summary → 상위 피처를 EDA 결과와 대조. dependence plot으로 임계점 읽기.
@@ -128,9 +134,10 @@ duckdb.query("""SELECT COUNT(DISTINCT user_id) AS users,
 
 ### 심화 과제
 
-1. **[샌드박스]** `generate_data.py`의 `EVENT_META`에서 핵심 이벤트 하나의 잔존 연관 강도를
-   낮추면(생성기를 열어 해당 이벤트의 품질 결합 파라미터 확인) SHAP 순위와 EDA `share_diff`
-   순위가 어떻게 바뀔지 예측하게 한다 → 수정 → 재생성 → 재실행 → 대조. 끝나면
+1. **[샌드박스]** `generate_data.py`의 `simulate_user` 안 D7 logit 블록(`0.6 * (session_duration
+   >= 150)`, `0.5 * (like_cnt >= 3)`)에서 계수 하나를 낮추면(`EVENT_META`는 이벤트명→화면·설명
+   매핑일 뿐 강도는 없다) SHAP 순위와 EDA `share_diff` 순위가 어떻게 바뀔지 예측하게 한다 →
+   수정 → 재생성 → 재실행 → 대조. 끝나면
    `git checkout -- generate_data.py data/` 후 재생성으로 원복.
 2. **[샌드박스]** `fm_query`의 피처 윈도는 현재 D0만이다(`d0_session` CTE의
    `date_diff('day', b.install_date, e.event_date) = 0`). 이를 `<= 1`(D0~D1)로 넓히면

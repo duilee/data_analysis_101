@@ -1,6 +1,7 @@
 # DAU 구성 진단 — 5세그먼트 Stock/Flow 분석
 
 **챕터**: `01_DAU_차트를_봐서는_DAU를_올릴_수_없다/` · 노트북: `dau_segment.ipynb`
+**동기화**: 코드 기준 커밋 `758ccde` (2026-09-13) — 노트북·README·sql과 대조 완료. 책 본문 대조는 미실시.
 
 ## 이 방법이 푸는 문제
 
@@ -54,8 +55,8 @@ jupyter nbconvert --to notebook --execute --inplace dau_segment.ipynb
 ### 2. 데이터 점검 — 통과 전 분석 시작 금지
 
 ```python
-duckdb.query("""SELECT COUNT(DISTINCT user_id) AS users, MIN(event_date) AS min_d,
-    MAX(event_date) AS max_d FROM read_csv_auto('YOUR_ACTIVITY_PATH')""").to_df()
+con.execute("""SELECT COUNT(DISTINCT user_id) AS users, MIN(event_date) AS min_d,
+    MAX(event_date) AS max_d FROM read_csv_auto('YOUR_ACTIVITY_PATH')""").df()   # 노트북의 con 재사용
 ```
 
 - 통과 기준: `max_d` ≥ 기준일, 로그 기간 ≥ 60일, 마스터의 유저가 활동 로그 유저를 포함
@@ -66,9 +67,9 @@ duckdb.query("""SELECT COUNT(DISTINCT user_id) AS users, MIN(event_date) AS min_
 
 | 앵커 (실습/식별자) | 무엇을 | 어떻게 |
 | --- | --- | --- |
-| ⚠ CSV 경로 | 준비 셀의 `read_csv_auto` **2곳**(테이블 등록) | 독자 경로로 — 이후 쿼리는 테이블명 참조라 추가 수정 불필요 |
-| ⚠ 기준일 | SQL 문자열 안에 `'2026-05-20'` 리터럴로 하드코딩 | 실습 4의 `build_mart_query.replace("2026-05-20", ts)` 패턴처럼 `TARGET` 변수 치환으로 통일 |
-| ⚠ 세그먼트 경계 | new 윈도 `days < 7`, heavy 기준 `cnt >= 5`, dormant 기준 `INTERVAL 30 DAY` | **실습 1의 분류 CASE + `classify_seg` 매크로 두 곳**을 반드시 함께 수정 |
+| ⚠ CSV 경로 | 준비 셀 `for t in ["user_master", "user_activity"]` 루프의 f-string `read_csv_auto('data/{t}.csv')` 1곳 | 경로가 테이블명에서 파생된다 — 파일명이 테이블명과 다르면 루프를 풀어 두 줄로 쓰거나 `{테이블명: 경로}` dict로 바꾼다. 이후 쿼리는 테이블명 참조라 추가 수정 불필요 |
+| ⚠ 기준일 | SQL 문자열 안에 `'2026-05-20'` 리터럴로 하드코딩 | 실습 4의 `build_mart_query.replace("2026-05-20", t.date().isoformat())` 패턴처럼 `TARGET` 변수 치환으로 통일 |
+| ⚠ 세그먼트 경계 | new 윈도 7일, heavy 기준 활동일 5일, dormant 기준 `INTERVAL 30 DAY` | **실습 1의 분류 CASE(`days_since_signup`/`active_day_count`/`last_active_date`) + `classify_seg` 매크로(`days`/`cnt`/`last_active`) 두 곳** — 이름은 다르지만 같은 기준이라 반드시 함께 수정 |
 | ⚠ 최근성 윈도 | 오늘 `INTERVAL 6 DAY`, 어제 `INTERVAL 7 DAY ~ 1 DAY` | 파생지표 쿼리(`user_metrics`)와 `build_mart_query` 의 오늘/어제 윈도를 함께 수정 |
 | 실습 4 | `pd.date_range(end=TARGET, periods=31)` | 추적 기간에 맞게 |
 | 실습 4 | `nday_query.format(seg="heavy")` | 추적할 출발 세그먼트 — 노트북이 `heavy`·`new` 둘 다 실행한다 |

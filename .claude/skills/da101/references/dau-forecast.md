@@ -1,6 +1,7 @@
 # DAU 기여 추정 — power law 리텐션 적합
 
 **챕터**: `05_이_기능은_DAU_얼마짜리_기능일까/` · 노트북: `dau_forecast.ipynb`
+**동기화**: 코드 기준 커밋 `758ccde` (2026-09-13) — 노트북·README·sql와 대조 완료. 책 본문 대조는 미실시.
 
 ## 이 방법이 푸는 문제
 
@@ -19,6 +20,8 @@ jupyter nbconvert --to notebook --execute --inplace dau_forecast.ipynb
 - `sql/retention_curve.sql`(인라인 동일)이 basis_month × platform별 D1~D28 리텐션을 만든다.
 - **기대 결과**: 생성기가 심은 정답은 ios `a=0.42, b=-0.45`, android `a=0.35, b=-0.50`.
   코호트 그룹별 `curve_fit` 결과의 `b`가 이 값 근처로 복원되고, 관측-모델 곡선이 겹쳐야 한다.
+  `b_mean ≈ -0.475`면 `baseline`은 40대 초반이 나온다(본문 예시 63과 다른 것이 정상 — 심은
+  b가 다르다).
 - 실습 2의 상수는 `baseline = 1.0 + np.sum(np.arange(1, 365) ** b_mean)`으로 계산된다.
 
 ## 내 데이터에 적용 — 인터랙티브 프로토콜
@@ -63,10 +66,10 @@ duckdb.query("""SELECT COUNT(*) AS rows, COUNT(DISTINCT user_id) AS users,
 
 | 앵커 (실습/식별자) | 무엇을 | 어떻게 |
 | --- | --- | --- |
-| 실습 1 `query` 셀 | `read_csv_auto('data/active_daily.csv')` | `YOUR_CSV_PATH`로. 컬럼명도 매핑대로 치환 |
-| 〃 | `install_flag = TRUE` (신규 정의) | 독자의 신규 정의로 (없으면 `MIN(date)` 파생 CTE 추가) |
+| 실습 1 `con.execute` CREATE VIEW 셀 (`base`·`installs` 뷰) | `read_csv_auto('data/active_daily.csv')`, 컬럼 매핑 | `YOUR_CSV_PATH`로. 컬럼명은 `base` 뷰의 SELECT에서 매핑 (⚠ `query` 셀에는 경로가 없다) |
+| 〃 `installs` 뷰 | `WHERE install_flag = TRUE` (신규 정의) | 독자의 신규 정의로 (없으면 뷰 정의를 `SELECT user_id, MIN(date) … GROUP BY user_id`로 교체) |
 | 〃 ⚠ | `BETWEEN 1 AND 28` 관측 윈도 | 바꾸면 적합 셀의 `days = np.arange(1, 29)`도 **함께** 변경 |
-| `b_mean` 계산 셀·플롯 셀 | `'ios'` / `'android'` 하드코딩 (적합 루프 자체는 groupby라 수정 불필요) | 독자의 세그먼트 값으로 (세그먼트 없으면 그룹 축 제거) |
+| `b_mean` 계산 셀·플롯 셀 | `'ios'` / `'android'` 하드코딩, 플롯 셀의 `plt.subplots(1, 2)`·`zip(axes, ["ios", "android"])`(서브플롯 수 2도 고정) | 독자의 세그먼트 값·개수로 (세그먼트 1개면 `axes = [ax]`, 없으면 그룹 축 제거) |
 | 실습 2 셀 | `np.arange(1, 365)` 기간 | 원하는 horizon으로 (기본 1년 유지 권장) |
 
 - `func(x, a, b)`, `curve_fit(..., maxfev=10000)`, `df_constant`, `baseline` 계산 로직은
@@ -76,7 +79,9 @@ duckdb.query("""SELECT COUNT(*) AS rows, COUNT(DISTINCT user_id) AS users,
 
 ### 4. 단계별 진행
 
-1. 치환한 `query` 실행 → 리텐션 테이블 출력. day_diff별로 단조 감소하는지 함께 확인.
+1. CREATE VIEW 셀 → `query` 셀 순으로 실행 → 리텐션 테이블 출력. day_diff별로 단조 감소하는지,
+   그리고 `df.groupby(['basis_month', 'platform']).size()`가 전부 28인지 확인(잔존자 0인 날은 행이
+   빠져 `curve_fit`이 길이 불일치로 실패한다 — 부족하면 `reindex(days, fill_value=0)`).
 2. 그룹별 `curve_fit` → `df_constant`(그룹별 `a`, `b`) 표 제시. 그룹 간 `b` 편차 확인 —
    편차가 크면(예: 0.1 이상) 상수를 하나로 접지 말고 세그먼트별 상수를 제안.
 3. 관측 vs 모델 곡선 플롯 → 독자와 적합 품질 확인 (초반 급락·후반 꼬리가 맞는지).

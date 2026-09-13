@@ -1,6 +1,7 @@
 # MAB — Thompson Sampling 시뮬레이션과 실전 보완
 
 **챕터**: `09_MAB_그거_어떻게_쓰는건데/` · 노트북: `mab_thompson_sampling.ipynb`
+**동기화**: 코드 기준 커밋 `758ccde` (2026-09-13) — 노트북·README와 대조 완료. 책 본문 대조는 미실시.
 
 ## 이 방법이 푸는 문제
 
@@ -23,8 +24,9 @@ jupyter nbconvert --to notebook --execute --inplace mab_thompson_sampling.ipynb
   - 실습 2: `PROBS = [0.05, 0.07, 0.01]` — `run_ab` 대비 `run_ts`의 누적 regret이 확연히 낮다.
   - 실습 3: `CTR = [0.009, 0.006, 0.003]`, `IMPR = 1000` — 그냥 보면 Beta 분포가 겹치고,
     `make_beta(coef)`/`exposure_share(15)`의 계수 적용으로 분리가 빨라진다.
-  - 실습 4: `SCHED`(i=1000에서 최적 arm이 뒤집힘) — `run_ns(..., gamma=0.9, decay_every=50)`의
-    Discounted TS가 일반 TS와 달리 새 최적 arm으로 갈아탄다.
+  - 실습 4: `SCHED`(i=1000에서 최적 arm이 뒤집힘) — 실습 2의 `run_ts`를 재사용해
+    `run_ts(SCHED, N4, gamma=0.9)`(`decay_every`는 기본값 50)로 돌린 Discounted TS가 일반 TS와
+    달리 새 최적 arm으로 갈아탄다.
 
 ## 내 데이터에 적용 — 인터랙티브 프로토콜
 
@@ -55,10 +57,11 @@ jupyter nbconvert --to notebook --execute --inplace mab_thompson_sampling.ipynb
 | --- | --- | --- |
 | 실습 1 | `BANNER_PROBABILITIES`, `NUM_TRIALS`, `checkpoints` | 독자의 arm 수·예상 CTR·트래픽으로 |
 | 실습 2 | `PROBS`, `N` | 독자 시나리오로 — AB 대비 절약분을 수치로 보여주는 용도 |
-| 실습 3 | `CTR`, `IMPR`, `exposure_share(15)`의 계수 | CTR이 낮고 가까울 때만 필요. 계수는 1(미적용)부터 올려가며 |
-| 실습 4 | `SCHED`의 전환 시점 `1000`, `gamma=0.9`, `decay_every=50` | 변화 주기에 맞춰 — 주기가 짧을수록 gamma↓ 또는 decay_every↓ |
-| ⚠ `run_ns` | 내부에 `np.ones(3)`으로 **arm 수 3이 하드코딩** | arm 수가 3이 아니면 반드시 수정 |
-| (B 경로) `Banner` 클래스 | `.a`/`.b` 초기값 | `Beta(1+클릭, 1+노출−클릭)`으로 초기화해 기존 데이터 반영 |
+| 실습 3 | `CTR`, `IMPR`, 계수 — 플롯 루프 `zip(axes, [1, 15], [0.03, 0.25])`(계수와 x축 상한 짝)와 print의 `exposure_share(15)` 두 곳 | CTR이 낮고 가까울 때만 필요. 계수는 1(미적용)부터 올려가며 |
+| ⚠ 실습 4 | 전환 시점 `1000`이 **`SCHED` 람다·`plt.axvline(1000 - w // 2)`·phase 2 집계 `r_plain[1000:]`/`r_disc[1000:]` 세 곳** | 변화 시점을 바꾸면 세 곳 함께 |
+| 실습 4 | `gamma=0.9`, `decay_every`(호출에 명시 안 함 — `run_ts` 기본값 50) | 변화 주기에 맞춰 — 주기가 짧을수록 gamma↓ 또는 `run_ts(SCHED, N4, gamma=0.9, decay_every=…)`로 명시해 줄인다 |
+| arm 수 | `run_ts`가 `k = len(sched(0))`로 arm 수를 자동 추론 | `PROBS`/`SCHED` 길이만 바꾸면 된다 — 별도 하드코딩 없음 |
+| (B 경로) `Banner` 클래스(실습 1) · `run_ts`의 `a = np.ones(k); b = np.ones(k)`(실습 2~4) | 사전분포 초기값 | `Beta(1+클릭, 1+노출−클릭)`으로 초기화해 기존 데이터 반영 — 실습 2~4 경로는 `run_ts` 안의 두 배열을 prior 배열로 교체 |
 
 ### 4. 단계별 진행
 
@@ -114,9 +117,10 @@ jupyter nbconvert --to notebook --execute --inplace mab_thompson_sampling.ipynb
    1·2등 간격을 절반으로 좁히면, TS가 2등에서 벗어나는 데 걸리는 trial이 대략 몇 배가 될지
    예측하게 한다 → 수정 → 재실행 → regret 곡선 대조. (간격 Δ가 절반이면 필요 표본 ≈ 4배라는
    감각이 목표.) 끝나면 원래 값 복원.
-2. **[샌드박스]** 실습 4의 `SCHED` 전환 시점을 `1000 → 200`으로 앞당기고 `decay_every=50`을
-   유지하면 Discounted TS가 잘 적응할지 예측 → 실행 → 대조 → `gamma`/`decay_every`를 조정해
-   적응시켜 본다. "변화 주기와 할인 주기의 궁합"을 체득. 원복 필수.
+2. **[샌드박스]** 실습 4의 전환 시점을 `1000 → 200`으로 앞당기고(⚠ `SCHED`·`axvline`·phase 2
+   집계 세 곳 함께) `decay_every`는 기본값 50 그대로 두면 Discounted TS가 잘 적응할지 예측 →
+   실행 → 대조 → `gamma`/`decay_every`(호출에 인자로 명시)를 조정해 적응시켜 본다. "변화 주기와
+   할인 주기의 궁합"을 체득. 원복 필수.
 3. **[사고]** 아침에는 A 배너, 저녁에는 B 배너가 최적인 서비스라면 Discounted TS로 충분한가?
    더 나은 구조는? (컨텍스트를 조건으로 거는 contextual bandit 아이디어로 유도 — 시간대별
    독립 TS부터 시작해 토론)

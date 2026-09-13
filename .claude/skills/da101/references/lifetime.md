@@ -1,6 +1,7 @@
 # Lifetime 추정 — 7일 리텐션으로 3가지 방법 + 삼각측량
 
 **챕터**: `04_일주일_데이터로_Lifetime을_예측하라구요/` · 노트북: `lifetime_estimation.ipynb`
+**동기화**: 코드 기준 커밋 `758ccde` (2026-09-13) — 노트북·README·sql과 대조 완료. 책 본문 대조는 미실시.
 
 ## 이 방법이 푸는 문제
 
@@ -34,8 +35,8 @@ jupyter nbconvert --to notebook --execute --inplace lifetime_estimation.ipynb
 ## 내 데이터에 적용 — 인터랙티브 프로토콜
 
 아래 1→5 순서로 진행한다. 각 단계 결과를 독자에게 보여주고 확인한 뒤 다음으로 간다.
-노트북에 `[내 데이터 적용]` 주석이 7곳 있다 — 그 지점을 기본으로 따라가되, ⚠ 중복 상수는
-주석만으로는 놓치기 쉬우니 아래 표로 반드시 확인한다.
+노트북에 `[내 데이터 적용]` 주석이 7곳 있다 — 그 지점을 기본으로 따라간다. 노트북 안에서는
+상수가 한 곳씩이지만, 단독 실행용 `sql/compare_methods.sql`에 같은 상수가 복제돼 있다(⚠ 표시).
 
 ### 1. 인테이크 — 독자에게 물을 것
 
@@ -64,10 +65,10 @@ jupyter nbconvert --to notebook --execute --inplace lifetime_estimation.ipynb
 | --- | --- | --- |
 | 데이터 셀 | `data/cohort_retention.csv` 경로 | 독자 파일로 (컬럼명 `day, retention` 유지가 가장 간단) |
 | 설정 셀 | `DAYS = 365` | lifetime 정의 기간 (기본 1년 유지 권장) |
-| ⚠ Case 1 | 이탈률 추정 윈도 `WHERE day BETWEEN 5 AND 7` | `heuristic_query`와 `compare_query` **두 곳** 함께 |
+| ⚠ Case 1 | 이탈률 추정 윈도 `WHERE day BETWEEN 5 AND 7` | 노트북은 `heuristic_query` 한 곳. `sql/compare_methods.sql`을 따로 쓸 때는 그 안의 같은 윈도도 함께 |
 | Case 2 | 카탈로그 그리드: `d1_anchors`(0.15~0.50, 0.01 간격 36점), `b_grid`(0.05~1.00, 0.01 간격 96점) | 독자의 D1이 0.15~0.50 밖이면 anchors 범위를 넓힌다. D1 간격은 0.01을 유지(모양 파라미터가 b 하나라 성긴 D1 격자 오차가 lifetime에 그대로 남는다) |
 | Case 2 | 매칭 포인트 D1/D3/D7 (`catalog_match_query`) | 관측이 더 있으면 D14 등을 추가해 SSE 항 확장 가능 |
-| ⚠ Case 3 | 장기 코호트 상수 `51.5`(실측 lifetime), `1.875`(D1~D7 면적) | `mature_query`와 `compare_query` **두 곳** 함께, 독자 실측값으로 |
+| ⚠ Case 3 | 장기 코호트 상수 `51.5`(실측 lifetime), `1.875`(D1~D7 면적) | 노트북은 `mature_query` 한 곳, 독자 실측값으로. `sql/compare_methods.sql`에도 같은 상수가 있으니 그 파일을 쓸 때 함께 |
 
 - `power_curve` 함수, SSE 매칭 로직, 비교 표 구조는 그대로 둔다.
 
@@ -78,7 +79,8 @@ jupyter nbconvert --to notebook --execute --inplace lifetime_estimation.ipynb
 3. Case 2: 카탈로그 생성 → 독자 D1이 anchors 범위 안인지 확인 → 매칭 실행 → 매칭된 곡선을
    관측치와 겹쳐 플롯.
 4. (가능하면) Case 3 실행.
-5. `compare_query`로 삼각측량 표 → 아래 해석 프레임으로 읽는다.
+5. `compare` DataFrame 셀(pandas — 앞 세 결과를 그대로 모음)로 삼각측량 표 → 아래 해석
+   프레임으로 읽는다.
 
 ### 5. 결과 해석
 

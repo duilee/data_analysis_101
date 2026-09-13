@@ -1,6 +1,7 @@
 # 데이터 마트 층 쌓기 — raw → staging → dim/fact → mart
 
 **챕터**: `11_쿼리가_30분째_안_끝나는데요/` · 노트북: `data_mart_layers.ipynb`
+**동기화**: 코드 기준 커밋 `758ccde` (2026-09-13) — 노트북·README·sql과 대조 완료. 책 본문 대조는 미실시.
 
 ## 이 방법이 푸는 문제
 
@@ -10,7 +11,7 @@
 
 - 실습 1 raw: 다섯 CSV를 한 쿼리(47줄)로 조인 — 정의가 쿼리 안에 흩어져 있어 사람마다 숫자가 달라지는 구조
 - 실습 2 staging: 소스 1:1 뷰 — 이름·타입·중복·시스템 이벤트만 정리, 비즈니스 로직 금지
-- 실습 3 dim/fact: 유저 일별 스냅샷 디멘션 + 거래 팩트(구독 이벤트) + 스냅샷 팩트(일별 활성 구독)
+- 실습 3 dim/fact: 유저 일별 스냅샷·SKU 디멘션 + 거래 팩트(구독 이벤트) + 스냅샷 팩트(일별 활성 구독)
 - 실습 4 mart: 파티션(날짜) 하나씩 채우는 `run_partition()` 배치로 90일 backfill, 같은 질문을 3줄로
 - 실습 5 멱등성·유니크 키 테스트, 실습 6 늦게 도착한 이벤트와 3일 재적재 창
 
@@ -24,13 +25,16 @@ jupyter nbconvert --to notebook --execute --inplace data_mart_layers.ipynb
 - 입력: `data/events.csv`(event_id, user_id, event_name, session_id, event_time, received_time, properties),
   `data/subscription_events.csv`(sub_event_id, user_id, event_type, sku_id, is_trial, event_time, received_time, price_local, currency),
   `data/user_snapshots.csv`(snapshot_date, user_id, platform, country, app_version, install_date), `data/sku.csv`, `data/exchange_rates.csv`.
-- SQL 파일(인라인과 동일): `sql/raw_daily_subscribers.sql`, `sql/stg_views.sql`, `sql/dim_tables.sql`,
+- SQL 파일(인라인과 같은 쿼리 — 마트 SQL은 파티션 하나를 전개한 예시): `sql/raw_daily_subscribers.sql`, `sql/stg_views.sql`, `sql/dim_tables.sql`,
   `sql/fact_subscription_events.sql`, `sql/fact_subscriber_daily.sql`, `sql/mart_subscription_daily.sql`. 챕터 폴더에서 실행한다.
-- **기대 결과**: 생성기가 심은 정답은 6월 일평균 활성 구독자 **574명(체험 포함)**, 기간 매출 합계 **$5,953**(환불 반영),
-  도착 지연 분포 앱 이벤트 70/20/8/2%, 구독 이벤트 55/25/12/8%. 노트북에서 확인할 것:
+- **기대 결과**: 생성기가 심은 정답(`python generate_data.py` 실행 시 stdout에 찍힘 — 노트북은 이
+  값을 다시 계산하지 않는다)은 6월 일평균 활성 구독자 **574명(체험 포함)**, 기간 매출 합계
+  **$5,953**(환불 반영), 도착 지연 분포 앱 이벤트 70/20/8/2%, 구독 이벤트 55/25/12/8%.
+  노트북에서 확인할 것은 아래 항목이다(팩트 층의 집계 기준이 생성기와 달라 위 두 금액·인원은
+  노트북 결과와 직접 맞춰 보지 않는다):
   - 실습 1 raw 쿼리 결과 885행, 실습 2 raw 95,313행 → staging 86,040행(중복·시스템 이벤트 제거분)
   - 실습 4 `raw 쿼리와 마트의 활성 구독자 수 차이(합): 0` — raw와 마트가 같은 숫자
-  - 실습 5 두 번 실행 전/후 동일, DELETE 없이 INSERT만 하면 유니크 키 위반 38건
+  - 실습 5 두 번 실행 전/후 동일, DELETE 없이 INSERT만 하면 유니크 키 위반 70건
   - 실습 6 2026-06-14 파티션이 D+0 13건 → D+1 20건 → D+2 24건 → D+3 26건으로 채워짐(50% → 77% → 92% → 100%)
 - 이 챕터의 **apply 모드는 코드 치환이 아니라 설계 문서 작성**이다 (아래 프로토콜).
 
@@ -76,6 +80,7 @@ FROM read_csv_auto('<파일>')""").df()
 | 실습 3 `fact_subscription_events` | grain 한 문장 → 한 행 | 2단계에서 선언한 grain 그대로. 환산(환율 등)은 여기서 |
 | 실습 3 `fact_subscriber_daily` | 상태 스냅샷(semi-additive) | "그 시점에 ~인 엔티티 × 날짜"가 필요할 때만 |
 | 실습 3 `dim_user_daily` | 천천히 바뀌는 속성 | 매일 전체 스냅샷 + `_latest` 뷰 |
+| 실습 3 `dim_sku` | 참조 테이블(상품 마스터) | staging을 그대로 복사 — 독자의 참조 테이블도 같은 방식 |
 | 실습 4 `MART_SQL` | `{partition_date}` 한 파티션 집계 | 1단계에서 정한 레벨(차원)로 GROUP BY |
 | 실습 6 `window_days` | 재적재 창 | 소스의 최대 지연일 + 1 |
 
@@ -128,7 +133,7 @@ FROM read_csv_auto('<파일>')""").df()
 
 ### 핵심 개념 — 이 챕터를 마치면 설명할 수 있어야 하는 것
 
-- 네 층(src·staging·dim/fact·mart)의 역할과 각 층이 **하지 않는 일**
+- 네 층(raw·staging·dim/fact·mart)의 역할과 각 층이 **하지 않는 일**
 - grain 한 문장이 왜 설계의 절반인가, 가장 낮은 레벨로 잡는 이유
 - additive / semi-additive / non-additive
 - 한 배치 = 한 파티션(멱등성)과 backfill, 매일 스냅샷으로 SCD를 푸는 방식
@@ -143,7 +148,7 @@ FROM read_csv_auto('<파일>')""").df()
 3. 마트의 `active_subscribers`를 주간으로 보려면 어떻게 해야 하는가?
    - 힌트: semi-additive.
 4. 배치가 두 번 실행됐다. `run_partition`은 왜 안전하고, INSERT만 하는 배치는 왜 위험한가?
-   - 힌트: 실습 5의 유니크 키 위반 38건.
+   - 힌트: 실습 5의 유니크 키 위반 70건.
 5. 어트리뷰션이 설치 후 최대 3일 뒤에 확정된다. 배치와 대시보드에서 각각 무엇을 바꿔야 하는가?
    - 힌트: 재적재 창 + "어제 숫자는 확정치가 아니다".
 
