@@ -3,4 +3,4 @@
 -- 준비: users 테이블 등록 (data/users.csv)
 CREATE OR REPLACE VIEW mature AS
 SELECT user_id, channel, date_trunc('month', signup_date) AS cohort_month
-FROM users WHERE signup_date < DATE '2023-07-01';
+FROM users WHERE signup_date BETWEEN DATE '2022-07-01' AND DATE '2023-06-30';
