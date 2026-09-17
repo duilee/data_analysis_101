@@ -2,37 +2,27 @@
 -- 신규 코호트의 D1~D7 면적에다, D7 이후의 무한 등비급수 꼬리를 더해 lifetime을 추정한다.
 --   lifetime ≈ (D1 + D2 + ... + D7) + D7 × r / (1 − r)
 -- r 은 후반부 며칠치 일별 retention 비율(D5/D4, D6/D5, D7/D6)의 평균.
+-- 1) daily_ratios: LAG로 8일치 전체의 일별 비율을 계산해 두고
+-- 2) stats: 관측 면적(D1~D7 합)·D7·r(day 5~7 비율 평균)을 FILTER 집계로 한 번에 구한다.
+--    FILTER (WHERE …) 가 없는 웨어하우스에서는 SUM(CASE WHEN … THEN retention END) 로 바꿔 쓴다.
 
--- 1) D1 ~ D7의 면적 (직접 관측된 부분)
-WITH observed_area AS (
-  SELECT SUM(retention) AS area_d1_d7
+WITH daily_ratios AS (
+  SELECT day, retention,
+         retention / LAG(retention) OVER (ORDER BY day) AS ratio
   FROM cohort_retention
-  WHERE day BETWEEN 1 AND 7
 ),
--- 2) 후반 며칠의 일별 retention 비율을 모아 r 추정
---    (LAG는 8일치 전체에서 계산한 뒤 day 5~7만 골라 평균낸다)
-daily_ratios AS (
+-- 관측 면적·D7·후반부 잔존비율 r 을 한 번에 집계
+stats AS (
   SELECT
-    day,
-    retention,
-    retention / LAG(retention) OVER (ORDER BY day) AS ratio
-  FROM cohort_retention
-),
-r_estimate AS (
-  SELECT AVG(ratio) AS r
+    SUM(retention) FILTER (WHERE day BETWEEN 1 AND 7) AS area_d1_d7,
+    MAX(retention) FILTER (WHERE day = 7)             AS d7,
+    AVG(ratio)     FILTER (WHERE day BETWEEN 5 AND 7) AS r
   FROM daily_ratios
-  WHERE day BETWEEN 5 AND 7
-),
--- 3) D7과 r로 꼬리 면적 계산
-d7_value AS (
-  SELECT retention AS d7
-  FROM cohort_retention
-  WHERE day = 7
 )
 SELECT
-  ROUND(o.area_d1_d7, 3)                          AS observed_d1_d7_area,
-  ROUND(d.d7, 3)                                  AS d7,
-  ROUND(r.r, 4)                                   AS estimated_r,
-  ROUND(d.d7 * r.r / (1 - r.r), 2)                AS extrapolated_tail_area,
-  ROUND(o.area_d1_d7 + d.d7 * r.r / (1 - r.r), 2) AS lifetime_estimate
-FROM observed_area o, r_estimate r, d7_value d;
+  ROUND(area_d1_d7, 3)                    AS observed_d1_d7_area,
+  ROUND(d7, 3)                            AS d7,
+  ROUND(r, 4)                             AS estimated_r,
+  ROUND(d7 * r / (1 - r), 2)              AS extrapolated_tail_area,
+  ROUND(area_d1_d7 + d7 * r / (1 - r), 2) AS lifetime_estimate
+FROM stats;

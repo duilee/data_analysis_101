@@ -21,6 +21,4 @@ SELECT
   ROUND(b, 2)        AS matched_b,
   ROUND(sse, 6)      AS sse,
   ROUND(lifetime, 2) AS lifetime_estimate
-FROM errors
-ORDER BY sse ASC
-LIMIT 1;
+FROM errors ORDER BY sse LIMIT 1;
