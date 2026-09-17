@@ -25,6 +25,7 @@ jupyter notebook dau_segment.ipynb    # 노트북을 위에서 아래로 실행 
 | `sql/build_metrics.sql` | 3개 파생지표(+DAU 교차용 d0_active) 계산 → `user_metrics` 테이블 (오늘 시점) |
 | `sql/classify_segment.sql` | `user_metrics` 의 3개 지표를 5개 세그먼트로 분류 |
 | `sql/classify_macro.sql` | 분류 CASE를 기준일 인자를 받는 매크로로 정의 (마트가 재사용) |
+| `sql/segment_at_macro.sql` | 기준일 하나로 그날의 유저별 세그먼트를 돌려주는 테이블 매크로 (마트가 두 시점에 호출) |
 | `sql/build_mart.sql` | 어제·오늘 두 시점을 담은 세그먼트 마트 생성 |
 | `sql/stock_distribution.sql` | 일별 세그먼트 분포 (Stock) |
 | `sql/transition_matrix.sql` | 세그먼트 전이 행렬 (Flow) |
