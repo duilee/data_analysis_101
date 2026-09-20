@@ -1,0 +1,14 @@
+property_name,scope,data_type,allowed_values,description,events
+step,event,enum,1|2|3|4,온보딩 단계 번호,page_view_onboarding_step|tap_onboarding_next|tap_onboarding_skip
+permission,event,enum,notification|camera|location,허용된 권한 종류,system_permission_granted
+banner_id,event,string,,배너 식별자,view_main_banner|tap_main_banner
+content_id,event,string,,콘텐츠 식별자,view_content_card|tap_content_card|page_view_content_detail|tap_like_button|tap_share_button
+content_type,event,enum,article|video,콘텐츠 종류,view_content_card|tap_content_card|page_view_content_detail
+position,event,int,,피드 안에서의 순서(0부터),view_content_card|tap_content_card|tap_search_result
+channel,event,enum,kakao|instagram|link,공유 채널,tap_share_button
+source,event,enum,home|content_detail|settings|push,결제 화면 진입 경로,page_view_paywall
+plan,event,enum,monthly|yearly,구독 플랜,tap_purchase_button|subscription_started|subscription_renewed
+theme,event,enum,dark|light,전환된 테마,tap_theme_toggle
+push_type,event,enum,daily|content|promo,푸시 종류,system_push_sent|tap_push_notification
+subscription_status,user,enum,free|trial|paid|churned,구독 상태,
+signup_date,user,date,,가입일,

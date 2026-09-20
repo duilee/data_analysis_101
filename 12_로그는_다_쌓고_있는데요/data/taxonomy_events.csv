@@ -1,0 +1,25 @@
+event_name,event_type,source,platform,screen_name,description,status,lifetime,version_added
+system_first_launch,System,Client,iOS|Android,app,설치 후 첫 실행. 모든 퍼널의 기준 이벤트,Live,Permanent,3.0.0
+page_view_onboarding_step,Page View,Client,iOS|Android,onboarding,온보딩 각 단계 화면 진입. step 프로퍼티로 단계 구분,Live,Permanent,3.0.0
+tap_onboarding_next,Tap/Click,Client,iOS|Android,onboarding,온보딩 다음 버튼 탭,Live,Permanent,3.0.0
+tap_onboarding_skip,Tap/Click,Client,iOS|Android,onboarding,온보딩 건너뛰기 탭,Live,Permanent,3.0.0
+system_permission_granted,System,Client,iOS|Android,onboarding,권한 허용 결과. permission 프로퍼티로 종류 구분,Live,Permanent,3.0.0
+page_view_home,Page View,Client,iOS|Android,home,홈 화면 진입,Live,Permanent,3.0.0
+view_main_banner,View,Client,iOS|Android,home,홈 상단 배너 노출,Live,Permanent,3.0.0
+tap_main_banner,Tap/Click,Client,iOS|Android,home,홈 상단 배너 탭,Live,Permanent,3.0.0
+view_content_card,View,Client,iOS|Android,home,홈 피드의 콘텐츠 카드 노출,Live,Permanent,3.0.0
+tap_content_card,Tap/Click,Client,iOS|Android,home,홈 피드의 콘텐츠 카드 탭,Live,Permanent,3.0.0
+page_view_content_detail,Page View,Client,iOS|Android,content_detail,콘텐츠 상세 화면 진입,Live,Permanent,3.0.0
+tap_like_button,Tap/Click,Client,iOS|Android,content_detail,콘텐츠 좋아요 탭,Live,Permanent,3.0.0
+tap_share_button,Tap/Click,Client,iOS|Android,content_detail,콘텐츠 공유 버튼 탭,Live,Permanent,3.0.0
+page_view_search,Page View,Client,iOS|Android,search,검색 화면 진입,Live,Permanent,3.0.0
+tap_search_result,Tap/Click,Client,iOS|Android,search,검색 결과 탭,Live,Permanent,3.0.0
+page_view_paywall,Page View,Client,iOS|Android,paywall,결제 화면 진입. source 프로퍼티로 진입 경로 구분,Live,Permanent,3.0.0
+tap_purchase_button,Tap/Click,Client,iOS|Android,paywall,구매 버튼 탭,Live,Permanent,3.0.0
+subscription_started,System,Server,iOS|Android,server,구독 시작 (서버),Live,Permanent,3.0.0
+subscription_renewed,System,Server,iOS|Android,server,구독 갱신 (서버 일 배치),Live,Permanent,3.0.0
+page_view_settings,Page View,Client,iOS|Android,settings,설정 화면 진입,Live,Permanent,3.0.0
+tap_theme_toggle,Tap/Click,Client,iOS|Android,settings,테마 전환 토글 탭,Live,Permanent,3.0.0
+system_push_sent,System,Server,iOS|Android,server,푸시 발송 (서버),Live,Permanent,3.0.0
+tap_push_notification,Tap/Click,Client,iOS|Android,app,푸시 알림 탭,Live,Permanent,3.0.0
+page_view_profile,Page View,Client,iOS|Android,profile,프로필 화면 진입,Live,Permanent,3.0.0
