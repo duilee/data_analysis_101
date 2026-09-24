@@ -1,4 +1,4 @@
-# 12장. 로그는 다 쌓고 있는데요?
+# 12장. 로그는 쌓고 있는데, 왜 전환율은 못 구해요?
 
 택소노미 문서가 맞아도 배포 뒤에 로그는 조용히 깨집니다 — 이벤트가 안 오거나, 두 번 오거나, 오긴 오는데 값이
 비어 있거나. 가상의 콘텐츠 앱 로그 30일치(8월 25일 3.5.0 배포에 사고 5종을 심어 둠 — 다섯 모두 표준 문턱으로 잡힘)를 놓고, 일별 마트를 만들고
@@ -29,5 +29,5 @@ jupyter notebook log_monitoring.ipynb  # 노트북을 위에서 아래로 실행
 | `sql/event_count_anomaly.sql` | 이벤트 수 D-2 vs D-9 이상 감지 (`params` CTE에 기준일·문턱·최소 건수) |
 | `sql/param_null_anomaly.sql` | 프로퍼티 채움률 이상 감지 |
 | `img/` | 노트북이 저장하는 추세 그림 2개 (본문 삽입용) |
-| `extra/taxonomy_check.py`, `extra/sql/` | 부록: 택소노미 문서 규칙 검사 + 문서 vs 로그 대조 (본문 5.1절). `extra/` 안에서 실행 |
+| `extra/taxonomy_check.py`, `extra/sql/` | 부록: 택소노미 문서 규칙 검사 + 문서 vs 로그 대조 (본문 6.1절). `extra/` 안에서 실행 |
 | `log_monitoring.ipynb` | 실습 1~4 노트북 |
