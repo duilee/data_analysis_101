@@ -49,7 +49,7 @@ jupyter nbconvert --to notebook --execute --inplace leading_indicators.ipynb
   `accuracy=0.7717 AUC=0.8534 best_iter=202` · Optuna `best CV AUC = 0.8587` · 튜닝 후
   `accuracy=0.7767 AUC=0.8539`(해석용이라 차이는 미미한 게 정상) · Sankey `transitions: 84 rows |
   D7 retention range: 2.6% ~ 86.7%` · 시작 잔존율 40%에서 온보딩 스킵·홈 진입 시 15%로
-  떨어졌다가 content_view로 가면 28%로 회복.
+  떨어졌다가 page_view_content_detail로 가면 28%로 회복.
 - 의존성이 가장 무거운 챕터다(lightgbm, shap, optuna, plotly 등) — 첫 실행 시 설치 시간이 걸린다.
 
 ## 내 데이터에 적용 — 인터랙티브 프로토콜
@@ -70,7 +70,7 @@ jupyter nbconvert --to notebook --execute --inplace leading_indicators.ipynb
 | `event_timestamp` / `event_date` | TIMESTAMP / DATE | 이벤트 시각·일자 | 필수 |
 | `event_count` | INT | 이벤트 횟수 (없으면 행당 1) | 선택 |
 
-- **설치(기준) 이벤트**의 이벤트명은? (노트북 앵커: `'application_install'` — 없으면 유저별
+- **설치(기준) 이벤트**의 이벤트명은? (노트북 앵커: `'system_app_install'` — 없으면 유저별
   첫 이벤트로 파생)
 - **타깃(후행지표) 정의**는? — 기본 D7 잔존 외에 구독 전환·재구매 등 무엇이든 가능. 라벨
   관측에 필요한 경과일도 함께 정한다.
@@ -95,12 +95,12 @@ duckdb.query("""SELECT COUNT(DISTINCT user_id) AS users,
 | 앵커 (실습/식별자) | 무엇을 | 어떻게 |
 | --- | --- | --- |
 | 로드 셀 `CREATE OR REPLACE TABLE event_log AS … read_csv_auto('data/event_log.csv')` | CSV 경로, 컬럼명 | 독자 데이터로 — 이후 쿼리는 전부 `event_log` 테이블명을 참조하므로 경로는 이 한 곳 |
-| 라벨 뷰 셀 (`installs`·`d7_label` 뷰, 결과는 `labels`로 확인) | 기준 이벤트 `'application_install'` | 독자 정의로 |
+| 라벨 뷰 셀 (`installs`·`d7_label` 뷰, 결과는 `labels`로 확인) | 기준 이벤트 `'system_app_install'` | 독자 정의로 |
 | ⚠ D7 윈도 | `d7_label` 뷰의 `date_diff('day', i.install_date, e.event_date) = 7` **노트북 1곳** — `eda_query`·`fm_query`·`sankey_query`는 이 뷰를 JOIN | 타깃 경과일 변경 시 뷰 한 곳만. 단 `sql/*.sql` 3개에는 뷰 정의가 각각 복제돼 있어 파일까지 맞추면 3곳 추가. 라벨 컬럼명 `d7_retention_flag`는 세 쿼리·`fm` 분리 코드가 공유하므로 유지 |
 | `eda_query` | 행동 윈도 `<= 1` (D0~D1), 노이즈 컷 `HAVING d7_ret1_share >= 10 OR d7_ret0_share >= 10` (기간 필터는 없다 — 제한하려면 `installs` 뷰에 `WHERE` 추가) | 독자 윈도·데이터 크기에 맞게 |
-| EDA 강조 셀 `spot` | 이벤트 리스트 `content_view, like_content, search_used, share_content, error_popup` | 독자 이벤트로 |
-| SHAP dependence 셀 | `interaction_index="content_view"` | 독자의 핵심 이벤트로 |
-| `fm_query` ⚠ | 피처 이벤트명 리스트 (`content_view, like_content, search_used, share_content, page_view_profile, settings_open, error_popup, tutorial_complete, push_allow`)가 하드코딩 | 독자 이벤트 택소노미로 재작성 + SHAP 셀의 `NUMERIC` 리스트도 **함께** |
+| EDA 강조 셀 `spot` | 이벤트 리스트 `page_view_content_detail, tap_like_button, tap_search_button, tap_share_button, view_error_popup` | 독자 이벤트로 |
+| SHAP dependence 셀 | `interaction_index="page_view_content_detail"` | 독자의 핵심 이벤트로 |
+| `fm_query` ⚠ | 피처 이벤트명 리스트 (`page_view_content_detail, tap_like_button, tap_search_button, tap_share_button, page_view_profile, page_view_settings, view_error_popup, tap_tutorial_complete, system_push_permission_granted`)가 하드코딩 | 독자 이벤트 택소노미로 재작성 + SHAP 셀의 `NUMERIC` 리스트도 **함께** |
 | 모델 셀 | `train_test_split(test_size=0.10, random_state=314, stratify=y)`, LGBM 파라미터, Optuna `n_trials=25` | 기본 유지 권장, 데이터가 작으면 `test_size` 상향 |
 | Sankey CONFIG | `MAX_STEPS = 10`, `TOP_K = 6`, `MIN_USERS = 20`, 세션 윈도 `INTERVAL 1 HOUR` | 이벤트 종류 많으면 `TOP_K`↓·`MIN_USERS`↑로 노이즈 전이 제거 |
 | 진단 셀 | `ret_gap_at_source > 15`, `user_count >= 50` 컷 | 데이터 크기에 맞게 |

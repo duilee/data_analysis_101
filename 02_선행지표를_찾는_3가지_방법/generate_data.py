@@ -13,12 +13,12 @@
 등)를 각자의 방식으로 복원하게 된다. 합성이지만 결과가 진실을 되짚어 주는 것이 실습의 핵심이다.
 
 심어둔 관계 (세 실습에서 일관되게 드러나야 함):
-  - tutorial_complete / push_allow : 잔존 유저에서 수행 비중이 크게 높음
-  - content_view 횟수              : 많을수록 잔존↑ (단조 증가)
-  - like_content                   : 3회 이상에서 잔존이 한 번 더 꺾여 올라감 (임계/아하 모먼트)
+  - tap_tutorial_complete / system_push_permission_granted : 잔존 유저에서 수행 비중이 크게 높음
+  - page_view_content_detail 횟수              : 많을수록 잔존↑ (단조 증가)
+  - tap_like_button                   : 3회 이상에서 잔존이 한 번 더 꺾여 올라감 (임계/아하 모먼트)
   - session_duration_sec           : 약 150초 이상에서 잔존이 꺾여 올라감 (임계/아하 모먼트)
-  - search_used                    : 수행 비중은 낮지만, 하는 유저는 여러 번 함 (평균 횟수↑)
-  - error_popup                    : 많을수록 잔존↓ (음의 기여)
+  - tap_search_button                    : 수행 비중은 낮지만, 하는 유저는 여러 번 함 (평균 횟수↑)
+  - view_error_popup                    : 많을수록 잔존↓ (음의 기여)
   - 흐름 분기                       : 튜토리얼 스킵 / 홈→내정보·설정 이탈은 잔존↓,
                                       홈→콘텐츠 조회→좋아요는 잔존↑
 """
@@ -39,18 +39,18 @@ BASE_DATE = pd.Timestamp("2026-01-01")  # 첫 설치 가능일
 
 # 이벤트 메타데이터: event_name -> (screen_name, description)
 EVENT_META = {
-    "application_install":        ("app",            "앱 설치"),
+    "system_app_install":        ("app",            "앱 설치"),
     "page_view_onboarding_step":  ("onboarding",     "온보딩 단계 조회"),
-    "tutorial_complete":          ("onboarding",     "튜토리얼 완료"),
-    "push_allow":                 ("permission",     "푸시 알림 허용"),
+    "tap_tutorial_complete":          ("onboarding",     "튜토리얼 완료"),
+    "system_push_permission_granted":                 ("permission",     "푸시 알림 허용"),
     "page_view_home":             ("home",           "메인 홈 조회"),
-    "content_view":               ("content_detail", "메인 콘텐츠 상세 조회"),
-    "like_content":               ("content_detail", "콘텐츠 좋아요"),
-    "share_content":              ("content_detail", "콘텐츠 공유"),
-    "search_used":                ("search",         "검색 사용"),
+    "page_view_content_detail":               ("content_detail", "메인 콘텐츠 상세 조회"),
+    "tap_like_button":               ("content_detail", "콘텐츠 좋아요"),
+    "tap_share_button":              ("content_detail", "콘텐츠 공유"),
+    "tap_search_button":                ("search",         "검색 사용"),
     "page_view_profile":          ("profile",        "내 정보 조회"),
-    "settings_open":              ("settings",       "설정 열기"),
-    "error_popup":                ("error",          "에러 팝업 노출"),
+    "page_view_settings":              ("settings",       "설정 열기"),
+    "view_error_popup":                ("error",          "에러 팝업 노출"),
 }
 
 
@@ -73,18 +73,18 @@ def simulate_user(uid, q, install_dt, rng, rows):
         rows.append((ts, ts.date(), uid, event_name, screen, count, desc))
 
     # --- D0 설치 세션: 분기되는 흐름 ---------------------------------------
-    emit("application_install", install_dt, gap=(0, 1))
+    emit("system_app_install", install_dt, gap=(0, 1))
     emit("page_view_onboarding_step", install_dt, gap=(2, 8))
 
     # 분기 1) 튜토리얼 완료 vs 스킵 (q 가 높을수록 완료)
     tutorial = rng.random() < sigmoid(0.9 * q + 0.4)
     if tutorial:
-        emit("tutorial_complete", install_dt, gap=(5, 30))
+        emit("tap_tutorial_complete", install_dt, gap=(5, 30))
 
     # 푸시 권한 허용
     push = rng.random() < sigmoid(0.7 * q + 0.0)
     if push:
-        emit("push_allow", install_dt, gap=(2, 10))
+        emit("system_push_permission_granted", install_dt, gap=(2, 10))
 
     emit("page_view_home", install_dt, gap=(3, 15))
 
@@ -96,34 +96,34 @@ def simulate_user(uid, q, install_dt, rng, rows):
         n_content = 1 + int(rng.poisson(max(0.2, np.exp(0.2 + 0.5 * q))))
         n_content = min(n_content, 8)
         for _ in range(n_content):
-            emit("content_view", install_dt, count=int(rng.integers(1, 4)), gap=(8, 60))
+            emit("page_view_content_detail", install_dt, count=int(rng.integers(1, 4)), gap=(8, 60))
             content_cnt += 1
             # 분기 3) 콘텐츠를 보고 좋아요 (q 높을수록)
             if rng.random() < sigmoid(0.8 * q + 0.0):
-                emit("like_content", install_dt, gap=(2, 8))
+                emit("tap_like_button", install_dt, gap=(2, 8))
                 like_cnt += 1
             if rng.random() < sigmoid(-1.2 + 0.4 * q):
-                emit("share_content", install_dt, gap=(3, 12))
+                emit("tap_share_button", install_dt, gap=(3, 12))
                 share_cnt += 1
 
         # 검색: 수행 비중은 낮지만(드물게), 한번 쓰는 유저는 여러 번 쓴다 → 평균 횟수↑
         if rng.random() < sigmoid(-1.4 + 0.8 * q):
             n_search = min(1 + int(rng.poisson(max(0.1, np.exp(0.3 + 0.7 * q)))), 6)
             for _ in range(n_search):
-                emit("search_used", install_dt, count=int(rng.integers(1, 3)), gap=(5, 30))
+                emit("tap_search_button", install_dt, count=int(rng.integers(1, 3)), gap=(5, 30))
                 search_cnt += 1
     else:
         if rng.random() < 0.5:
             emit("page_view_profile", install_dt, gap=(3, 15))
             profile_cnt += 1
         else:
-            emit("settings_open", install_dt, gap=(3, 15))
+            emit("page_view_settings", install_dt, gap=(3, 15))
             settings_cnt += 1
 
     # 에러 팝업: q 낮을수록 자주
     n_err = min(int(rng.poisson(max(0.02, np.exp(-0.5 - 0.7 * q)))), 3)
     for _ in range(n_err):
-        emit("error_popup", install_dt, gap=(5, 40))
+        emit("view_error_popup", install_dt, gap=(5, 40))
 
     session_duration = clock["t"]  # 첫 이벤트가 t>0 부터 시작하므로 사실상 세션 길이
 
@@ -153,13 +153,13 @@ def simulate_user(uid, q, install_dt, rng, rows):
         clock["t"] = 0
         emit("page_view_home", d1_dt, gap=(2, 10))
         for _ in range(1 + int(rng.poisson(0.8))):
-            emit("content_view", d1_dt, count=int(rng.integers(1, 4)), gap=(8, 50))
+            emit("page_view_content_detail", d1_dt, count=int(rng.integers(1, 4)), gap=(8, 50))
 
     if d7_retained:
         d7_dt = pd.Timestamp(install_dt.date()) + pd.Timedelta(days=7, hours=int(rng.integers(8, 22)))
         clock["t"] = 0
         emit("page_view_home", d7_dt, gap=(2, 10))
-        emit("content_view", d7_dt, count=int(rng.integers(1, 4)), gap=(8, 50))
+        emit("page_view_content_detail", d7_dt, count=int(rng.integers(1, 4)), gap=(8, 50))
 
     return d7_retained, d1_retained, session_duration
 

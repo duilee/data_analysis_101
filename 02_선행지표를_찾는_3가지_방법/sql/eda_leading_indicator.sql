@@ -6,10 +6,10 @@
 --   CREATE OR REPLACE TABLE event_log AS SELECT * FROM read_csv_auto('data/event_log.csv');
 -- 아래 공용 뷰(installs·d7_label)는 실습 1·2·3 sql 파일마다 같은 정의를 반복해 두어 어느 파일이든 단독 실행된다.
 
--- 설치(D0) 시점: 유저별 첫 application_install
+-- 설치(D0) 시점: 유저별 첫 system_app_install
 CREATE OR REPLACE VIEW installs AS
   SELECT user_id, MIN(event_timestamp) AS install_ts, MIN(event_date) AS install_date
-  FROM event_log WHERE event_name = 'application_install' GROUP BY 1;
+  FROM event_log WHERE event_name = 'system_app_install' GROUP BY 1;
 
 -- D7 잔존 라벨: 설치 7일째에 활동이 있으면 1. 실습 1·2·3 이 모두 이 뷰를 쓴다
 CREATE OR REPLACE VIEW d7_label AS

@@ -6,10 +6,10 @@
 --   CREATE OR REPLACE TABLE event_log AS SELECT * FROM read_csv_auto('data/event_log.csv');
 -- 아래 공용 뷰(installs·d7_label)는 실습 1·2·3 sql 파일마다 같은 정의를 반복해 두어 어느 파일이든 단독 실행된다.
 
--- 설치(D0) 시점: 유저별 첫 application_install
+-- 설치(D0) 시점: 유저별 첫 system_app_install
 CREATE OR REPLACE VIEW installs AS
   SELECT user_id, MIN(event_timestamp) AS install_ts, MIN(event_date) AS install_date
-  FROM event_log WHERE event_name = 'application_install' GROUP BY 1;
+  FROM event_log WHERE event_name = 'system_app_install' GROUP BY 1;
 
 -- D7 잔존 라벨: 설치 7일째에 활동이 있으면 1. 실습 1·2·3 이 모두 이 뷰를 쓴다
 CREATE OR REPLACE VIEW d7_label AS
@@ -25,15 +25,15 @@ WITH d0_session AS (   -- 설치 당일(D0) 세션 이벤트만. D1 이후 행�
 ),
 feat AS (
     SELECT user_id,
-           MAX(CASE WHEN event_name = 'tutorial_complete' THEN 1 ELSE 0 END) AS tutorial_complete,
-           MAX(CASE WHEN event_name = 'push_allow'        THEN 1 ELSE 0 END) AS push_allow,
-           COUNT(*) FILTER (WHERE event_name = 'content_view')      AS content_view,
-           COUNT(*) FILTER (WHERE event_name = 'like_content')      AS like_content,
-           COUNT(*) FILTER (WHERE event_name = 'search_used')       AS search_used,
-           COUNT(*) FILTER (WHERE event_name = 'share_content')     AS share_content,
-           COUNT(*) FILTER (WHERE event_name = 'page_view_profile') AS profile_view,
-           COUNT(*) FILTER (WHERE event_name = 'settings_open')     AS settings_open,
-           COUNT(*) FILTER (WHERE event_name = 'error_popup')       AS error_popup,
+           MAX(CASE WHEN event_name = 'tap_tutorial_complete' THEN 1 ELSE 0 END) AS tap_tutorial_complete,
+           MAX(CASE WHEN event_name = 'system_push_permission_granted'        THEN 1 ELSE 0 END) AS system_push_permission_granted,
+           COUNT(*) FILTER (WHERE event_name = 'page_view_content_detail')      AS page_view_content_detail,
+           COUNT(*) FILTER (WHERE event_name = 'tap_like_button')      AS tap_like_button,
+           COUNT(*) FILTER (WHERE event_name = 'tap_search_button')       AS tap_search_button,
+           COUNT(*) FILTER (WHERE event_name = 'tap_share_button')     AS tap_share_button,
+           COUNT(*) FILTER (WHERE event_name = 'page_view_profile') AS page_view_profile,
+           COUNT(*) FILTER (WHERE event_name = 'page_view_settings')     AS page_view_settings,
+           COUNT(*) FILTER (WHERE event_name = 'view_error_popup')       AS view_error_popup,
            -- 설치 세션 길이(초): 첫 이벤트 ~ 마지막 이벤트
            date_diff('second', MIN(event_timestamp), MAX(event_timestamp)) AS session_duration_sec
     FROM d0_session
