@@ -1,18 +1,26 @@
--- 유저 세그먼트 마트 생성 (mart_user_segment)
+-- 실습 2, 단계 2) 유저 세그먼트 마트 생성 (mart_user_segment)
 --
--- segment_at_macro.sql 의 segment_at 을 오늘/어제 두 시점으로 호출해 user_seg(오늘)와
--- user_seg_from(어제)을 한 행에 담아 적재한다. 기준일 2026-05-20.
--- classify_macro.sql → segment_at_macro.sql 순으로 먼저 실행할 것.
--- 오늘 막 가입한 유저는 '어제' 시점에 존재하지 않았으므로 user_seg_from 이 NULL 이 된다.
--- 준비: 두 원천 CSV를 테이블로 등록해 두었다는 전제 (노트북 0단계)
---   CREATE TABLE user_master   AS SELECT * FROM read_csv_auto('data/user_master.csv');
---   CREATE TABLE user_activity AS SELECT * FROM read_csv_auto('data/user_activity.csv');
+-- build_metrics_daily.sql 이 만든 날짜별 지표에 classify_segment.sql(실습 1.2)과 같은 CASE를
+-- 적용해 날짜별 세그먼트(user_seg)를 만들고, 어제 세그먼트(user_seg_from)는 윈도우 함수
+-- lag 로 같은 유저의 바로 앞 날짜 행에서 가져온다. 오늘 막 가입한 유저는 앞 행이 없어 NULL.
+-- 임계값(new 윈도·heavy 컷·경계일)을 바꿀 때는 classify_segment.sql 과 이 파일의 CASE 두 곳을 똑같이 고친다.
+-- build_metrics_daily.sql 을 먼저 실행할 것.
 
 CREATE OR REPLACE TABLE mart_user_segment AS
+WITH seg AS (
+  SELECT target_date, user_id,
+    CASE
+      WHEN days_since_signup < 7           THEN 'new'
+      WHEN active_day_count >= 5           THEN 'heavy'
+      WHEN active_day_count BETWEEN 1 AND 4 THEN 'light'
+      WHEN last_active_date >= target_date - INTERVAL 30 DAY THEN 'risk'
+      ELSE 'dormant'
+    END AS user_seg
+  FROM user_metrics_daily
+)
 SELECT
-  DATE '2026-05-20' AS target_date, user_id,
-  y.user_seg AS user_seg_from,
-  t.user_seg
-FROM segment_at(DATE '2026-05-20') AS t
-JOIN segment_at(DATE '2026-05-20' - INTERVAL 1 DAY) AS y USING (user_id)
-ORDER BY user_id;
+  target_date, user_id,
+  lag(user_seg) OVER (PARTITION BY user_id ORDER BY target_date)
+    AS user_seg_from,
+  user_seg
+FROM seg;

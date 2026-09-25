@@ -4,9 +4,9 @@
 세그먼트 사이의 이동(Flow)과 비율 지표로 서비스의 건강도를 입체적으로 진단합니다.
 
 - **실습 1.** 두 원천 테이블(`user_master`, `user_activity`)에서 3개 파생지표를 만들고(`user_metrics`), 그 지표를 정해진 기준에 따라 5개 세그먼트(new / heavy / light / risk / dormant)로 분류합니다. 세그먼트에 오늘 기록 여부를 교차해 DAU 구성도 확인합니다.
-- **실습 2.** 어제·오늘 두 시점의 세그먼트를 한 행에 담아, 세그먼트 변화를 추적할 수 있는 마트를 만듭니다.
+- **실습 2.** 날짜 × 유저 단위의 세그먼트 스냅샷을 한 달치 쌓고, 어제 세그먼트를 `lag` 로 나란히 붙여 세그먼트 변화를 추적할 수 있는 마트를 만듭니다.
 - **실습 3.** 그 마트를 분포(Stock)·전이 행렬(Flow)·비율 지표(HURR/CURR/Heavy Loss/Light Loss/Reactivation) 세 각도로 분석합니다.
-- **실습 4.** 마트를 여러 날 적재해, 30일 전 heavy 유저와 new 유저가 오늘 어디로 흩어졌는지 N일 변화를 추적합니다.
+- **실습 4.** 한 달치 마트를 self-join 해, 30일 전 heavy 유저와 new 유저가 오늘 어디로 흩어졌는지 N일 변화를 추적합니다.
 
 ## 실행 방법
 
@@ -24,9 +24,8 @@ jupyter notebook dau_segment.ipynb    # 노트북을 위에서 아래로 실행 
 | `data/user_activity.csv` | 유저가 습관 체크를 남긴 날의 로그 (`user_id, event_date`) |
 | `sql/build_metrics.sql` | 3개 파생지표(+DAU 교차용 d0_active) 계산 → `user_metrics` 테이블 (오늘 시점) |
 | `sql/classify_segment.sql` | `user_metrics` 의 3개 지표를 5개 세그먼트로 분류 |
-| `sql/classify_macro.sql` | 분류 CASE를 기준일 인자를 받는 매크로로 정의 (마트가 재사용) |
-| `sql/segment_at_macro.sql` | 기준일 하나로 그날의 유저별 세그먼트를 돌려주는 테이블 매크로 (마트가 두 시점에 호출) |
-| `sql/build_mart.sql` | 어제·오늘 두 시점을 담은 세그먼트 마트 생성 |
+| `sql/build_metrics_daily.sql` | 달력(31일) × 유저 단위로 3개 파생지표 계산 → `user_metrics_daily` 테이블 |
+| `sql/build_mart.sql` | 날짜별 세그먼트 분류 + `lag` 로 어제 세그먼트를 붙인 마트 생성 (한 달치) |
 | `sql/stock_distribution.sql` | 일별 세그먼트 분포 (Stock) |
 | `sql/transition_matrix.sql` | 세그먼트 전이 행렬 (Flow) |
 | `sql/segment_kpi.sql` | 전이 기반 비율 지표 5종 |

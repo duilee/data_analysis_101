@@ -6,7 +6,7 @@ SELECT
   past.user_seg AS seg_30days_ago,
   curr.user_seg AS seg_today,
   count(*) AS users,
-  round(count(*) / sum(count(*)) OVER () * 100, 1) AS pct
+  round(100.0 * count(*) / sum(count(*)) OVER (), 1) AS pct
 FROM mart_user_segment AS past
 LEFT JOIN mart_user_segment AS curr
   ON past.user_id = curr.user_id

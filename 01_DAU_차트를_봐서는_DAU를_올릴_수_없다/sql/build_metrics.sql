@@ -20,6 +20,7 @@ SELECT
   max(CASE WHEN a.event_date <= DATE '2026-05-20'
       THEN a.event_date END) AS last_active_date,
   -- (+) 오늘 기록 여부
-  bool_or(a.event_date = DATE '2026-05-20') AS d0_active
+  max(CASE WHEN a.event_date = DATE '2026-05-20'
+      THEN 1 ELSE 0 END) AS d0_active
 FROM user_master m LEFT JOIN user_activity a USING (user_id)
 GROUP BY m.user_id, m.first_active_date;

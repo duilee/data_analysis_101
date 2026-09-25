@@ -34,9 +34,10 @@ jupyter nbconvert --to notebook --execute --inplace dau_segment.ipynb
 - 파이프라인: 파생지표 쿼리(3개 지표: `days_since_signup, active_day_count,
   last_active_date` + DAU 교차용 `d0_active` → 테이블 `user_metrics`) → 분류 CASE(5분류, 컬럼 `user_seg`) →
   세그먼트×오늘 기록 여부 교차(`dau_by_seg`) →
-  분류 CASE를 매크로화한 `classify_seg` + `build_mart_query`(어제·오늘 2시점 → 테이블
-  `mart_user_segment`) → Stock(`dist`)/Flow(`trans`)/KPI(`kpi`) → 실습 4에서 31일치 백필 후
-  N일 추적(30일 전 heavy → 오늘, 30일 전 new → 오늘).
+  달력(`generate_series` 31일) × 유저로 같은 지표를 날짜별 계산(`user_metrics_daily`) →
+  같은 CASE + `lag(user_seg)` 로 어제 세그먼트를 붙인 마트(`mart_user_segment`, 한 달치) →
+  Stock(`dist`)/Flow(`trans`)/KPI(`kpi`) → 실습 4에서 self-join 으로 N일 추적(30일 전 heavy → 오늘,
+  30일 전 new → 오늘).
 - **기대 결과**: 생성기(시드 42, 유저 200명, 기준일 `TARGET = "2026-05-20"`)가 활동 티어와
   이탈 유형(recent/mid/old)을 심어 두었으므로, Stock에 dormant·risk가 뚜렷이 나타나고
   전이 행렬에서 heavy → light → risk → dormant 흐름과 new → heavy/light 안착이 읽혀야 한다.
@@ -80,10 +81,10 @@ con.execute("""SELECT COUNT(DISTINCT user_id) AS users, MIN(event_date) AS min_d
 | 앵커 (실습/식별자) | 무엇을 | 어떻게 |
 | --- | --- | --- |
 | ⚠ CSV 경로 | 준비 셀 `for t in ["user_master", "user_activity"]` 루프의 f-string `read_csv_auto('data/{t}.csv')` 1곳 | 경로가 테이블명에서 파생된다 — 파일명이 테이블명과 다르면 루프를 풀어 두 줄로 쓰거나 `{테이블명: 경로}` dict로 바꾼다. 이후 쿼리는 테이블명 참조라 추가 수정 불필요 |
-| ⚠ 기준일 | SQL 문자열 안에 `'2026-05-20'` 리터럴로 하드코딩 | 실습 4의 `build_mart_query.replace("2026-05-20", t.date().isoformat())` 패턴처럼 `TARGET` 변수 치환으로 통일 |
-| ⚠ 세그먼트 경계 | new 윈도 7일, heavy 기준 활동일 5일, dormant 기준 `INTERVAL 30 DAY` | **실습 1의 분류 CASE(`days_since_signup`/`active_day_count`/`last_active_date`) + `classify_seg` 매크로(`days`/`cnt`/`last_active`) 두 곳** — 이름은 다르지만 같은 기준이라 반드시 함께 수정 |
-| ⚠ 최근성 윈도 | 오늘 `INTERVAL 6 DAY`, 어제 `INTERVAL 7 DAY ~ 1 DAY` | 파생지표 쿼리(`user_metrics`)와 `build_mart_query` 의 오늘/어제 윈도를 함께 수정 |
-| 실습 4 | `pd.date_range(end=TARGET, periods=31)` | 추적 기간에 맞게 |
+| ⚠ 기준일 | 준비 셀 `TARGET = "2026-05-20"` 한 곳 — 각 쿼리는 f-string `DATE '{TARGET}'` 로 끼워 넣고, 실습 2의 적재 범위(`TARGET - INTERVAL 30 DAY ~ TARGET`)도 여기서 유도 | `TARGET` 만 내 날짜로 바꾼다 |
+| ⚠ 세그먼트 경계 | new 윈도 7일, heavy 기준 활동일 5일, dormant 기준 `INTERVAL 30 DAY` | **실습 1.2의 분류 CASE + 실습 2 마트 쿼리의 CASE 두 곳** — 컬럼명까지 같은 CASE 이므로 반드시 함께 수정 |
+| ⚠ 최근성 윈도 | `INTERVAL 6 DAY` | 파생지표 쿼리(`user_metrics`, 실습 1.1)와 날짜별 지표 쿼리(`user_metrics_daily`, 실습 2) 두 곳을 함께 수정 |
+| 실습 2 | `generate_series(DATE '{TARGET}' - INTERVAL 30 DAY, DATE '{TARGET}', INTERVAL 1 DAY)` | 적재 범위 — N일 추적 구간(60·90일)에 맞게 `30 DAY` 를 늘린다 |
 | 실습 4 | `nday_query.format(seg="heavy")` | 추적할 출발 세그먼트 — 노트북이 `heavy`·`new` 둘 다 실행한다 |
 
 - `SEG_ORDER`(5개 세그먼트명)와 KPI 5종(`hurr_pct, curr_pct, heavy_loss_pct, light_loss_pct,
@@ -98,9 +99,9 @@ con.execute("""SELECT COUNT(DISTINCT user_id) AS users, MIN(event_date) AS min_d
 1. 파생지표 쿼리(실습 1.1) 실행 → `user_metrics` 분포(3개 지표 요약 통계) 확인 — 경계값이 실제 분포의
    의미 있는 지점에 있는지 독자와 함께 본다.
 2. 분류 CASE 쿼리(실습 1.2) → 세그먼트별 인원수. 특정 세그먼트가 0명이거나 90% 이상이면 경계 재조정.
-3. `build_mart_query`(실습 2) → 대표 유저 몇 명의 from→to 이동을 보여주고 분류가 직관과 맞는지 확인.
+3. 마트 적재(실습 2, `user_metrics_daily` → `mart_user_segment`) → 대표 유저 몇 명의 from→to 이동을 보여주고 분류가 직관과 맞는지 확인.
 4. Stock(3.1) → Flow(3.2) → KPI(3.3) 순서로 실행하며 각각 해석을 붙인다.
-5. (독자가 원하면) 실습 4 백필로 30일 추적까지 — 실무에서는 일 배치 적재 구조를 권한다.
+5. (독자가 원하면) 실습 4의 self-join 으로 30일 추적까지 — 실무에서는 일 배치 적재 구조를 권한다.
 
 ### 5. 결과 해석
 
@@ -156,7 +157,7 @@ con.execute("""SELECT COUNT(DISTINCT user_id) AS users, MIN(event_date) AS min_d
    Stock과 전이 행렬이 어떻게 변할지 예측하게 한다(어느 세그먼트가 불고, 어느 전이가 커지나).
    수정 → 재생성 → 노트북 재실행 → 대조. 끝나면 `git checkout -- generate_data.py data/` 후
    재생성으로 원복.
-2. **[샌드박스]** heavy 기준을 `active_day_count >= 5 → >= 3`으로 낮추면(⚠ 분류 CASE와 매크로 두 곳 모두)
+2. **[샌드박스]** heavy 기준을 `active_day_count >= 5 → >= 3`으로 낮추면(⚠ 실습 1.2 와 실습 2 마트 쿼리의 CASE 두 곳 모두)
    HURR와 Heavy Loss가 각각 어느 방향으로 움직일지 예측 → 실행 → 대조. "경계를 낮추면 지표가
    좋아 보이는 착시"를 토론. 원복 필수.
 3. **[사고]** 우리 서비스에 "구독 결제했지만 접속 안 하는 유저"가 많다면, 5세그먼트 체계를
