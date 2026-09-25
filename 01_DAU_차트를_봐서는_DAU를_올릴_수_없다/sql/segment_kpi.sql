@@ -1,5 +1,5 @@
 -- 세그먼트 전이 기반 비율 지표 5종 (HURR / CURR / Heavy Loss / Light Loss / Reactivation)
--- 노트북에서는 core = ('heavy', 'light') 를 파이썬 문자열 상수로 끼워 넣는다.
+-- 노트북에서는 current = ('heavy', 'light') 를 파이썬 문자열 상수로 끼워 넣는다.
 -- 분모가 0이 되는 경우를 막기 위해 nullif(..., 0) 으로 감싼다.
 
 SELECT
