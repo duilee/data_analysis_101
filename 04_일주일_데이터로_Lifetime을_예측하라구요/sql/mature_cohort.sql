@@ -20,4 +20,4 @@ SELECT
   ROUND(n.area_d1_d7_new / p.area_d1_d7_mature, 4) AS scaling_factor,
   ROUND(p.lifetime_mature * n.area_d1_d7_new / p.area_d1_d7_mature, 2)
     AS lifetime_estimate
-FROM new_area AS n, params AS p;
+FROM new_area AS n CROSS JOIN params AS p;

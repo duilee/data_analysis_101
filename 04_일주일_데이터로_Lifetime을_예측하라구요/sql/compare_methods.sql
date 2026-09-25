@@ -11,7 +11,7 @@ WITH params AS (
 ),
 obs AS (
   SELECT
-    SUM(retention) FILTER (WHERE day BETWEEN 1 AND 7) AS area_d1_d7,
+    SUM(CASE WHEN day BETWEEN 1 AND 7 THEN retention END) AS area_d1_d7,
     MAX(CASE WHEN day = 1 THEN retention END)         AS d1,
     MAX(CASE WHEN day = 3 THEN retention END)         AS d3,
     MAX(CASE WHEN day = 7 THEN retention END)         AS d7
@@ -31,7 +31,7 @@ heuristic AS (
 lookup_match AS (
   SELECT cat.lifetime AS lifetime_estimate
   FROM lifetime_catalog AS cat, obs
-  ORDER BY POW(cat.D1 - obs.d1, 2) + POW(cat.D3 - obs.d3, 2) + POW(cat.D7 - obs.d7, 2)
+  ORDER BY POWER(cat.D1 - obs.d1, 2) + POWER(cat.D3 - obs.d3, 2) + POWER(cat.D7 - obs.d7, 2)
   LIMIT 1
 ),
 mature_extrap AS (

@@ -12,9 +12,9 @@ WITH new_obs AS (
 ),
 errors AS (
   SELECT cat.D1, cat.b, cat.lifetime,
-         POW(cat.D1 - obs.d1, 2) + POW(cat.D3 - obs.d3, 2)
-           + POW(cat.D7 - obs.d7, 2) AS sse
-  FROM lifetime_catalog AS cat, new_obs AS obs
+         POWER(cat.D1 - obs.d1, 2) + POWER(cat.D3 - obs.d3, 2)
+           + POWER(cat.D7 - obs.d7, 2) AS sse
+  FROM lifetime_catalog AS cat CROSS JOIN new_obs AS obs
 )
 SELECT
   ROUND(D1, 2)       AS matched_d1,
