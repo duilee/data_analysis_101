@@ -41,7 +41,7 @@ jupyter nbconvert --to notebook --execute --inplace unit_economics.ipynb
 - 입력: `data/marketing_costs.csv`(월×채널 비용, 매체비/기타 분리) ·
   `data/users.csv`(유입 명부 — **미결제 유저 포함**) · `data/payments.csv`(결제 건별 매출).
 - 흐름: 실습 1 채널별 CAC(매체비 vs fully-loaded, 오가닉은 비용 조인에서 자연 탈락) →
-  실습 2 장기 코호트(획득 후 36개월) 백테스트로 LTR → ×`CM_RATIO`(0.65) → LTV공헌이익 +
+  실습 2 장기 코호트(획득 후 12개월 — 4장과 같은 1년 기준) 백테스트로 LTR → ×`CM_RATIO`(0.65) → LTV공헌이익 +
   캐스케이드 → 실습 3 CAC·LTV를 채널 단위로 merge(채널 표) → 실습 4 `payback_df()`로
   회수 곡선 4개(검색·디스플레이 × 2025-03/04) → 실습 5 Payback 기반 CAC 가이드라인.
 - **기대 결과**: 생성기가 심은 정답(모두 본문 표의 값)이 복원돼야 한다.
@@ -51,8 +51,8 @@ jupyter nbconvert --to notebook --execute --inplace unit_economics.ipynb
   - 캐스케이드: LTR/매체비 **3.1** → LTV/매체비 **2.0** → LTV/fully-loaded **1.7**
   - LTV:CAC 비율: 2.9 / 1.0 / 6.7 / 0.9 · 유료 전체 1.7
   - 2025-04 검색 코호트 회수 곡선: 월별 공헌이익 403/310/207/110/85/70만원,
-    회수율 0.35→1.03 — **6개월째 본전**. 3월 코호트는 7개월째(`QUALITY=0.93`),
-    디스플레이는 두 코호트 모두 관측 구간 내 미회수.
+    회수율 0.37→1.02 — **3개월째 본전**. 3월 코호트는 4개월째(`QUALITY=0.93`),
+    디스플레이는 4월 코호트가 12개월째 턱걸이(1.04), 3월 코호트는 관측 12개월 내 미회수.
 
 ## 내 데이터에 적용 — 인터랙티브 프로토콜
 
@@ -75,7 +75,7 @@ jupyter nbconvert --to notebook --execute --inplace unit_economics.ipynb
 - **'획득'의 기준** — 유입 명부의 한 행이 인스톨인가, 가입인가, 첫 결제인가? CAC 분모와
   LTV 모집단이 같은 기준인지 확인한다(본문 2.2의 단위 맞추기).
 - 채널 명명 — 비용 테이블과 유입 테이블의 채널 값이 같은 체계인가? 오가닉의 정의는?
-- **데이터 기간** — LTV 실측 지평을 정한다. 3년 치가 없으면 12·24개월 캡으로 명시하고
+- **데이터 기간** — LTV 실측 지평을 정한다. 1년 치가 없으면 6개월 캡처럼 짧은 지평을 명시하고
   시작한다(캡이 다른 LTV끼리 비교 금지).
 
 ### 2. 데이터 점검 — 통과 전 분석 시작 금지
@@ -100,7 +100,7 @@ duckdb.query("""SELECT (SELECT COUNT(*) FROM read_csv_auto('USERS')) AS users,
 | ⚠ 실습 2 캐스케이드 셀 | `paid_ltr / 12000`, `paid_ltv / 12000`, `paid_ltv / 14500` — 본문 표의 CAC가 **숫자로 박혀 있음** | 실습 1에서 계산한 독자의 매체비 CAC·fully-loaded CAC 값으로 치환 |
 | 실습 1 `cac`·`apr` 쿼리 | 기준 월 `DATE '2025-04-01'` (2곳) | 독자의 최근 '완결된' 월로 |
 | 실습 2 `mature` 뷰 (`CREATE OR REPLACE VIEW`) | 컷 `DATE '2023-07-01'` | 독자의 LTV 지평으로 — 한 곳만 고치면 실습 5도 이 뷰를 재사용 |
-| 실습 2 LTV 쿼리 | `INTERVAL 36 MONTH` | LTV 지평과 같이 변경 (실습 5의 `INTERVAL 12 MONTH`·`/ 12.0`은 월평균 계산 기간이라 별개) |
+| 실습 2 LTV 쿼리 | `INTERVAL 12 MONTH` | LTV 지평과 같이 변경 (실습 5의 `INTERVAL 12 MONTH`·`/ 12.0`은 월평균 계산 기간이라 별개) |
 | 실습 4 `payback_df("search", "2025-04")` 호출과 `styles` 리스트 | 채널·코호트월 조합 | 비교하고 싶은 채널×코호트로 |
 
 - `sql/*.sql` 4개(`cac_by_channel`, `mature_cohort`, `ltv_backtest`, `payback_curve`)는 참고용
@@ -139,7 +139,7 @@ duckdb.query("""SELECT (SELECT COUNT(*) FROM read_csv_auto('USERS')) AS users,
   인당 LTV도 커져서 비율이 우연히 비슷해 보일 수 있지만, 회수 곡선의 절대 수준이 왜곡된다.
 - 기간제 선결제(연간권 등)가 섞이면 결제 시점 현금이 아니라 제공 기간에 안분한 매출로
   곡선을 그려야 한다(본문 3.1).
-- LTV 실측 지평(예: 36개월 캡)을 명시하지 않으면 지평이 다른 숫자끼리 비교하게 된다.
+- LTV 실측 지평(예: 12개월 캡)을 명시하지 않으면 지평이 다른 숫자끼리 비교하게 된다.
 - ROAS 자체는 나쁜 지표가 아니다 — 캠페인 운영 지표를 사업 수익성 판정에 그대로 쓰는 것이
   문제. 마케팅팀에 공헌이익 기반 운영을 요구하기보다 LTV공헌이익·LTR·ROAS의 연결고리
   (예: 목표 Payback → CAC 가이드라인 → 필요한 D7 ROAS)를 데이터팀이 만들어 준다(책 3.2절).
