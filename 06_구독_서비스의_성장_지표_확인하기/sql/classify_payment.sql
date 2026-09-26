@@ -17,7 +17,7 @@ WITH orders AS (
 )
 SELECT *
      , CASE WHEN order_cnt = 1 THEN 'new'
-            WHEN date_diff('day', prev_date, order_charged_date) < 32
+            WHEN order_charged_date - prev_date < 32
                  THEN 'renew'
             ELSE 'reactivation' END AS pay_type
 FROM orders
