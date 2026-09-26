@@ -11,7 +11,7 @@ Practice code and example data for a Korean-language **data-analysis book** (데
 - **All chapters live under `chapters/`, one folder per chapter**, named after the Korean chapter title with spaces → underscores and `?`/illegal characters dropped . Folder names carry a zero-padded chapter number prefix (`NN_`), e.g. `05_이_기능은_DAU_얼마짜리_기능일까/`.
 - The top-level `README.md` holds a chapter index table; add a row when creating a new chapter.
 - `.claude/skills/da101/` is a reader-facing Claude Code skill (method router + one `references/*.md` per chapter), also user-invocable as the `/da101` slash command. When adding or changing a chapter, update the skill's routing table and the matching reference file.
-- `my-work/` (git-ignored) is where the reader-facing `/da101` skill writes everything it produces — executed notebooks, reader data, modified notebook copies, design docs — mirrored as `my-work/<chapter folder name>/`. The skill never modifies chapter folders.
+- `my-work/` (git-ignored) is where the reader-facing `/da101` skill writes everything it produces — executed notebooks, reader data, modified notebook copies, design docs, quiz session logs — mirrored as `my-work/<chapter folder name>/`. The skill never modifies chapter folders.
 - A chapter folder contains: `README.md`, `requirements.txt`, a seeded `generate_data.py`, generated data in `data/*.csv`, optional `sql/*.sql`, and a Jupyter notebook that walks through the book's 실습 (practice) sections.
 
 ## Running / verifying a chapter
