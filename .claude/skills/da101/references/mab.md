@@ -1,6 +1,6 @@
 # MAB — Thompson Sampling 시뮬레이션과 실전 보완
 
-**챕터**: `09_MAB_그거_어떻게_쓰는건데/` · 노트북: `mab_thompson_sampling.ipynb`
+**챕터**: `chapters/09_MAB_그거_어떻게_쓰는건데/` · 노트북: `mab_thompson_sampling.ipynb`
 <!-- 동기화: 코드 기준 커밋 `8e8b97c` (2026-09-13) — 노트북·README와 대조 완료. 책 본문 대조 완료 (2026-09-13). -->
 
 ## 이 방법이 푸는 문제

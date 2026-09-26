@@ -14,3 +14,6 @@ output/
 
 # Article drafts (canonical copy lives in Google Docs)
 *.docx
+
+# 독자 실습 산출물 (/da101 스킬이 생성)
+my-work/

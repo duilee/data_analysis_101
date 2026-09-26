@@ -1,6 +1,6 @@
 # Lifetime 추정 — 7일 리텐션으로 3가지 방법 + 삼각측량
 
-**챕터**: `04_일주일_데이터로_Lifetime을_예측하라구요/` · 노트북: `lifetime_estimation.ipynb`
+**챕터**: `chapters/04_일주일_데이터로_Lifetime을_예측하라구요/` · 노트북: `lifetime_estimation.ipynb`
 <!-- 동기화: 코드 기준 커밋 `8e8b97c` (2026-09-13) — 노트북·README·sql과 대조 완료. 책 본문 대조 완료 (2026-09-13). -->
 
 ## 이 방법이 푸는 문제
