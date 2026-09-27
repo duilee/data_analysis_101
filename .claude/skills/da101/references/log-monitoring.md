@@ -1,6 +1,6 @@
 # 로그 모니터링 — 배포 뒤에 깨진 로그 찾기
 
-**챕터**: `chapters/12_로그는_쌓고_있는데_왜_전환율은_못_구해요/` · 노트북: `log_monitoring.ipynb`
+**챕터**: `chapters/12_로그는_쌓고_있는데_왜_전환율을_못_구해요/` · 노트북: `log_monitoring.ipynb`
 <!-- 동기화: 코드 기준 커밋 `3de9864` (2026-09-24) — 노트북·README·sql·generate_data·extra와 대조 완료. 책 본문 대조 완료 (2026-09-26, 원고 절 구성: 1절 도입 → 2절 택소노미 구성(2.1~2.5) → 3절 설계(3.1~3.3) → 4절 이름 붙이기(4.1~4.4) → 5절 템플릿(5.1~5.4) → 6절 검증과 모니터링(6.1~6.2) → 실습 0~4 → Claude Code 실습 → 정리하며). -->
 
 ## 이 방법이 푸는 문제
@@ -29,7 +29,7 @@
 ```bash
 python generate_data.py      # data/*.csv 3개 (SEED=11, 유저 3,000명 × 30일, event_log ≈ 17만 행)
 jupyter nbconvert --to notebook --execute log_monitoring.ipynb \
-  --output-dir ../../my-work/12_로그는_쌓고_있는데_왜_전환율은_못_구해요   # 결과는 my-work에
+  --output-dir ../../my-work/12_로그는_쌓고_있는데_왜_전환율을_못_구해요   # 결과는 my-work에
 ```
 
 - 입력: `data/event_log.csv`(2026-08-01 ~ 08-30, event_time, user_id, platform, app_version, event_name, screen_name, properties JSON),
