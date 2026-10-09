@@ -9,7 +9,7 @@
   2 Android view_content_card       이벤트 수 2배   (노출 이벤트 중복 발화)              → 감지됨 (급증)
   3 iOS   page_view_content_detail  content_id 채움률 100% → 30% (프로퍼티 누락)       → 감지됨 (null 비율)
   4 Android page_view_home          이벤트 수 -70%  (홈 진입 이벤트 누락)               → 감지됨 (급감)
-  5 subscription_renewed (서버)     이벤트 수 -100% (갱신 배치 중단)                  → 감지됨 (급감, 0건)
+  5 system_subscription_renewed (서버)     이벤트 수 -100% (갱신 배치 중단)                  → 감지됨 (급감, 0건)
 """
 import json, os
 import numpy as np
@@ -44,8 +44,8 @@ ev("page_view_search", "Page View", "search", "검색 화면 진입")
 ev("tap_search_result", "Tap/Click", "search", "검색 결과 탭")
 ev("page_view_paywall", "Page View", "paywall", "결제 화면 진입. source 프로퍼티로 진입 경로 구분")
 ev("tap_purchase_button", "Tap/Click", "paywall", "구매 버튼 탭")
-ev("subscription_started", "System", "server", "구독 시작 (서버)", source="Server")
-ev("subscription_renewed", "System", "server", "구독 갱신 (서버 일 배치)", source="Server")
+ev("system_subscription_started", "System", "server", "구독 시작 (서버)", source="Server")
+ev("system_subscription_renewed", "System", "server", "구독 갱신 (서버 일 배치)", source="Server")
 ev("page_view_settings", "Page View", "settings", "설정 화면 진입")
 ev("tap_theme_toggle", "Tap/Click", "settings", "테마 전환 토글 탭")
 ev("system_push_sent", "System", "server", "푸시 발송 (서버)", source="Server")
@@ -63,7 +63,7 @@ P = [
  ("position","event","int","","피드 안에서의 순서(0부터)","view_content_card|tap_content_card|tap_search_result"),
  ("channel","event","enum","kakao|instagram|link","공유 채널","tap_share_button"),
  ("source","event","enum","home|content_detail|settings|push","결제 화면 진입 경로","page_view_paywall"),
- ("plan","event","enum","monthly|yearly","구독 플랜","tap_purchase_button|subscription_started|subscription_renewed"),
+ ("plan","event","enum","monthly|yearly","구독 플랜","tap_purchase_button|system_subscription_started|system_subscription_renewed"),
  ("theme","event","enum","dark|light","전환된 테마","tap_theme_toggle"),
  ("push_type","event","enum","daily|content|promo","푸시 종류","system_push_sent|tap_push_notification"),
  ("subscription_status","user","enum","free|trial|paid|churned","구독 상태",""),
@@ -133,13 +133,13 @@ for i in range(N_USERS):
             if rng.random() < 0.15:
                 plan = rng.choice(["monthly","yearly"], p=[0.7,0.3])
                 log(t, uid, plat, ver, "tap_purchase_button", "paywall", plan=plan)
-                log(t, uid, plat, ver, "subscription_started", "server", plan=plan); sub = True
+                log(t, uid, plat, ver, "system_subscription_started", "server", plan=plan); sub = True
         if rng.random() < 0.04: log(t, uid, plat, ver, "page_view_profile", "profile")
     # 서버 이벤트: 구독 갱신 일 배치(사고 5: 배포 뒤 중단), 푸시
     if sub:
         for day in range(DAYS):
             if day >= RELEASE_DAY: break                                                                          # 사고 5
-            if rng.random() < 0.15: log(START + pd.Timedelta(days=day, hours=3), uid, plat, "server", "subscription_renewed", "server", plan="monthly")
+            if rng.random() < 0.15: log(START + pd.Timedelta(days=day, hours=3), uid, plat, "server", "system_subscription_renewed", "server", plan="monthly")
     for day in range(max(d0, 0), DAYS):
         if rng.random() < 0.06:
             t = START + pd.Timedelta(days=day, hours=9)

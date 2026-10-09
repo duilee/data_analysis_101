@@ -38,7 +38,7 @@ jupyter nbconvert --to notebook --execute log_monitoring.ipynb \
 - SQL 파일(인라인과 동일): `sql/mart_event_daily.sql`, `sql/mart_event_param_daily.sql`, `sql/event_count_anomaly.sql`, `sql/param_null_anomaly.sql`.
 - **기대 결과** (생성기가 8/25 3.5.0 배포에 심은 사고 5종 — 표준 문턱 ±60%·최소 50건으로 모두 잡힘. 책 실습 절의 표와 같은 숫자여야 한다):
   - 실습 1: 원본 172,458행 → 이벤트 마트 1,426행 · 프로퍼티 마트 1,486행. 8/21 확인 행: `page_view_home` Android 297 / iOS 378, `tap_content_card` Android 251 / iOS 330, `view_content_card` Android 1,048 / iOS 1,336; `page_view_content_detail`의 content_id·content_type 채움률은 양 플랫폼 모두 1.0(Android 251건, iOS 330건).
-  - 실습 2 📉: Android·iOS `subscription_renewed` 83/76 → 0 (−100%, 서버 갱신 배치 중단 — 양 플랫폼 동시), iOS `tap_content_card` 330 → 103 (−68.8%), Android `page_view_home` 297 → 105 (−64.6%)
+  - 실습 2 📉: Android·iOS `system_subscription_renewed` 83/76 → 0 (−100%, 서버 갱신 배치 중단 — 양 플랫폼 동시), iOS `tap_content_card` 330 → 103 (−68.8%), Android `page_view_home` 297 → 105 (−64.6%)
   - 실습 2 📈: Android `view_content_card` 1,048 → 2,312 (+120.6%, 중복 발화)
   - 실습 3: iOS `page_view_content_detail`의 `content_id` 채움률 1.0 → 0.2857 (−71.4%) — 이벤트 수는 330 → 350으로 늘었는데 값만 빔. 기준일에 오지 않은 이벤트(구독 갱신)는 3단계 대상에서 제외(2단계 몫)
   - 실습 4 리포트 여섯 건(감소 4·증가 1·채움률 1) — 헤더 "🚨 로그 이상 감지 리포트 — 2026-08-28 (일주일 전 대비, ±60%, 최소 50건)". 그림 2개는 `img/event_trend.png`, `img/param_trend.png`에 저장.

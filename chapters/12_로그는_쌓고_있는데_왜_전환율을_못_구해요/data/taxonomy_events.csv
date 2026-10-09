@@ -16,8 +16,8 @@ page_view_search,Page View,Client,iOS|Android,search,검색 화면 진입,Live,P
 tap_search_result,Tap/Click,Client,iOS|Android,search,검색 결과 탭,Live,Permanent,3.0.0
 page_view_paywall,Page View,Client,iOS|Android,paywall,결제 화면 진입. source 프로퍼티로 진입 경로 구분,Live,Permanent,3.0.0
 tap_purchase_button,Tap/Click,Client,iOS|Android,paywall,구매 버튼 탭,Live,Permanent,3.0.0
-subscription_started,System,Server,iOS|Android,server,구독 시작 (서버),Live,Permanent,3.0.0
-subscription_renewed,System,Server,iOS|Android,server,구독 갱신 (서버 일 배치),Live,Permanent,3.0.0
+system_subscription_started,System,Server,iOS|Android,server,구독 시작 (서버),Live,Permanent,3.0.0
+system_subscription_renewed,System,Server,iOS|Android,server,구독 갱신 (서버 일 배치),Live,Permanent,3.0.0
 page_view_settings,Page View,Client,iOS|Android,settings,설정 화면 진입,Live,Permanent,3.0.0
 tap_theme_toggle,Tap/Click,Client,iOS|Android,settings,테마 전환 토글 탭,Live,Permanent,3.0.0
 system_push_sent,System,Server,iOS|Android,server,푸시 발송 (서버),Live,Permanent,3.0.0

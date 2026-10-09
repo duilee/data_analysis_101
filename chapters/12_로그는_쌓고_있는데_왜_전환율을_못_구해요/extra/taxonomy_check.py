@@ -45,7 +45,7 @@ NEEDS = {
   "온보딩 4단계 전환율": [("system_first_launch", None), ("page_view_onboarding_step", "step"), ("system_permission_granted", "permission")],
   "홈 배너 클릭률":       [("view_main_banner", "banner_id"), ("tap_main_banner", "banner_id")],
   "콘텐츠 카드 클릭률":   [("view_content_card", "position"), ("tap_content_card", "position")],
-  "결제 화면 진입 경로별 전환": [("page_view_paywall", "source"), ("tap_purchase_button", "plan"), ("subscription_started", "plan")],
+  "결제 화면 진입 경로별 전환": [("page_view_paywall", "source"), ("tap_purchase_button", "plan"), ("system_subscription_started", "plan")],
 }
 live = set(events.query("status == 'Live'").event_name)
 prop_of = {r.property_name: set(r.events.split("|")) for r in props.itertuples()}
