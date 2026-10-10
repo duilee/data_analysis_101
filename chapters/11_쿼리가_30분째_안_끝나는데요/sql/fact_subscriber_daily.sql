@@ -1,4 +1,4 @@
--- 실습 3) fact 2 — 일별 활성 구독 스냅샷 (one row per 구독 중인 유저 × 날짜)
+-- 11.6.4) fact 2 — 일별 활성 구독 스냅샷 (one row per 구독 중인 유저 × 날짜)
 --
 -- 구매·갱신 기간을 날짜로 펼치고 해지·환불 이후를 제외한다. semi-additive 한 '활성 구독자 수'의 원천.
 -- 전제: fact_subscription_events.sql 을 먼저 실행.

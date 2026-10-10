@@ -1,11 +1,11 @@
--- 신규 유저 리텐션 커브 (실습 1 입력용)
+-- 신규 유저 리텐션 곡선 (5.8.2 입력용)
 --
--- 예시 CSV(data/active_daily.csv)를 DuckDB 로 읽어 리텐션 커브를 구한다.
+-- 예시 CSV(data/active_daily.csv)를 DuckDB 로 읽어 리텐션 곡선을 구한다.
 -- 핵심 패턴: 설치 코호트(installs)와 전체 활동(base)을 같은 user_id 로
 -- self-join 하여 day_diff(설치 후 경과일) 별 잔존율을 구한다.
 --
 -- 단독 실행: 앞의 두 CREATE VIEW(base·installs)를 먼저 실행한 뒤 본 쿼리를 실행한다
--- (노트북 실습 1의 두 셀과 동일).
+-- (노트북 5.8.2의 두 셀과 동일).
 
 CREATE VIEW base AS
   SELECT date AS event_date, user_id, platform, install_flag

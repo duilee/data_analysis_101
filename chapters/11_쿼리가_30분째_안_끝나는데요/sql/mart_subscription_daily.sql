@@ -1,7 +1,7 @@
--- 실습 4) mart — 날짜 × 플랫폼 × 국가 × SKU × 체험 여부 집계 (파티션 하나 = 배치 한 번)
+-- 11.6.5) mart — 날짜 × 플랫폼 × 국가 × SKU × 체험 여부 집계 (파티션 하나 = 배치 한 번)
 --
 -- 노트북의 MART_SQL 에서 {partition_date} 를 2026-06-14 으로 전개한 예시. 배치는 날짜를 바꿔 가며 이 문을 반복한다.
--- 전제: 실습 3 의 팩트·디멘션이 있어야 하고, 아래 CREATE TABLE 을 먼저 실행.
+-- 전제: 11.6.4의 팩트·디멘션이 있어야 하고, 아래 CREATE TABLE 을 먼저 실행.
 -- 전제: 챕터 폴더에서 실행 (read_csv_auto 경로가 data/ 기준)
 
 CREATE OR REPLACE TABLE mart_subscription_daily (

@@ -1,16 +1,16 @@
--- 실습 3) 설치 세션 스텝 전이 + 전이별 D7 잔존율 (Sankey 입력)
+-- 2.5.4) 설치 세션 스텝 전이 + 전이별 D7 잔존율 (Sankey 입력)
 -- 노트북의 CONFIG 상수는 값으로 전개: MAX_STEPS=10, TOP_K=6, MIN_USERS=20
 --
 -- 전제: event_log 테이블이 등록돼 있어야 한다 (노트북 준비 셀과 동일):
 --   CREATE OR REPLACE TABLE event_log AS SELECT * FROM read_csv_auto('data/event_log.csv');
--- 아래 공용 뷰(installs·d7_label)는 실습 1·2·3 sql 파일마다 같은 정의를 반복해 두어 어느 파일이든 단독 실행된다.
+-- 아래 공용 뷰(installs·d7_label)는 2.5.2~2.5.4 sql 파일마다 같은 정의를 반복해 두어 어느 파일이든 단독 실행된다.
 
 -- 설치(D0) 시점: 유저별 첫 system_app_install
 CREATE OR REPLACE VIEW installs AS
   SELECT user_id, MIN(event_timestamp) AS install_ts, MIN(event_date) AS install_date
   FROM event_log WHERE event_name = 'system_app_install' GROUP BY 1;
 
--- D7 잔존 라벨: 설치 7일째에 활동이 있으면 1. 실습 1·2·3 이 모두 이 뷰를 쓴다
+-- D7 잔존 라벨: 설치 7일째에 활동이 있으면 1. 2.5.2~2.5.4가 모두 이 뷰를 쓴다
 CREATE OR REPLACE VIEW d7_label AS
   SELECT i.user_id, i.install_ts, i.install_date,
          MAX(CASE WHEN date_diff('day', i.install_date, e.event_date) = 7 THEN 1 ELSE 0 END) AS d7_retention_flag

@@ -1,4 +1,4 @@
--- 실습 3) fact 1 — 구독 이벤트 (one row per 구매·갱신·해지·환불)
+-- 11.6.4) fact 1 — 구독 이벤트 (one row per 구매·갱신·해지·환불)
 --
 -- 환율 조인으로 price_usd, SKU 조인으로 기간(체험은 trial_days)을 붙인다.
 -- 전제: stg_views.sql · dim_tables.sql 을 먼저 실행.
