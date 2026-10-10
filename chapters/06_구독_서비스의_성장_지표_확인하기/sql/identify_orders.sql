@@ -1,4 +1,4 @@
--- 실습 1. order_number에서 유저(pid)와 누적 결제 회차(order_cnt) 식별
+-- 6.3.2. order_number에서 유저(pid)와 누적 결제 회차(order_cnt) 식별
 -- prefix('..' 앞부분)가 동일 유저, row_number()가 결제 회차.
 -- suffix가 없거나(첫 결제) '..1', '..2'로 붙는(갱신) 실제 스토어 리포트 구조를 가정.
 -- (노트북은 이 결과를 orders 뷰로 만들어 이후 단계가 재사용한다)

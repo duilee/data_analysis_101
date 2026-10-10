@@ -1,4 +1,4 @@
--- 실습 3. 월별 MRR 분해: new / renew / reactivation / expansion / contraction / churn
+-- 6.3.4. 월별 MRR 분해: new / renew / reactivation / expansion / contraction / churn
 -- 유저×월 단위로 결제를 모은 뒤 전월과 FULL OUTER JOIN:
 --   양쪽에 있으면 계속 구독(renew + 업/다운그레이드 증감), 전월에만 있으면 churn.
 -- 준비: sales 테이블(data/subscription_sales.csv)만 있으면 단독 실행 가능.
