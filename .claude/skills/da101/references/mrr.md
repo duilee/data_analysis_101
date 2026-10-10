@@ -1,7 +1,7 @@
 # 구독 성장 지표 — MRR 6요소 분해와 GRR/NRR
 
 **장 폴더**: `chapters/06_구독_서비스의_성장_지표_확인하기/` · 노트북: `mrr_analysis.ipynb`
-<!-- 동기화: 코드 기준 커밋 `8e8b97c` (2026-09-13) — 노트북·README·sql과 대조 완료. 책 본문 대조 완료 (2026-09-26, 원고 절 구성: 도입 → 1절 구독자(1.1 요인, 1.2 프레임워크 1.2.1 Flow·1.2.2 Stock) → 2절 구독 매출(2.1~2.3, 2.4 실전 2.4.1~2.4.7) → 실습 0~5(Python·SQL) → Claude Code 실습 0~4 → 정리하며). -->
+<!-- 동기화: 코드 기준 커밋 `226e1dd` (2026-10-10) — 노트북·README·sql과 대조 완료. 책 1차 교정본 대조 완료 (2026-10-10, 절 구성: 도입 → 6.1 구독자(6.1.1 요인, 6.1.2 프레임워크 6.1.2.1 Flow·6.1.2.2 Stock) → 6.2 구독 매출(6.2.1~6.2.3, 6.2.4 실전 6.2.4.1~6.2.4.7) → 6.3 실습 6.3.1~6.3.6(파이썬·SQL) → 6.4 실습 6.4.1~6.4.5(클로드 코드) → 6.5 정리하며). 노트북 전용 코드 절은 `[노트북 보충]` 3곳(6.3.3·6.3.4·6.3.5). -->
 
 ## 이 방법이 푸는 문제
 
@@ -18,27 +18,29 @@ GRR(방어력)·NRR(성장력)로 요약한다. "MRR이 늘고 있다"가 신규
   실험 임팩트를 결제 건수·매출만으로 재면 안 되는 이유.
 - 6.1 — 구독자 축의 핵심은 Stock(구독자 수)이 아니라 Flow(유료 구독자 증감). 체험(Trial)은 유료와
   섞지 않는다(Trial 감소는 전환이면 긍정·만료면 부정인 중립 지표). 이후 용어는 '유료 구독자(Paid Subscriber)'.
-  - 1.1 — 유료 구독자 증감을 움직이는 변수는 신규 유료 구독자 증가와 기존 유료 구독자 이탈 둘뿐.
+  - 6.1.1 — 유료 구독자 증감을 움직이는 변수는 신규 유료 구독자 증가와 기존 유료 구독자 이탈 둘뿐.
     이탈은 취소자 수보다 구독 유지율(Retention)로 본다.
-  - 1.2 (그림 1) — 구독자 분석 프레임워크. 1.2.1 Flow: 유저 A~E(A 유료 구독자 증감 = B 신규 − C 해지,
-    D 신규 체험, E 신규 가입) + 전환율 1~5(I2P·I2T·T2P·기존 유저 전환·구독 취소). 1.2.2 Stock: F 기존
+  - 6.1.2 (그림 6.1) — 구독자 분석 프레임워크. 6.1.2.1 Flow: 유저 A~E(A 유료 구독자 증감 = B 신규 − C 해지,
+    D 신규 체험, E 신규 가입) + 전환율 1~5(I2P·I2T·T2P·기존 유저 전환·구독 취소). 6.1.2.2 Stock: F 기존
     미구독 유저, G 현재 구독 유저. 매일 유료 구독자 증감부터 보고, 가입 코호트별 구독 유지율로 해상도를 높인다.
-- 2.1~2.3 — 결제 금액 단순 합산(미래 매출 선반영·선수금)과 기간 안분(안분 인식 매출, 원인 분석 해상도 부족)
+- 6.2.1~6.2.3 — 결제 금액 단순 합산(미래 매출 선반영·선수금)과 기간 안분(안분 인식 매출, 원인 분석 해상도 부족)
   의 한계 → MRR = Baseline + new + reactivation + expansion − contraction − churn, 뒤 다섯 항의 합이
   Net New MRR. 전월 − churn = renew. churn rate = 1 − renew ÷ 전월. MRR의 쓰임은 성장 지표·예측·가치 평가.
-- 2.4 — 스토어 리포트로 MRR을 만들 때의 실무 이슈 일곱 가지: 유저 식별(주문번호 prefix·row_number,
+- 6.2.4 — 스토어 리포트로 MRR을 만들 때의 실무 이슈 일곱 가지: 유저 식별(그림 6.2의 주문번호 prefix·row_number,
   애플은 집계값만 제공·Trial도 첫 결제로 기록 → 서버 알림(RTDN 등)이나 구독 관리 도구로 유저 단위 데이터를
   직접 적재) 과 gross/net(6.2.4.1), 해지는 패시브 이벤트라 churn = 전월 − renew로 역산하되 플랜이 여럿이면
   전월 − renew = churn + contraction − expansion이라 업/다운그레이드를 분리(6.2.4.2), renew/reactivation은
-  결제 간격 임계값(32일)과 유예 기간, reactivation 비중이 크면 new MRR 퍼널 해석이 왜곡(6.2.4.3), 연구독은
+  결제 간격 임계값(32일, 그림 6.3)과 유예 기간, reactivation 비중이 크면 new MRR 퍼널 해석이 왜곡(6.2.4.3), 연구독은
   월 안분 + retained MRR(Baseline에 포함)(6.2.4.4), 환불은 액티브 이벤트·M+1월 초 확정·비자발적 이탈·더닝
   (6.2.4.5), GRR/NRR 정의와 Baseline·갭 해석(6.2.4.6), 구독자 수 분해에는 expansion/contraction이 없음(6.2.4.7).
-- 실습 절(Python·SQL) 0~5 — 0 데이터 준비 → 1 유저 식별 → 2 renew/reactivation → 3 MRR 분해 →
-  4 GRR/NRR → 5 이탈률과 LTV. 노트북과 코드·숫자 동일(노트북에만 있는 셀은 아래 기대 결과 참고).
-- Claude Code 실습 절 — 자연어/`/da101 run|apply|qna|quiz MRR` 4가지 모드 예시. 인테이크 4문항
+- 6.3 실습(파이썬·SQL) — 6.3.1 데이터 준비(표 6.1 결제 로그 테이블) → 6.3.2 유저 식별 → 6.3.3 renew/reactivation →
+  6.3.4 MRR 분해 → 6.3.5 GRR/NRR → 6.3.6 이탈률과 LTV. 노트북과 코드·숫자 동일(노트북에만 있는 `[노트북 보충]`
+  셀 3곳은 아래 기대 결과 참고).
+- 6.4 실습(클로드 코드) — 6.4.1 리포지터리 가져오기 → 6.4.2 run · 6.4.3 apply · 6.4.4 qna · 6.4.5 quiz 순으로
+  자연어/`/da101 … MRR` 예시. 6.4.3의 인테이크 4문항
   (컬럼·주문번호 체계·구독 주기·금액과 예외 행)과 데이터 점검 항목은 아래 프로토콜과 같다.
-- 정리하며 — 매일 유료 구독자 순증, 매달 Net New MRR이 플러스인지(new > churn), 분기 GRR·NRR 갭.
-  LTV ≈ ARPU ÷ 월 이탈률(5%면 ≈ 20개월) → CAC·회수 기간과 비교는 7장. 정리 표: 질문/상황/해결/주의/다음 액션.
+- 6.5 정리하며 — 매일 유료 구독자 순증, 매달 Net New MRR이 플러스인지(new > churn), 분기 GRR·NRR 갭.
+  LTV ≈ ARPU ÷ 월 이탈률(5%면 ≈ 20개월) → CAC·회수 기간과 비교는 7장.
 
 ## 실행·검증
 
@@ -51,25 +53,28 @@ jupyter nbconvert --to notebook --execute mrr_analysis.ipynb \
 - 입력: `data/subscription_sales.csv` (`order_number, order_charged_date, product_id,
   sales_amount_krw`).
 - 흐름: 6.3.2 `split_part(order_number, '..', 1) AS pid` + `row_number()` 결제 회차 →
-  6.3.3 `lag()` 간격 + `pay_type`(new/renew/reactivation, 32일 임계값) → 6.3.4 전월
-  FULL OUTER JOIN으로 6요소 분해(`mrr` df) + 항등식 검증(`check`) → 6.3.5 `grr`/`nrr` →
-  4.1 소절 구독자 수 단위 동일 분해(`sql/subscriber_counts.sql` — 유일하게 디스크에서 읽는 SQL) →
+  6.3.3 `lag()` 간격 + `pay_type`(new/renew/reactivation, 32일 임계값) + [노트북 보충] 결제 간격 분포 →
+  6.3.4 전월 FULL OUTER JOIN으로 6요소 분해(`mrr` df) + [노트북 보충] 항등식 검증(`check`) → 6.3.5 `grr`/`nrr`
+  + [노트북 보충] 구독자 수 단위 동일 분해(`sql/subscriber_counts.sql` — 유일하게 디스크에서 읽는 SQL) →
   6.3.6 이탈률 복원·LTV 어림. 노트북 인라인 쿼리는 `orders → classified → monthly → paired`
   **뷰 체인**이고, `sql/mrr_breakdown.sql`은 같은 로직을 `payments → classified → paired → SELECT`
   **CTE 4층**으로 담은 단독 실행용 사본이다(QnA에서 "네 층" 설명은 이 파일 기준).
+- 실습 표의 `renew`는 6.2.3의 renew MRR(전월 − churn)에서 contraction까지 뺀 '그대로 유지된 금액'이다
+  (`least(amt, prev_amt)`). 다운그레이드 분을 이미 덜어냈으므로 결과 표에서는 MRR = renew + new +
+  reactivation + expansion으로 딱 떨어지고, 6.2.3의 식과 맞추려면 renew에 contraction을 다시 더한다(책 6.3.4).
 - **기대 결과**: 생성기가 심은 정답은 **월 이탈률 5%**(`CHURN_RATE=0.05`). 6.3.6에서
   `stable = mrr[mrr.month >= "2025-04"]` 구간의 churn rate가 5% 근처로 수렴하고
   `LTV ≈ ARPU ÷ churn rate`로 연결된다. 플랜은 monthly_basic 4,900원 / monthly_plus 9,900원 —
-  expansion/contraction은 갱신 시 업/다운그레이드에서 나온다. 4.1 소절에서 업/다운그레이드가
+  expansion/contraction은 갱신 시 업/다운그레이드에서 나온다. 6.3.5 [노트북 보충]에서 업/다운그레이드가
   매출은 바꾸지만 구독자 수는 바꾸지 않음을 확인한다.
   책 실습 절과 같은 수치(대조용): 유저 1,653명 / 결제 10,653건(18개월, 2025-01-01~2026-06-28, 최대 18회;
-  결제 횟수 분포 1회 198명 … 18회 25명) · pay_type renew 8,961 / new 1,653 / reactivation 39 ·
+  결제 횟수 분포 1회 198명 … 18회 25명 — 책 6.3.2의 결과 표) · pay_type renew 8,961 / new 1,653 / reactivation 39 ·
   마지막 달 2026-06 MRR 7,608,900원(baseline 7,136,700 · new 811,700 · reactivation 49,300 · renew
   6,707,900 · expansion 40,000 · contraction 25,000 · churn 403,800) · **GRR 평균 94.4% / NRR 평균 95.2% /
   갭 +0.73%p** · 복원 churn rate **5.2%** → 기대 유지 19.2개월, ARPU 6,237원, LTV 어림 120,030원
-  (이탈률 4.2%면 23.8개월·약 148,000원, +24%).
-  노트북에만 있는 출력(책 실습 절에는 없음): 6.3.3 결제 간격 renew 28~31일(중앙값 31일) /
-  reactivation 44~396일(중앙값 160일) · 6.3.4 항등식 최대 오차 0원 · 4.1 구독자 수 2026-06 1,211명
+  (이탈률 4.2%면 23.8개월·약 148,500원, +24%).
+  노트북에만 있는 출력(`[노트북 보충]` 3곳, 책에는 없음): 6.3.3 결제 간격 renew 28~31일(중앙값 31일) /
+  reactivation 44~396일(중앙값 160일) · 6.3.4 항등식 최대 오차 0원 · 6.3.5 구독자 수 2026-06 1,211명
   (new 133 · reactivation 7 · churned 62), 구독자 수 항등식 오차 0.
 
 ## 내 데이터에 적용 — 인터랙티브 프로토콜
@@ -117,9 +122,9 @@ duckdb.query("""SELECT COUNT(*) AS rows, MIN(order_charged_date) AS min_d,
 | --- | --- | --- |
 | 로드 셀 `CREATE TABLE sales AS …` | CSV 경로, 컬럼명 | 독자 데이터로 — 테이블명 `sales`는 유지 (이후 모든 SQL과 `sql/*.sql`이 참조) |
 | 6.3.2 `orders` 뷰 셀 | `split_part(order_number, '..', 1)`의 구분자·파싱 규칙 | 독자 주문번호 체계로 (유저 ID 있으면 이 실습 생략) |
-| ⚠ renew 임계값 | `date_diff('day', prev_date, order_charged_date) < 32` — 노트북은 **6.3.3 `classified` 뷰 한 곳**(6.3.4·4·5가 이 뷰를 재사용), 그리고 4.1 소절이 읽는 **`sql/subscriber_counts.sql`**에 별도로 한 번 더 | 월 구독 32일 기준. 연 구독 혼재 시 플랜별 주기+유예로 분리, **두 곳 함께** 수정 (참고용 사본 `sql/classify_payment.sql`·`sql/mrr_breakdown.sql`도 맞춰 두면 좋다) |
+| ⚠ renew 임계값 | `date_diff('day', prev_date, order_charged_date) < 32` — 노트북은 **6.3.3 `classified` 뷰 한 곳**(6.3.4~6.3.6이 이 뷰를 재사용), 그리고 6.3.5 [노트북 보충]이 읽는 **`sql/subscriber_counts.sql`**에 별도로 한 번 더 | 월 구독 32일 기준. 연 구독 혼재 시 플랜별 주기+유예로 분리, **두 곳 함께** 수정 (참고용 사본 `sql/classify_payment.sql`·`sql/mrr_breakdown.sql`도 맞춰 두면 좋다) |
 | 6.3.4 `paired` 뷰 셀 | `INTERVAL 1 MONTH` 2곳 (coalesce와 JOIN 조건) | 주 단위 분해가 필요하면 함께 변경 |
-| 4.1 소절 (구독자 수 분해) | `open("sql/subscriber_counts.sql")` — 유일하게 디스크에서 읽는 SQL | 이 파일은 실제 실행 대상이므로 직접 수정 |
+| 6.3.5 [노트북 보충] (구독자 수 분해) | `open("sql/subscriber_counts.sql")` — 유일하게 디스크에서 읽는 SQL | 이 파일은 실제 실행 대상이므로 직접 수정 |
 | 6.3.6 | 안정 구간 컷 `mrr[mrr.month >= "2025-04"]` | 독자 데이터의 초기 성장 왜곡 구간을 제외한 시점으로 |
 
 - 6요소 분해의 FULL OUTER JOIN 구조와 항등식 검증 셀(`check`)은 그대로 둔다 — 치환 후
@@ -130,7 +135,7 @@ duckdb.query("""SELECT COUNT(*) AS rows, MIN(order_charged_date) AS min_d,
 
 ### 4. 단계별 진행
 
-1. (필요시) 파싱 실행 → pid 수·회차 분포 제시 → 6.3.3의 `gap` 셀로 결제 간격 분포 확인(월
+1. (필요시) 파싱 실행 → pid 수·회차 분포 제시 → 6.3.3 [노트북 보충]의 `gap` 셀로 결제 간격 분포 확인(월
    구독이면 28~31일에 몰려야 함 — 여기서 임계값의 타당성을 독자와 확인). ⚠ 6.3.5에서 같은
    이름 `gap`이 NRR−GRR 갭으로 재정의되므로, 나중에 간격 분포를 다시 보려면 6.3.3 셀을 재실행.
 2. `pay_type` 분류 → new/renew/reactivation 비중 제시, 상식과 대조.
@@ -149,12 +154,12 @@ duckdb.query("""SELECT COUNT(*) AS rows, MIN(order_charged_date) AS min_d,
 - 반대로 **GRR은 높은데 갭이 거의 없으면** 이탈 방어는 훌륭하지만 업셀링 구조가 없는 상태 — 예시
   데이터가 이 케이스(갭 +0.73%p)다. 플랜 세분화·부가 기능(Add-on)으로 고객당 매출을 키울 단계인지
   판단하는 근거로 쓴다(책 6.2.4.6).
-- 운영 리듬(책 정리하며): 매일 유료 구독자 순증, 매달 Net New MRR이 플러스인지(new > churn인지),
+- 운영 리듬(책 6.5): 매일 유료 구독자 순증, 매달 Net New MRR이 플러스인지(new > churn인지),
   분기마다 GRR·NRR 갭으로 방어와 업셀링의 균형을 본다. 판단의 갈림길은 "지금 이탈 방어(GRR)에 힘쓸
   단계인가, 고객당 매출(NRR)을 키울 단계인가".
 - 매출 분해 결과는 구독자 축(유료 구독자 순증, 가입 코호트별 구독 유지율)과 나란히 놓고 읽는다 — 매출은
   구독자보다 후행하고, Trial·연장 거부처럼 한쪽 축에만 잡히는 이벤트가 있다(책 도입·6.1).
-- 복원한 이탈률은 LTV 어림(ARPU ÷ churn)으로 이어 CAC·회수 기간과 비교한다(책 정리하며 → 7장).
+- 복원한 이탈률은 LTV 어림(ARPU ÷ churn)으로 이어 CAC·회수 기간과 비교한다(책 6.5 → 7장).
 
 ## 함정
 
@@ -165,8 +170,8 @@ duckdb.query("""SELECT COUNT(*) AS rows, MIN(order_charged_date) AS min_d,
   (책 6.2.4.1). 이 장은 gross 기준.
 - 결제 실패 후 스토어 재시도(유예 기간)로 뒤늦게 성공한 결제는 32일을 넘겨 reactivation으로 잡힐 수
   있다 — 임계값에 여유를 두거나 분포로 확인한다(책 6.2.4.3).
-- 카드 만료·결제 오류로 끊긴 **비자발적 이탈**이 churn MRR에 섞여 들어온다(책 정리 표: 전체 이탈의 약
-  1/3) — 결제 실패를 따로 추적(더닝 관리)하지 않으면 제품 매력도 문제와 결제 결함을 구분할 수 없다(책 6.2.4.5).
+- 카드 만료·결제 오류로 끊긴 **비자발적 이탈**이 churn MRR에 섞여 들어온다 — 행동 로그에는 '해지'로
+  남지 않는다. 결제 실패를 따로 추적(더닝 관리)하지 않으면 제품 매력도 문제와 결제 결함을 구분할 수 없다(책 6.2.4.5).
 - `churn = 전월 − renew` 역산은 플랜이 사실상 하나일 때만 정확하다 — 플랜이 여럿이면 전월 − renew =
   churn + contraction − expansion이므로 이 노트북처럼 업/다운그레이드를 따로 뗀다(책 6.2.4.2).
 - 애플 스토어 리포트는 유저 단위가 아닌 집계값이고 Trial도 첫 결제로 찍힌다 — 스토어 리포트만으로는
@@ -182,8 +187,8 @@ duckdb.query("""SELECT COUNT(*) AS rows, MIN(order_charged_date) AS min_d,
   (책 6.2.4.4).
 - MRR 분해는 월 스냅샷 비교라 월 중 가입-이탈은 상쇄되어 안 보인다. 짧은 주기 문제는
   주 단위로 내려서 본다.
-- `LTV ≈ ARPU ÷ churn`은 이탈률 일정 가정의 어림이다 — 코호트별 이탈률이 변하면 lifetime
-  4장의 방법으로 보정한다.
+- `LTV ≈ ARPU ÷ churn`은 이탈률 일정 가정의 어림이다 — 코호트별 이탈률이 변하면
+  4장(lifetime)의 방법으로 보정한다.
 
 ## 학습 가이드
 
