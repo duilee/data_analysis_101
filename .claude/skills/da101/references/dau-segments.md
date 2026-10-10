@@ -1,7 +1,7 @@
 # DAU 구성 진단 — 5세그먼트 Stock/Flow 분석
 
 **장 폴더**: `chapters/01_DAU_차트를_봐서는_DAU를_올릴_수_없다/` · 노트북: `dau_segment.ipynb`
-<!-- 동기화: 코드 기준 커밋 `8e8b97c` (2026-09-13) — 노트북·README·sql과 대조 완료. 책 본문 대조 완료 (2026-09-26, 원고 절 구성: 도입 → 1절 재방문율 → 2절 프레임워크(2.1~2.3) → 실습 0~4 → Claude Code 실습 → 정리하며). -->
+<!-- 동기화: 코드 기준 커밋 `226e1dd` (2026-10-10) — 노트북·README·sql과 대조 완료. 책 1차 교정본 대조 완료 (2026-10-10, 절 구성: 도입 → 1.1 재방문율 → 1.2 프레임워크(1.2.1~1.2.3) → 1.3 실습(1.3.1~1.3.5) → 1.4 클로드 코드 실습(1.4.1~1.4.5) → 1.5 정리하며). 노트북 절 번호는 책 1.3.x와 동일. -->
 
 ## 이 방법이 푸는 문제
 
@@ -15,25 +15,25 @@ Reactivation)으로 **어디서 유저가 새고 어디로 이동하는지**를 
 - 도입 — DAU·MAU는 전형적인 후행지표라 차트만 봐서는 "무엇을 해야 하나"에 답할 수 없다는 문제의식.
 - 1.1 — 월간 재방문율이 같은 두 서비스의 성장 궤적이 신규 유입의 성장 속도(CCGR)에 따라
   갈린다는 논지. 재방문율은 성장 단계에 따라 뜻이 달라지는 착시 지표이므로 단독으로 쓰지 않는다.
-  절 후반의 듀오링고(세그먼트별 리텐션 중 CURR이 DAU 성장의 핵심 레버)와 알라미(세그먼트와
+  1.1 후반의 듀오링고(세그먼트별 리텐션 중 CURR이 DAU 성장의 핵심 레버)와 알라미(세그먼트와
   전이 경로 모니터링) 사례가 이 장 프레임워크의 출처. 접속/미접속 이분법 대신 유저 상태를 입체적으로 본다.
 - 1.2 도입 — 가상 서비스 '루틴로그'(습관 트래커, '오늘 기록을 남겼는가'가 활동). 프레임워크 = 네모(유저
   세그먼트, Stock)와 화살표(세그먼트 변화, Flow). Stock은 시점 스냅샷, Flow는 기간 변화.
-- 2.1 (표 1) — 5세그먼트 정의. 경계(7일 중 5일 등)는 서비스 사용 주기와 활동 정의에 따라 바꾸는 예시일 뿐.
+- 1.2.1 (표 1.1) — 5세그먼트 정의. 경계(7일 중 5일 등)는 서비스 사용 주기와 활동 정의에 따라 바꾸는 예시일 뿐.
   new 를 7일로 잡은 이유: 첫 주를 넘겨 남는지가 중요하고, new 에서 나가는 경로가 안착 여부를 말해 준다.
   하루 단위로는 heavy → risk, risk → heavy가 한 번에 일어나지 않고 light를 거친다(논리적 제약).
-- 2.2 (표 2) — 세그먼트 변화 10가지 정의:
+- 1.2.2 (표 1.2) — 세그먼트 변화 10가지 정의:
   New Activation(new → light/heavy) · New Loss(new → risk) · Loyalization(light → heavy) ·
   Heavy Loss(heavy → light) · Light Loss(light → risk) · Risk Loss(risk → dormant) ·
   Reactivation(risk → light) · Resurrection(dormant → light) · HURR(heavy → heavy) ·
   CURR(light+heavy → light+heavy). 노트북의 KPI 5종은 이 중 HURR·CURR·Heavy Loss·Light Loss·
   Reactivation. 변화량은 절대 수와 '변경 전 상태를 분모로 한 비율' 두 가지로 본다.
-- 2.3 (표 3) — 세그먼트·변화로 답하는 6가지 건강도 질문(new 규모, 첫 주 안착, light → heavy/risk 비율,
+- 1.2.3 (표 1.3) — 세그먼트·변화로 답하는 6가지 건강도 질문(new 규모, 첫 주 안착, light → heavy/risk 비율,
   light → risk 방어, HURR, 재활성). Stock 옆에 '오늘 활동한 유저'를 나란히 두면 DAU를 세그먼트로
   쪼개 볼 수 있다(같은 DAU 70명이라도 heavy 30명인 날과 new 30명인 날은 다르다). 변화량은 일 단위
   외에 30·90일 누적으로도 본다. 액션 예시: Heavy Loss 급증 → 배포·장애 점검, light → risk 증가 →
   리텐션 캠페인, 기능 실험은 'light → heavy 전이율'로 판단.
-- 정리하며 — 세그먼트·임계값은 예시(매일 쓰는 서비스 7일, 주간 서비스 14·28일). 다음 액션은 기준을
+- 1.5 정리하며 — 세그먼트·임곗값은 예시(매일 쓰는 서비스 7일, 주간 서비스 14·28일). 다음 액션은 기준을
   우리 서비스 주기에 맞게 조정하고 마트로 구축하는 것.
 
 ## 실행·검증
@@ -50,7 +50,7 @@ jupyter nbconvert --to notebook --execute dau_segment.ipynb \
   세그먼트×오늘 기록 여부 교차(`dau_by_seg`) →
   달력(`generate_series` 31일) × 유저로 같은 지표를 날짜별 계산(`user_metrics_daily`) →
   같은 CASE + `lag(user_seg)` 로 어제 세그먼트를 붙인 마트(`mart_user_segment`, 한 달치) →
-  Stock(`dist`)/Flow(`trans`)/KPI(`kpi`) → 1.3.5에서 self-join 으로 N일 추적(30일 전 heavy → 오늘,
+  Stock(`dist`)/Flow(`trans`)/KPI(`kpi`) → 1.3.5에서 셀프 조인으로 N일 추적(30일 전 heavy → 오늘,
   30일 전 new → 오늘).
 - **기대 결과**: 생성기(시드 42, 유저 200명, 기준일 `TARGET = "2026-05-20"`)가 활동 티어와
   이탈 유형(recent/mid/old)을 심어 두었으므로, Stock에 dormant·risk가 뚜렷이 나타나고
@@ -59,12 +59,12 @@ jupyter nbconvert --to notebook --execute dau_segment.ipynb \
   (new 11 · heavy 30 · light 29); 마트 `n_days` 31 · `n_rows` 5233; HURR 92.1% · CURR 96.4% ·
   Heavy Loss 7.9% · Light Loss 5.4% · Reactivation 2.0%(risk 51명 중 1명); 30일 전 heavy 45명 중
   heavy 25(55.6%) · light 12 · risk 8; 30일 전 new 10명 중 7명이 heavy·light로 잔존(light 6 · heavy 1).
-  책 실습 절의 표와 같은 숫자여야 한다.
+  책 1.3의 결과 표와 같은 숫자여야 한다.
 
 ## 내 데이터에 적용 — 인터랙티브 프로토콜
 
 아래 1→5 순서로 진행한다. 각 단계 결과를 독자에게 보여주고 확인한 뒤 다음으로 간다.
-노트북에 `[내 데이터 적용]` 주석이 4곳 있다 — 그 지점을 기본으로 따라가되, 아래 ⚠ 항목이
+노트북에 `[내 데이터 적용]` 콜아웃이 5곳 있다 — 그 지점을 기본으로 따라가되, 아래 ⚠ 항목이
 주석보다 넓은 범위를 다룬다.
 
 ### 1. 인테이크 — 독자에게 물을 것
@@ -107,10 +107,10 @@ con.execute("""SELECT COUNT(DISTINCT user_id) AS users, MIN(event_date) AS min_d
 - `SEG_ORDER`(5개 세그먼트명)와 KPI 5종(`hurr_pct, curr_pct, heavy_loss_pct, light_loss_pct,
   reactivation_pct`) 계산 로직은 그대로 둔다.
 - 경계 조정 가이드: 주기가 긴 서비스일수록 최근성 윈도(6일)와 heavy 기준(7일 중 5일)을
-  주기 배수로 늘린다(책 정리하며: 매일 쓰는 서비스 7일, 주간 단위 서비스 14·28일). '활동'의
+  주기 배수로 늘린다(책 1.5: 매일 쓰는 서비스 7일, 주간 단위 서비스 14·28일). '활동'의
   정의도 접속 대신 구매·콘텐츠 소비·핵심 기능 사용으로 바꿀 수 있다.
 - `sql/*.sql` 8개는 인라인 쿼리의 전시용 사본 — 노트북만 고치면 sql 파일은 구버전으로 남는다.
-- 웨어하우스로 옮길 때(책 1.3.2.1·2): `count_if` → BigQuery `COUNTIF`/Snowflake `COUNT_IF`, 없으면
+- 웨어하우스로 옮길 때(책 1.3.2.1·1.3.2.2): `count_if` → BigQuery `COUNTIF`/Snowflake `COUNT_IF`, 없으면
   `SUM(CASE WHEN … THEN 1 ELSE 0 END)`; `generate_series` → BigQuery `GENERATE_DATE_ARRAY`;
   `lag() OVER (PARTITION BY user_id ORDER BY target_date)` 는 표준 SQL이라 그대로.
 
@@ -121,7 +121,7 @@ con.execute("""SELECT COUNT(DISTINCT user_id) AS users, MIN(event_date) AS min_d
 2. 분류 CASE 쿼리(1.3.2.2) → 세그먼트별 인원수. 특정 세그먼트가 0명이거나 90% 이상이면 경계 재조정.
 3. 마트 적재(1.3.3, `user_metrics_daily` → `mart_user_segment`) → 대표 유저 몇 명의 from→to 이동을 보여주고 분류가 직관과 맞는지 확인.
 4. Stock(1.3.4.1) → Flow(1.3.4.2) → KPI(1.3.4.3) 순서로 실행하며 각각 해석을 붙인다.
-5. (독자가 원하면) 1.3.5의 self-join 으로 30일 추적까지 — 실무에서는 일 배치 적재 구조를 권한다.
+5. (독자가 원하면) 1.3.5의 셀프 조인으로 30일 추적까지 — 실무에서는 일 배치 적재 구조를 권한다.
 
 ### 5. 결과 해석
 
@@ -129,7 +129,7 @@ con.execute("""SELECT COUNT(DISTINCT user_id) AS users, MIN(event_date) AS min_d
   (예: heavy → light, light → risk)를 액션 타깃으로 잡는다.
 - Stock이 좋아 보여도 Flow가 나쁘면(heavy → light, light → risk 전이 증가) 곧 무너진다 — 두 축을 항상 같이.
 - DAU 는 세그먼트 Stock 에 ‘오늘 기록 여부’를 교차한 값(`dau_by_seg`) — 같은 DAU 라도 heavy 가 채운 날과 new 가 채운 날은 다르다.
-- 액션으로 번역(책 1.2.3·정리하며): Heavy Loss 가 평소보다 급증한 날은 배포·장애부터 점검, light → risk
+- 액션으로 번역(책 1.2.3·1.5): Heavy Loss 가 평소보다 급증한 날은 배포·장애부터 점검, light → risk
   비율이 오르면 그 유저를 겨냥한 리텐션 캠페인, "DAU 200명 감소"는 New Loss 가 튄 날과 Heavy Loss 가
   튄 날의 원인·대응이 다르다. 기능 실험의 성공 기준은 전체 DAU 가 아니라 'light → heavy 전이율'로.
 
