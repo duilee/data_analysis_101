@@ -1,6 +1,6 @@
 # 사용패턴 클러스터링 — KMeans 페르소나
 
-**챕터**: `chapters/08_Machine_Learning으로_찾아보는_유저들의_사용패턴/` · 노트북: `user_segmentation.ipynb`
+**장 폴더**: `chapters/08_Machine_Learning으로_찾아보는_유저들의_사용패턴/` · 노트북: `user_segmentation.ipynb`
 <!-- 동기화: 코드 기준 커밋 `8e8b97c` (2026-09-13) — 노트북·README·sql과 대조 완료. 책 본문 대조 완료 (2026-09-26, 원고 절 구성: 1절 평균 유저의 함정 → 2절 피처 엔지니어링(2.1~2.2) → 3절 클러스터링(3.1~3.3) → 4절 확장 → 실습 0~4(1.1·1.2·2·3.1·3.2·4.1·4.2·4.3) → Claude Code 실습 → 정리하며). -->
 
 ## 이 방법이 푸는 문제
@@ -69,7 +69,7 @@ jupyter nbconvert --to notebook --execute user_segmentation.ipynb \
 ## 내 데이터에 적용 — 인터랙티브 프로토콜
 
 아래 1→5 순서로 진행한다. 각 단계 결과를 독자에게 보여주고 확인한 뒤 다음으로 간다.
-이 노트북에는 `[내 데이터 적용]` 주석이 없고, **피처 SQL 전체가 도메인 특화**라 책의 챕터 중
+이 노트북에는 `[내 데이터 적용]` 주석이 없고, **피처 SQL 전체가 도메인 특화**라 책의 장 중
 치환 범위가 가장 넓다 — 피처 설계 단계에 시간을 들인다.
 
 ### 1. 인테이크 — 독자에게 물을 것
@@ -154,7 +154,7 @@ jupyter nbconvert --to notebook --execute user_segmentation.ipynb \
 
 ## 학습 가이드
 
-### 핵심 개념 — 이 챕터를 마치면 설명할 수 있어야 하는 것
+### 핵심 개념 — 이 장을 마치면 설명할 수 있어야 하는 것
 
 - **비지도 군집화** — 라벨 없이 거리 기반으로 비슷한 유저를 묶는 것. 정답이 없으므로 해석
   가능성이 품질 기준이 된다.
@@ -168,7 +168,7 @@ jupyter nbconvert --to notebook --execute user_segmentation.ipynb \
 
 출제 범위는 위 핵심 개념 5가지(비지도 군집화·표준화·Elbow/Silhouette·centroid 해석·클리핑).
 
-1. 스케일링 없이 KMeans를 돌리면 어떤 피처가 결과를 지배하게 될까요? 이 챕터의 예시 데이터로 예를
+1. 스케일링 없이 KMeans를 돌리면 어떤 피처가 결과를 지배하게 될까요? 이 장의 예시 데이터로 예를
    들어 설명해 보세요.
    - 힌트: 값 범위가 큰 피처 — 분 단위 기상 시간 `first_ring_to_last_dismiss`(0~120분)가 비율 피처
      `avg_snooze`(0~1대)나 개수 피처(`scheduled_cnt`, 1~3)를 압도해 사실상 한 피처로만 군집화된다.
@@ -199,4 +199,4 @@ jupyter nbconvert --to notebook --execute user_segmentation.ipynb \
    중심점을 끌고 간다"를 눈으로 확인. 원복 필수.
 3. **[사고]** 유저가 시간에 따라 페르소나를 옮겨 다닌다면(신규→성숙), 정적 클러스터링의
    무엇이 문제이고 어떻게 보완할까? (기간 슬라이딩 재클러스터링, 전이 추적 — dau-segments
-   챕터의 Flow 관점과 연결해 토론)
+   장의 Flow 관점과 연결해 토론)

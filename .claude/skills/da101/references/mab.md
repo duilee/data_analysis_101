@@ -1,6 +1,6 @@
 # MAB — Thompson Sampling 시뮬레이션과 실전 보완
 
-**챕터**: `chapters/09_MAB_그거_어떻게_쓰는건데/` · 노트북: `mab_thompson_sampling.ipynb`
+**장 폴더**: `chapters/09_MAB_그거_어떻게_쓰는건데/` · 노트북: `mab_thompson_sampling.ipynb`
 <!-- 동기화: 코드 기준 커밋 `8e8b97c` (2026-09-13) — 노트북·README와 대조 완료. 책 본문 대조 완료 (2026-09-26, 원고 절 구성: 1절 도입 → 2절 A/B 테스트의 단점(2.1·2.2) → 3절 MAB란(3.1~3.3) → 4절 실제 적용(도입, 4.1~4.4) → 실습 0~3 → Claude Code 실습 → 정리하며). -->
 
 ## 이 방법이 푸는 문제
@@ -54,7 +54,7 @@ jupyter nbconvert --to notebook --execute mab_thompson_sampling.ipynb \
   --output-dir ../../my-work/09_MAB_그거_어떻게_쓰는건데   # 결과는 my-work에
 ```
 
-- **이 챕터는 데이터 파일·생성기·SQL이 없다.** 배너의 '진짜 확률'을 코드에 정해 두고
+- **이 장은 데이터 파일·생성기·SQL이 없다.** 배너의 '진짜 확률'을 코드에 정해 두고
   노트북이 직접 시뮬레이션한다(`np.random.seed(42)`). `generate_data.py` 단계를 건너뛴다.
 - **기대 결과** (실습별 심어둔 정답 — 괄호 안은 시드 42에서 노트북·책 실습 절에 실린 출력 수치.
   2026-09-26 기준 노트북 outputs와 원고 숫자가 모두 일치):
@@ -72,12 +72,12 @@ jupyter nbconvert --to notebook --execute mab_thompson_sampling.ipynb \
     `run_ts(SCHED, N4, gamma=0.9)`(`decay_every`는 기본값 50)로 돌린 Discounted TS가 일반 TS와
     달리 새 최적 arm으로 갈아탄다. (`phase 2 reward — plain: 367, discounted: 510`)
 - **실행 후 변주 제안**: 시뮬레이션이라 재실행이 공짜다. 워크스루가 끝나면 `PROBS`(진짜 확률),
-  실습 2의 계수(`[1, 15]`), 실습 3의 `gamma`를 바꿔 다시 돌려 보자고 제안한다 — 책이 이 챕터를
+  실습 2의 계수(`[1, 15]`), 실습 3의 `gamma`를 바꿔 다시 돌려 보자고 제안한다 — 책이 이 장을
   "조건을 바꿔가며 결과를 비교하는" 실습으로 안내한다.
 
 ## 내 데이터에 적용 — 인터랙티브 프로토콜
 
-이 챕터의 "적용"은 두 갈래다: **(A) 시뮬레이션으로 자기 상황 사전 검증**, **(B) 실제 노출·클릭
+이 장의 "적용"은 두 갈래다: **(A) 시뮬레이션으로 자기 상황 사전 검증**, **(B) 실제 노출·클릭
 로그를 prior로 연결**. 아래 1→5 순서로 진행하고, 각 단계 결과를 독자와 확인한다.
 
 ### 1. 인테이크 — 독자에게 물을 것
@@ -150,7 +150,7 @@ jupyter nbconvert --to notebook --execute mab_thompson_sampling.ipynb \
 
 ## 학습 가이드
 
-### 핵심 개념 — 이 챕터를 마치면 설명할 수 있어야 하는 것
+### 핵심 개념 — 이 장을 마치면 설명할 수 있어야 하는 것
 
 - **탐색-활용 트레이드오프** (책 용어로는 탐색·수확, Explore & Exploit) — 더 알아보기(탐색) vs
   아는 최선 쓰기(활용·수확)의 균형 문제. MAB 알고리즘은 이 균형의 자동화다.
@@ -165,7 +165,7 @@ jupyter nbconvert --to notebook --execute mab_thompson_sampling.ipynb \
 
 ### 개념 체크
 
-책이 이 챕터의 점검 범위로 드는 다섯 개념(탐색-활용 트레이드오프, Beta-Bernoulli 켤레, Thompson
+책이 이 장의 점검 범위로 드는 다섯 개념(탐색-활용 트레이드오프, Beta-Bernoulli 켤레, Thompson
 Sampling, 누적 regret, 비정상 환경과 할인)에 하나씩 대응한다.
 
 1. Thompson Sampling에서 "샘플링"하는 대상은 무엇이고, 그것이 탐색과 활용의 균형을 어떻게

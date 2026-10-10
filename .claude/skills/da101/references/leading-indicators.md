@@ -1,6 +1,6 @@
 # 선행지표 탐색 — EDA·SHAP·Sankey 3렌즈 교차 확인
 
-**챕터**: `chapters/02_선행지표를_찾는_3가지_방법/` · 노트북: `leading_indicators.ipynb`
+**장 폴더**: `chapters/02_선행지표를_찾는_3가지_방법/` · 노트북: `leading_indicators.ipynb`
 <!-- 동기화: 코드 기준 커밋 `8e8b97c` (2026-09-13) — 노트북·README·sql과 대조 완료. 책 본문 대조 완료 (2026-09-26, 원고 절 구성: 1절 선행지표 필요성 → 2절 EDA(표 1·그림 1) → 3절 SHAP(3.1~3.4, 표 2) → 4절 Sankey(4.1~4.2, 표 3) → 실습 0~3(Python·SQL) → Claude Code 실습 0~4 → 정리하며(표)). -->
 
 ## 이 방법이 푸는 문제
@@ -75,7 +75,7 @@ jupyter nbconvert --to notebook --execute leading_indicators.ipynb \
   5-page_view_home → 6-page_view_content_detail 74.6% vs profile/settings 24.8% · TOP 전이
   9-tap_like_button → 10-page_view_content_detail 86.7%(641명) · BOTTOM 4-page_view_profile →
   5-view_error_popup 2.6%(547명).
-- 의존성이 가장 무거운 챕터다(lightgbm, shap, optuna, plotly 등) — 첫 실행 시 설치 시간이 걸린다.
+- 의존성이 가장 무거운 장이다(lightgbm, shap, optuna, plotly 등) — 첫 실행 시 설치 시간이 걸린다.
 
 ## 내 데이터에 적용 — 인터랙티브 프로토콜
 
@@ -173,7 +173,7 @@ duckdb.query("""SELECT COUNT(DISTINCT user_id) AS users,
 
 ## 학습 가이드
 
-### 핵심 개념 — 이 챕터를 마치면 설명할 수 있어야 하는 것
+### 핵심 개념 — 이 장을 마치면 설명할 수 있어야 하는 것
 
 - **선행 vs 후행지표** — 움직일 수 있는 초기 행동 vs 그 결과로 나타나는 지표. 액션은 선행에만
   걸 수 있다.

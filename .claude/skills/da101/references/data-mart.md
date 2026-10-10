@@ -1,12 +1,12 @@
 # 데이터 마트 층 쌓기 — raw → staging → dim/fact → mart
 
-**챕터**: `chapters/11_쿼리가_30분째_안_끝나는데요/` · 노트북: `data_mart_layers.ipynb`
+**장 폴더**: `chapters/11_쿼리가_30분째_안_끝나는데요/` · 노트북: `data_mart_layers.ipynb`
 <!-- 동기화: 코드 기준 커밋 `8e8b97c` (2026-09-13) — 노트북·README·sql과 대조 완료. 책 본문 대조 완료 (2026-09-26, 원고 절 구성: 1절 도입 → 2절 데이터는 어디에 놓이는가(2.1~2.3) → 3절 데이터에는 층이 있다(3.1~3.4) → 4절 마트를 설계한다는 것(4.1, 4.2.1~4.2.5, 4.3) → 5절 운영 참고사항(5.1~5.4) → 실습 0~6 → Claude Code 실습 → 정리하며). -->
 
 ## 이 방법이 푸는 문제
 
 느린 쿼리, DW에 없는 데이터, 팀마다 다른 숫자는 쿼리 실력이 아니라 **데이터가 놓인 자리**의
-문제다. 이 챕터는 가상의 구독형 앱 데이터(소스 다섯 개)로 네 층을 직접 쌓아 같은 질문
+문제다. 이 장은 가상의 구독형 앱 데이터(소스 다섯 개)로 네 층을 직접 쌓아 같은 질문
 ("일별 활성 구독자 수와 매출")을 raw와 마트에서 답해 보며 차이를 체감하게 한다.
 
 - 실습 1 raw: 다섯 CSV를 한 쿼리(47줄)로 조인 — 정의가 쿼리 안에 흩어져 있어 사람마다 숫자가 달라지는 구조
@@ -66,7 +66,7 @@ jupyter nbconvert --to notebook --execute data_mart_layers.ipynb \
   행 수(약, 책 실습 0 표): events 9.5만 · subscription_events 1,600 · user_snapshots 13.6만 · sku 4 · exchange_rates 450.
   기간 2026-04-01~06-29, 체험 시작은 가격 0인 purchase, 환불은 음수 금액.
 - SQL 파일(인라인과 같은 쿼리 — 마트 SQL은 파티션 하나를 전개한 예시): `sql/raw_daily_subscribers.sql`, `sql/stg_views.sql`, `sql/dim_tables.sql`,
-  `sql/fact_subscription_events.sql`, `sql/fact_subscriber_daily.sql`, `sql/mart_subscription_daily.sql`. 챕터 폴더에서 실행한다.
+  `sql/fact_subscription_events.sql`, `sql/fact_subscriber_daily.sql`, `sql/mart_subscription_daily.sql`. 장 폴더에서 실행한다.
 - **기대 결과**: 생성기가 심은 정답(`python generate_data.py` 실행 시 stdout에 찍힘 — 노트북은 이
   값을 다시 계산하지 않는다)은 6월 일평균 활성 구독자 **574명(체험 포함)**, 기간 매출 합계
   **$5,953**(환불 반영), 도착 지연 분포 앱 이벤트 70/20/8/2%, 구독 이벤트 55/25/12/8%.
@@ -81,7 +81,7 @@ jupyter nbconvert --to notebook --execute data_mart_layers.ipynb \
   - 실습 6 2026-06-14 파티션이 D+1 새벽 배치 13건($82.31) → D+2 20건($96.90) → D+3 24건($104.84) → D+4 새벽 배치 26건($109.83)으로 채워짐(50% → 77% → 92% → 100%).
     구매·갱신 건수와 매출만 본다 — 활성 구독자 수는 `fact_subscriber_daily`를 다시 만들어야 지연이 반영된다.
   - 실행 시간은 기대값이 아니다(raw 쿼리 1초 안팎, 마트 쿼리 0.00x초 — 환경마다 다름).
-- 이 챕터의 **apply 모드는 코드 치환이 아니라 설계 문서 작성**이다 (아래 프로토콜).
+- 이 장의 **apply 모드는 코드 치환이 아니라 설계 문서 작성**이다 (아래 프로토콜).
 
 ## 내 데이터에 적용 — 인터랙티브 프로토콜
 
@@ -194,7 +194,7 @@ FROM read_csv_auto('<파일>')""").df()
 
 ## 학습 가이드
 
-### 핵심 개념 — 이 챕터를 마치면 설명할 수 있어야 하는 것
+### 핵심 개념 — 이 장을 마치면 설명할 수 있어야 하는 것
 
 - 네 층(raw·staging·dim/fact·mart)의 역할과 각 층이 **하지 않는 일**
 - grain 한 문장이 왜 설계의 절반인가, 가장 낮은 레벨로 잡는 이유
