@@ -1,4 +1,4 @@
--- 실습 1, 단계 1) 파생지표 만들기 (오늘 시점, 기준일 2026-05-20)
+-- 1.3.2.1. 파생지표 만들기 (오늘 시점, 기준일 2026-05-20)
 --
 -- user_master 와 user_activity 를 LEFT JOIN 한 뒤 유저 단위로 집계해
 -- days_since_signup / active_day_count / last_active_date 3개 지표(+ DAU 교차용 d0_active)를

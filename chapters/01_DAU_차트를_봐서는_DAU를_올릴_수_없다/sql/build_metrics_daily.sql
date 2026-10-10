@@ -1,6 +1,6 @@
--- 실습 2, 단계 1) 날짜별 파생지표 (user_metrics_daily)
+-- 1.3.3. (1) 날짜별 파생지표 (user_metrics_daily)
 --
--- build_metrics.sql(실습 1.1)과 같은 지표 정의에 날짜 축을 더한다. 달력(generate_series,
+-- build_metrics.sql(1.3.2.1)과 같은 지표 정의에 날짜 축을 더한다. 달력(generate_series,
 -- 2026-04-20 ~ 2026-05-20 31일)을 유저 마스터와 조인해 날짜 × 유저 단위로 3개 지표를 계산하고,
 -- 그 날짜에 아직 가입하지 않은 유저는 조인 조건(first_active_date <= target_date)으로 거른다.
 -- '최근 7일' 활동 윈도우를 바꿀 때는 build_metrics.sql 과 이 파일의 INTERVAL 6 DAY 를 함께 고친다.
