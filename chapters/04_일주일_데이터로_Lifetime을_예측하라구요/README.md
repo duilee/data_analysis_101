@@ -12,8 +12,9 @@ Lifetime 추정 실습 코드입니다. 유저의 Lifetime(가입 후 이탈 전
 ## 실행 방법
 
 ```bash
-python generate_data.py                  # 예시 데이터 생성 (data/cohort_retention.csv)
-jupyter notebook lifetime_estimation.ipynb   # 노트북을 위에서 아래로 실행 (첫 셀이 의존성 설치)
+pip install -r requirements.txt              # 의존성 설치
+python generate_data.py                      # 예시 데이터 생성 (data/cohort_retention.csv)
+jupyter notebook lifetime_estimation.ipynb   # 노트북을 위에서 아래로 실행
 ```
 
 ## 파일 구성
