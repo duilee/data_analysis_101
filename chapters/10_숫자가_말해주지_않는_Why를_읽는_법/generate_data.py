@@ -179,7 +179,7 @@ random.shuffle(rows)
 rows = [(i + 1, p, r, t, assign_date(r, t)) for i, (p, r, t) in enumerate(rows)]
 
 with open(OUT / "reviews.csv", "w", newline="", encoding="utf-8") as f:
-    w = csv.writer(f)
+    w = csv.writer(f, lineterminator="\n")  # 기본값(CRLF) 대신 LF - 커밋된 CSV와 줄끝을 맞춘다
     w.writerow(["review_id", "product_id", "rating", "text", "created_at"])
     w.writerows(rows)
 

@@ -15,8 +15,9 @@
 ## 실행 방법
 
 ```bash
+pip install -r requirements.txt               # 의존성 설치
 python generate_data.py                       # 예시 데이터 생성 (data/reviews.csv)
-jupyter notebook review_analysis.ipynb        # 노트북을 위에서 아래로 실행 (첫 셀이 의존성 설치)
+jupyter notebook review_analysis.ipynb        # 노트북을 위에서 아래로 실행
 ```
 
 ## 파일 구성
