@@ -1,4 +1,4 @@
-# 8장. Machine Learning으로 찾아보는 유저들의 사용패턴
+# 8장. 머신러닝으로 찾아보는 유저들의 사용 패턴
 
 이 챕터의 실습 코드입니다. KMeans 클러스터링으로 알람 앱 유저의 사용 패턴(페르소나)을
 비지도로 나누고, 중심점으로 해석·네이밍한 뒤 리텐션 지표와 연결해 액션까지 이어 봅니다.
@@ -11,8 +11,10 @@
 ## 실행 방법
 
 ```bash
-python generate_data.py                 # 예시 데이터 생성 (data/*.csv)
-jupyter notebook user_segmentation.ipynb  # 노트북을 위에서 아래로 실행 (첫 셀이 의존성 설치)
+# 0장의 준비(파이썬 3.10 이상, 가상 환경 활성화)를 마친 뒤 실행합니다. 맥은 python 대신 python3
+pip install -r requirements.txt              # 의존성 설치 (처음 한 번)
+python generate_data.py                      # (선택) 시드를 바꿔 새로 만들 때만 — data/*.csv는 이미 들어 있음
+jupyter notebook user_segmentation.ipynb     # 노트북을 위에서 아래로 실행
 ```
 
 ## 파일 구성

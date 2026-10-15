@@ -1,6 +1,6 @@
 # 사용패턴 클러스터링 — KMeans 페르소나
 
-**장 폴더**: `chapters/08_Machine_Learning으로_찾아보는_유저들의_사용패턴/` · 노트북: `user_segmentation.ipynb`
+**장 폴더**: `chapters/08_머신러닝으로_찾아보는_유저들의_사용_패턴/` · 노트북: `user_segmentation.ipynb`
 <!-- 동기화: 코드 기준 커밋 `8e8b97c` (2026-09-13) — 노트북·README·sql과 대조 완료. 책 본문 대조 완료 (2026-09-26, 원고 절 구성: 1절 평균 유저의 함정 → 2절 피처 엔지니어링(2.1~2.2) → 3절 클러스터링(3.1~3.3) → 4절 확장 → 실습 0~4(1.1·1.2·2·3.1·3.2·4.1·4.2·4.3) → Claude Code 실습 → 정리하며). -->
 
 ## 이 방법이 푸는 문제
@@ -39,7 +39,7 @@
 ```bash
 python generate_data.py      # data/alarm_daily.csv, data/user_master.csv 생성
 jupyter nbconvert --to notebook --execute user_segmentation.ipynb \
-  --output-dir ../../my-work/08_Machine_Learning으로_찾아보는_유저들의_사용패턴   # 결과는 my-work에
+  --output-dir ../../my-work/08_머신러닝으로_찾아보는_유저들의_사용_패턴   # 결과는 my-work에
 ```
 
 - 입력: `alarm_daily.csv`(일별 알람 사용 피처), `user_master.csv`(`user_id, new_flag, retained_d7`).

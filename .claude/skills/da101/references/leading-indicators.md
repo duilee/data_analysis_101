@@ -64,11 +64,11 @@ jupyter nbconvert --to notebook --execute leading_indicators.ipynb \
 - **책에 실린 수치** (독자 결과와 대조): 로드 직후 `event_rows 136,391 · users 12,000` · 모수의 D7
   잔존율 39.7% · EDA `share_diff` 상위 tap_like_button +46.8%p(28.1 → 74.9), page_view_content_detail
   +41.2%p(58.8 → 100.0), tap_share_button +34.3%p, tap_tutorial_complete +31.7%p(46.0 → 77.8),
-  tap_search_button +23.9%p(횟수 차이는 3.7 → 5.7회로 최대) · 하위 view_error_popup −27.9%p,
+  tap_search_button +23.9%p(횟수 차이는 3.7 → 5.7회로 두 번째; 최대는 page_view_content_detail 5.6 → 8.9회) · 하위 view_error_popup −27.9%p,
   page_view_settings −22.5%p, page_view_profile −21.5%p · 피처 행렬 12,000행,
-  `session_duration_sec` 평균 119.36초 · 베이스라인 LGBM `accuracy=0.7717 AUC=0.8534 best_iter=202`
-  (테스트 1,200명: 잔존 476/이탈 724, precision 0.840/0.688) · Optuna `best CV AUC = 0.8587`
-  (`num_leaves 8, min_child_samples 119`) · 튜닝 후 `accuracy=0.7767 AUC=0.8539 best_iter=185`(해석용이라
+  `session_duration_sec` 평균 119.36초 · 베이스라인 LGBM `accuracy=0.7717 AUC=0.8535 best_iter=174`
+  (테스트 1,200명: 잔존 476/이탈 724, precision 0.842/0.686) · Optuna `best CV AUC = 0.8581`
+  (`num_leaves 8, min_child_samples 119`) · 튜닝 후 `accuracy=0.7750 AUC=0.8541 best_iter=152`(해석용이라
   차이는 미미한 게 정상) · Sankey `transitions: 84 rows | D7 retention range: 2.6% ~ 86.7%` · 시작
   잔존율 39.7%에서 온보딩 스킵·홈 진입(2,809명) 시 15.0%로 떨어졌다가 page_view_content_detail로
   가면 27.6%로 회복(책 본문은 40% → 15% → 28%로 반올림) · `branches` 최상단 갈림길

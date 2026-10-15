@@ -1,4 +1,4 @@
-# 9장. MAB(Multi Armed Bandit) 그거 어떻게 쓰는건데…?
+# 9장. MAB(Multi-Armed Bandit) 그거 어떻게 쓰는 건데?
 
 이 챕터의 실습 코드입니다. Multi-Armed Bandit 의 **Thompson Sampling**(베이지안·베타 분포)을
 시뮬레이션으로 직접 돌려 보며, 실제 서비스(배너 클릭률 최적화)에 적용할 때의 보완 기법까지 다룹니다.
@@ -11,7 +11,9 @@
 ## 실행 방법
 
 ```bash
-jupyter notebook mab_thompson_sampling.ipynb   # 노트북을 위에서 아래로 실행 (첫 셀이 의존성 설치)
+# 0장의 준비(파이썬 3.10 이상, 가상 환경 활성화)를 마친 뒤 실행합니다. 맥은 python 대신 python3
+pip install -r requirements.txt              # 의존성 설치 (처음 한 번)
+jupyter notebook mab_thompson_sampling.ipynb # 노트북을 위에서 아래로 실행
 ```
 
 ## 파일 구성

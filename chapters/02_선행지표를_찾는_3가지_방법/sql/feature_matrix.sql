@@ -27,13 +27,13 @@ feat AS (
     SELECT user_id,
            MAX(CASE WHEN event_name = 'tap_tutorial_complete' THEN 1 ELSE 0 END) AS tap_tutorial_complete,
            MAX(CASE WHEN event_name = 'system_push_permission_granted'        THEN 1 ELSE 0 END) AS system_push_permission_granted,
-           COUNT(*) FILTER (WHERE event_name = 'page_view_content_detail')      AS page_view_content_detail,
-           COUNT(*) FILTER (WHERE event_name = 'tap_like_button')      AS tap_like_button,
-           COUNT(*) FILTER (WHERE event_name = 'tap_search_button')       AS tap_search_button,
-           COUNT(*) FILTER (WHERE event_name = 'tap_share_button')     AS tap_share_button,
-           COUNT(*) FILTER (WHERE event_name = 'page_view_profile') AS page_view_profile,
-           COUNT(*) FILTER (WHERE event_name = 'page_view_settings')     AS page_view_settings,
-           COUNT(*) FILTER (WHERE event_name = 'view_error_popup')       AS view_error_popup,
+           COALESCE(SUM(event_count) FILTER (WHERE event_name = 'page_view_content_detail'), 0) AS page_view_content_detail,
+           COALESCE(SUM(event_count) FILTER (WHERE event_name = 'tap_like_button'), 0) AS tap_like_button,
+           COALESCE(SUM(event_count) FILTER (WHERE event_name = 'tap_search_button'), 0) AS tap_search_button,
+           COALESCE(SUM(event_count) FILTER (WHERE event_name = 'tap_share_button'), 0) AS tap_share_button,
+           COALESCE(SUM(event_count) FILTER (WHERE event_name = 'page_view_profile'), 0) AS page_view_profile,
+           COALESCE(SUM(event_count) FILTER (WHERE event_name = 'page_view_settings'), 0) AS page_view_settings,
+           COALESCE(SUM(event_count) FILTER (WHERE event_name = 'view_error_popup'), 0) AS view_error_popup,
            -- 설치 세션 길이(초): 첫 이벤트 ~ 마지막 이벤트
            date_diff('second', MIN(event_timestamp), MAX(event_timestamp)) AS session_duration_sec
     FROM d0_session

@@ -18,19 +18,20 @@ CREATE OR REPLACE VIEW d7_label AS
   FROM installs AS i LEFT JOIN event_log AS e ON i.user_id = e.user_id
   GROUP BY 1, 2, 3;
 
-WITH log_data AS (   -- raw 로그를 (유저, 이벤트, 화면, 일자) 단위 발생 횟수로 집계
-    SELECT event_date, event_name, screen_name, user_id,
-           SUM(event_count) AS event_count, MAX(description) AS description
-    FROM event_log
-    GROUP BY 1, 2, 3, 4
+WITH log_data AS (   -- raw 로그를 (유저, 이벤트, 화면) 단위로 D0~D1 구간 발생 횟수를 합산
+    SELECT e.user_id, e.event_name, e.screen_name,
+           SUM(e.event_count) AS event_count, MAX(e.description) AS description
+    FROM event_log AS e
+    JOIN d7_label AS r ON r.user_id = e.user_id
+    WHERE e.event_date >= r.install_date
+      AND date_diff('day', r.install_date, e.event_date) <= 1
+    GROUP BY 1, 2, 3
 ),
-event_stat AS (      -- 코호트(잔존/비잔존)별 D0~D1 구간 행동: 한 유저 수와 평균 횟수
+event_stat AS (      -- 코호트(잔존/비잔존)별 D0~D1 행동: 한 유저 수와 유저 1인당 평균 횟수
     SELECT r.d7_retention_flag, l.event_name, l.screen_name,
            COUNT(DISTINCT r.user_id) AS user_cnt, AVG(l.event_count) AS avg_event_count
     FROM d7_label AS r
-    LEFT JOIN log_data AS l
-      ON r.user_id = l.user_id AND l.event_date >= r.install_date
-     AND date_diff('day', r.install_date, l.event_date) <= 1
+    LEFT JOIN log_data AS l ON r.user_id = l.user_id
     GROUP BY 1, 2, 3
 ),
 population AS (SELECT d7_retention_flag, COUNT(*) AS total_user_cnt FROM d7_label GROUP BY 1),

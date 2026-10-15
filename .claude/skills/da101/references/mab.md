@@ -1,6 +1,6 @@
 # MAB — Thompson Sampling 시뮬레이션과 실전 보완
 
-**장 폴더**: `chapters/09_MAB_그거_어떻게_쓰는건데/` · 노트북: `mab_thompson_sampling.ipynb`
+**장 폴더**: `chapters/09_MAB_그거_어떻게_쓰는_건데/` · 노트북: `mab_thompson_sampling.ipynb`
 <!-- 동기화: 코드 기준 커밋 `8e8b97c` (2026-09-13) — 노트북·README와 대조 완료. 책 본문 대조 완료 (2026-09-26, 원고 절 구성: 1절 도입 → 2절 A/B 테스트의 단점(2.1·2.2) → 3절 MAB란(3.1~3.3) → 4절 실제 적용(도입, 4.1~4.4) → 실습 0~3 → Claude Code 실습 → 정리하며). -->
 
 ## 이 방법이 푸는 문제
@@ -51,7 +51,7 @@
 
 ```bash
 jupyter nbconvert --to notebook --execute mab_thompson_sampling.ipynb \
-  --output-dir ../../my-work/09_MAB_그거_어떻게_쓰는건데   # 결과는 my-work에
+  --output-dir ../../my-work/09_MAB_그거_어떻게_쓰는_건데   # 결과는 my-work에
 ```
 
 - **이 장은 데이터 파일·생성기·SQL이 없다.** 배너의 '진짜 확률'을 코드에 정해 두고
