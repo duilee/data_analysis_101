@@ -90,7 +90,7 @@ QnA ↔ 심화학습·퀴즈).
 | --- | --- | --- | --- |
 | 5장 | "이 기능을 붙이면 DAU가 얼마나 오를까?" — 기능·신규유입의 DAU 기여 추정 (책의 호출 별칭: **DAU 기여**) | `chapters/05_이_기능은_DAU_얼마짜리_기능일까` | `references/dau-forecast.md` |
 | 1장 | "DAU가 왜 정체지? 어디서 새고 있지?" — DAU 구성·이동 진단 (책의 호출 별칭: **DAU 세그먼트**) | `chapters/01_DAU_차트를_봐서는_DAU를_올릴_수_없다` | `references/dau-segments.md` |
-| 4장 | "일주일 데이터로 LTV/라이프타임을 알 수 있나?" (책의 호출 별칭: **lifetime**) | `chapters/04_일주일_데이터로_Lifetime을_예측하라구요` | `references/lifetime.md` |
+| 4장 | "일주일 데이터로 LTV/라이프타임을 알 수 있나?" (책의 호출 별칭: **lifetime**) | `chapters/04_일주일_데이터로_Lifetime을_예측하라고요` | `references/lifetime.md` |
 | 8장 | "유저 유형(페르소나)을 데이터로 나누고 싶다" (책의 호출 별칭: **클러스터링**) | `chapters/08_머신러닝으로_찾아보는_유저들의_사용_패턴` | `references/clustering.md` |
 | 9장 | "A/B 테스트 비용 없이 배너/문구를 최적화하고 싶다" (책의 호출 별칭: **MAB**) | `chapters/09_MAB_그거_어떻게_쓰는_건데` | `references/mab.md` |
 | 2장 | "D7 리텐션을 미리 알려주는 행동(아하 모먼트)을 찾고 싶다" — 후행지표뿐이라 당장 관리할 지표가 없을 때 (책의 호출 별칭: **선행지표**) | `chapters/02_선행지표를_찾는_3가지_방법` | `references/leading-indicators.md` |
