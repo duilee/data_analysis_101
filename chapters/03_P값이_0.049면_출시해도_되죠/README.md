@@ -12,6 +12,7 @@
 ## 실행 방법
 
 ```bash
+# 0장의 준비(파이썬 3.10 이상, 가상 환경 활성화) 후 실행. 맥은 python 대신 python3
 pip install -r requirements.txt           # 의존성 설치
 jupyter notebook ab_test_pitfalls.ipynb   # 노트북을 위에서 아래로 실행
 ```

@@ -15,8 +15,9 @@ MRR 분석 실습 코드입니다. 유저 ID가 없는 스토어 결제 로그(G
 ## 실행 방법
 
 ```bash
+# 0장의 준비(파이썬 3.10 이상, 가상 환경 활성화) 후 실행. 맥은 python 대신 python3
 pip install -r requirements.txt     # 의존성 설치
-python generate_data.py             # 예시 데이터 생성 (data/subscription_sales.csv)
+python generate_data.py             # (선택) 시드를 바꿔 새로 만들 때만 — data/subscription_sales.csv는 이미 들어 있음
 jupyter notebook mrr_analysis.ipynb # 노트북을 위에서 아래로 실행
 ```
 

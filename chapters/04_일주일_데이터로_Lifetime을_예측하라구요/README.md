@@ -12,8 +12,9 @@ Lifetime 추정 실습 코드입니다. 유저의 Lifetime(가입 후 이탈 전
 ## 실행 방법
 
 ```bash
+# 0장의 준비(파이썬 3.10 이상, 가상 환경 활성화) 후 실행. 맥은 python 대신 python3
 pip install -r requirements.txt              # 의존성 설치
-python generate_data.py                      # 예시 데이터 생성 (data/cohort_retention.csv)
+python generate_data.py                      # (선택) 시드를 바꿔 새로 만들 때만 — data/cohort_retention.csv는 이미 들어 있음
 jupyter notebook lifetime_estimation.ipynb   # 노트북을 위에서 아래로 실행
 ```
 
