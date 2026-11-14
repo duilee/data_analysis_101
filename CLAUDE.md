@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-Practice code and example data for a Korean-language **data-analysis book** (데이터 분석 책). Each chapter is a self-contained, runnable teaching artifact — not production code. The audience is a reader following along with the book, so clarity and reproducibility matter more than abstraction or performance.
+Practice code and example data for a Korean-language **data-analysis book**: 《분석가, 기획자, 리더가 함께 읽는 프로덕트 데이터 분석 with 클로드 코드》 (양승화·이두희 저, 위키북스). Each chapter is a self-contained, runnable teaching artifact — not production code. The audience is a reader following along with the book, so clarity and reproducibility matter more than abstraction or performance.
 
 ## Repository structure
 
