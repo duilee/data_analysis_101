@@ -38,4 +38,4 @@ The notebook's first code cell installs deps via `%pip install -q -r requirement
 
 ## Git
 
-Commit messages are written in Korean. Commit/push only when asked.
+Commit messages are written in English (conventional commits). Commit/push only when asked.
